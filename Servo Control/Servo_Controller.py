@@ -1,37 +1,24 @@
 import RPi.GPIO as GPIO
-import time
+from time import sleep
 
-GPIO.setmode(GPIO.BOARD)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(18,GPIO.OUT)
+pwm=GPIO.PWM(18,50)
 
-GPIO.setup(11,GPIO.OUT)
-servo1 = GPIO.PWM(11,50)
+pwm.start(0)
 
-servo1.start(0)
-print("Waiting or 2 seconds")
-time.sleep(2)
+pwm.ChangeDutyCycle(7.5)
+sleep(1)
+pwm.ChangeDutyCycle(10.5)
+sleep(1)
+pwm.ChangeDutyCycle(7.5)
+sleep(1)
+# pwm.ChangeDutyCycle(4.5)
+# sleep(0.1)
+# pwm.ChangeDutyCycle(1.5)
+# sleep(0.1)
+# pwm.ChangeDutyCycle(7.5)
+# sleep(0.1)
+# pwm.ChangeDutyCycle(0)
 
-print("Rotating 180 degrees in 10 steps")
-
-duty = 10
-
-while duty <= 100:
-    servo1.ChangeDutyCycle(duty)
-    time.sleep(1)
-    duty = duty + 1
-servo1.stop()
-    
-servo1.ChangeDutyCycle(0)
-time.sleep(2)
-
-print("Turning back 90 degrees for 2 seconds")
-servo1.ChangeDutyCycle(7)
-
-print("Turning back to 0 degrees")
-servo1.ChangeDutyCycle(2)
-time.sleep(0.5)
-servo1.ChangeDutyCycle(0)
-
-servo1.stop()
-GPIO.cleanup()
-
-
+# pwm.stop()
