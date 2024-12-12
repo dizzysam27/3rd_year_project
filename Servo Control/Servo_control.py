@@ -1,22 +1,10 @@
 import RPi.GPIO as GPIO
 import time
 
-# Setup GPIO mode
+
 GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-
-# Pin configuration
-SERVO_PIN = 18  # Choose the GPIO pin connected to the servo motor
-
-# Initialize PWM parameters
-FREQ = 50  # Servo frequency in Hz (most servos operate at 50 Hz)
-
-# Setup GPIO pin as output
-GPIO.setup(SERVO_PIN, GPIO.OUT)
-
-# Create PWM instance
-pwm = GPIO.PWM(SERVO_PIN, FREQ)
-pwm.start(0)  # Start PWM with 0% duty cycle
+GPIO.setup(18,GPIO.OUT)
+pwm=GPIO.PWM(18,50)
 
 def set_angle(angle):
     """Set the servo angle.
