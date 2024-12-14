@@ -15,8 +15,8 @@ def get_limits(colour):
 
     return lowerLimit, upperLimit
 
-cap = cv2.VideoCapture(0)
-yellow = [0, 255, 255]
+cap = cv2.VideoCapture(1)
+yellow = [255, 0, 0]
 
 while True:
     ret, frame = cap.read()
