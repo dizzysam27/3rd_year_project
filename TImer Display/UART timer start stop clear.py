@@ -1,4 +1,5 @@
-from machine import Pin
+from machine import UART, Pin
+
 import time
 
 # Dictionary which stores the pins for each segment
@@ -85,32 +86,75 @@ def display_go():
     display_number("digit1", "G")
     display_number("digit2", 0)
 
+def waiting():
+    while True:
+        if uart.any():
+            data = uart.read()
+            print("Received:", data)
+            value = data.decode()
+            print(value)
+            if value == "Start":
+                clear_digit("digit1")
+                clear_digit("digit2")
+                clear_digit("digit3")
+                dp1.value(0)
+                dp2.value(0)
+                counter()
+            if value == "Clear":
+                clear_digit("digit1")
+                clear_digit("digit2")
+                clear_digit("digit3")
+                dp1.value(0)
+                dp2.value(0)
+                seconds = 0
+                minutes = 0
+                
+        time.sleep(1)
+        
+def counter():
 
-# Counter loop
-clear_digit("digit1")
-clear_digit("digit2")
-clear_digit("digit3")
-dp1.value(0)
-dp2.value(0)
-
-display_go()
-time.sleep(1)
-seconds += 1
-
-while True:
-
-        seconds += 0.1
-
-        if seconds >= 60:
-            seconds = 0
-            time.sleep(0.1)  # 0.1s precision
-            minutes += 1
-        elif minutes == 10:
-            minutes = 0
-            seconds = 0
-            time.sleep(0.1)
+    global seconds, minutes
+    seconds = 0
+    minutes = 0
+    display_go()
+    time.sleep(1)
+    seconds += 1
+    counting = True
+    while counting == True:
+        
+        if uart.any():
+            data = uart.read()
+            value = data.decode()
+            print(value)
+            if value == "Stop":
+                counting == False
+                waiting()
+            else:
+                pass
         else:
-            time.sleep(0.1)
-            display_float(seconds)
-            
+            seconds += 0.1
+
+            if seconds >= 60:
+                seconds = 0
+                time.sleep(0.1)  # 0.1s precision
+                minutes += 1
+            elif minutes == 10:
+                minutes = 0
+                seconds = 0
+                time.sleep(0.1)
+            else:
+                time.sleep(0.1)
+                display_float(seconds)
+
+# Initialize UART0
+uart = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
+
+waiting()
+
+
+
+
+        
+
+
 

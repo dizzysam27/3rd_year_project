@@ -1,4 +1,4 @@
-from machine import Pin
+from machine import UART, Pin
 import time
 
 # Dictionary which stores the pins for each segment
@@ -85,6 +85,47 @@ def display_go():
     display_number("digit1", "G")
     display_number("digit2", 0)
 
+def counter():
+    
+    global seconds, minutes
+    display_go()
+    time.sleep(1)
+    seconds += 1
+    counting = True
+    while counting == True:
+        
+        if uart.any():
+            uart.read()
+            counting = False
+            break
+        else:
+            seconds += 0.1
+
+            if seconds >= 60:
+                seconds = 0
+                time.sleep(0.1)  # 0.1s precision
+                minutes += 1
+            elif minutes == 10:
+                minutes = 0
+                seconds = 0
+                time.sleep(0.1)
+            else:
+                time.sleep(0.1)
+                display_float(seconds)
+            
+waiting = True
+
+def uart_interrupt_handler(pin):
+    print("Timer Started")
+    waiting = False
+    counter()
+
+uart = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
+
+# Setup the UART interrupt to trigger when data is received
+uart.init(bits=8, parity=None, stop=2)  # Set the UART parameters
+pin_uart = Pin(1, Pin.IN)  # Assuming the Raspberry Pi sends data via pin 16
+pin_uart.irq(trigger=Pin.IRQ_RISING, handler=uart_interrupt_handler)
 
 # Counter loop
 clear_digit("digit1")
@@ -93,24 +134,10 @@ clear_digit("digit3")
 dp1.value(0)
 dp2.value(0)
 
-display_go()
-time.sleep(1)
-seconds += 1
+print("exited loop")
+while waiting == True:
+    pass
 
-while True:
+        
 
-        seconds += 0.1
-
-        if seconds >= 60:
-            seconds = 0
-            time.sleep(0.1)  # 0.1s precision
-            minutes += 1
-        elif minutes == 10:
-            minutes = 0
-            seconds = 0
-            time.sleep(0.1)
-        else:
-            time.sleep(0.1)
-            display_float(seconds)
-            
 
