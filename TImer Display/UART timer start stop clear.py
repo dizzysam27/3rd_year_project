@@ -127,6 +127,7 @@ def counter():
             value = data.decode()
             print(value)
             if value == "Stop":
+                uart.write(str(minutes) + ' minutes ' + str(seconds) + ' seconds')
                 counting == False
                 waiting()
             else:
