@@ -3,9 +3,9 @@ import time
 
 # Dictionary which stores the pins for each segment
 segments = {
-    "digit1": [22, 17, 6, 27, 5, 21, 18],
-    "digit2": [19, 16, 10, 8, 7, 20, 9],
-    "digit3": [13, 12, 4, 3, 2, 15, 14],
+    "digit1": [4,5,21,22,26,2,3],
+    "digit2": [7,8,17,19,20,6,18],
+    "digit3": [11,12,13,14,15,9,10],
 }
 
 global seconds, minutes
@@ -73,9 +73,9 @@ def display_float(value):
     else:
         dp1.value(1)
         dp2.value(0)
-        digit1 = minutes
-        digit2 = int_part // 10
-        digit3 = int_part % 10
+        digit1 = 8
+        digit2 = 8
+        digit3 = 8
     
     display_number("digit1", digit1)
     display_number("digit2", digit2, dp=True)
@@ -97,20 +97,9 @@ display_go()
 time.sleep(1)
 seconds += 1
 
-while True:
-
-        seconds += 0.1
-
-        if seconds >= 60:
-            seconds = 0
-            time.sleep(0.1)  # 0.1s precision
-            minutes += 1
-        elif minutes == 10:
-            minutes = 0
-            seconds = 0
-            time.sleep(0.1)
-        else:
-            time.sleep(0.1)
-            display_float(seconds)
+display_number("digit1", 8)
+display_number("digit2", 8, dp=True)
+display_number("digit3", 8)
             
+
 

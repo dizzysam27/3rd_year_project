@@ -16,9 +16,9 @@
 CRGB leds[NUM_LEDS];
 
 // Time scaling factors for each component
-#define TIME_FACTOR_HUE 60
-#define TIME_FACTOR_SAT 100
-#define TIME_FACTOR_VAL 100
+#define TIME_FACTOR_HUE 10000
+#define TIME_FACTOR_SAT 10000
+#define TIME_FACTOR_VAL 10000
 
 void setup() {
     Serial.begin(115200);
