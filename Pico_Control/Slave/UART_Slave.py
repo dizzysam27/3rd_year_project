@@ -1,8 +1,7 @@
 from machine import Pin, UART, ADC # type: ignore
 import time
-import _thread
 
-# Define UART0 conditions
+# Define UART Protocol
 uart0 = UART(0,
              baudrate=9600,
              bits=8,
@@ -11,32 +10,26 @@ uart0 = UART(0,
              tx=Pin(0),
              rx=Pin(1))
 
+uart0 = UART(0, 9600, 8, None, 1, 0, 1)
+# Further UART can be added easily
+
 # Define Joystick axes and button
 xAxis = ADC(27)
 yAxis = ADC(26)
 JoyButton = Pin(2, Pin.IN, Pin.PULL_UP) # Pulled up signal
 
-# 7 Segment Display Values
-thousands = [Pin(20, Pin.OUT, value=0),
-             Pin(28, Pin.OUT, value=0),
-             Pin(22, Pin.OUT, value=0),
-             Pin(21, Pin.OUT, value=0)
-             ]
-hundreds = [Pin(16, Pin.OUT, value=0),
-            Pin(19, Pin.OUT, value=0),
-            Pin(18, Pin.OUT, value=0),
-            Pin(17, Pin.OUT, value=0)
-            ]
-tens = [Pin(12, Pin.OUT, value=0),
-        Pin(15, Pin.OUT, value=0),
-        Pin(14, Pin.OUT, value=0),
-        Pin(13, Pin.OUT, value=0)
-        ]
-units = [Pin(8, Pin.OUT, value=0),
-         Pin(11, Pin.OUT, value=0),
-         Pin(10, Pin.OUT, value=0),
-         Pin(9, Pin.OUT, value=0)
-         ]
+# Define 7 Segment Display Pins
+def segmentDefinition(pinouts):
+    return [Pin(pinouts[0], Pin.OUT, value=0),
+            Pin(pinouts[1], Pin.OUT, value=0),
+            Pin(pinouts[2], Pin.OUT, value=0),
+            Pin(pinouts[3], Pin.OUT, value=0)]
+
+thousands = segmentDefinition([20, 28, 22, 21])
+hundreds = segmentDefinition([16, 19, 18, 17])
+tens = segmentDefinition([12, 15, 14, 13])
+units = segmentDefinition([8, 11, 10, 9])
+# Further displays can be added easily
 
 # UART Transmit Function
 def UARTtx(dataIn, uartName):
