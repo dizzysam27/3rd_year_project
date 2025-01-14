@@ -2,7 +2,7 @@ import serial
 import time
 
 # Initialize UART on /dev/serial0
-ser = serial.Serial('/dev/serial0', baudrate=9600, timeout=1)
+ser = serial.Serial('/dev/serial1', baudrate=9600, timeout=1)
 
 try:
     while True:
