@@ -2,26 +2,44 @@ from machine import Pin, UART, ADC
 import time
 import _thread
 
-uart1 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
-uart0 = UART(1, baudrate=9600, tx=Pin(4), rx=Pin(5))
+# Defining UART0 conditions
+uart0 = UART(0,
+             baudrate=9600,
+             bits=8,
+             parity=None,
+             stop=1,
+             tx=Pin(0),
+             rx=Pin(1))
+
+# Function to transmit data
+def UARTtx(dataIn, uartName):
+    try:
+        uartName.write(dataIn)
+        print("Sent: ", dataIn)
+    except Exception as e:
+        print("Error sending data: ", e)
+
+# Function to recieve data
+def UARTrx(uartName):
+    try:
+        if uartName.any():
+            dataOut = uartName.readline().decode("utf-8")
+            print("Recieved (",uartName,"): ",data)
+            return dataOut
+    except Exception as e:
+        print("Error reading data: ",e)
+    return None
+
+while True:
+    dataRx = UARTrx(uart0)
+    if dataRx:
+        UARTtx("Hello from Pico\n", uart0)
 
 x_axis = ADC(27)  # Connect VRx to GP26 (ADC0)
 y_axis = ADC(26)  # Connect VRy to GP27 (ADC1)
 
 # Setup for joystick button
 button = Pin(2, Pin.IN, Pin.PULL_UP)  # Connect SW to GP16 with pull-up
-
-# Function to send data to Raspberry Pi
-def send_data_uart1(data):
-    uart1.write(data)
-    print("CORE1 Sent - " ,data)
-    
-def read_data_uart1():
-    if uart1.any():
-        data_uart1 = uart1.read().decode('utf-8')
-        print("CORE0 - Received on UART1: ", data_uart1)
-        return data_uart1
-    return None
 
 # Function to map analog values to a percentage (-100 to 100)
 def map_value(value, in_min=0, in_max=65535, out_min=-100, out_max=100):
