@@ -21,7 +21,7 @@ while True:
             yValue = int(dataRx) - (xValue*10 + buttonValue) - 100        
     
     testData = str(xValue)[-2:-1] + str(yValue)[-2:-1]
-    ser.write(b''+testData+'\n')
+    uart0.write(b''+testData+'\n')
 
     time.sleep(0.1)
 
