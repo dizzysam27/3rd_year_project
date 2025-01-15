@@ -18,9 +18,13 @@ while True:
             dataRx = str(uart0.readline().decode('utf-8').strip())
             buttonValue = int(dataRx[-1])
             xValue = int(dataRx[-4:-2]) - 100
-            yValue = int(dataRx) - (xValue*10 + buttonValue) - 100
-            
-            
+            yValue = int(dataRx) - (xValue*10 + buttonValue) - 100        
+    
+    testData = str(xValue)[-2:-1] + str(yValue)[-2:-1]
+    ser.write(b''+testData+'\n')
+
+    time.sleep(0.1)
+
 
 while True:
     try:

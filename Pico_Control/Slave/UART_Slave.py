@@ -10,9 +10,6 @@ uart0 = UART(0,
              tx=Pin(0),
              rx=Pin(1))
 
-uart0 = UART(0, 9600, 8, None, 1, 0, 1)
-# Further UART can be added easily
-
 # Define Joystick axes and button
 xAxis = ADC(27)
 yAxis = ADC(26)
@@ -57,20 +54,20 @@ def readJoy(axis):
 
 # Update Values
 def counterUpdate(data):
+    data = '1237'
     valueLength = len(data)
     for x in range(valueLength):
-        binaryValue = format(int(data[x]), '#006b')
+        binaryValue = f'{int(data[x]):04b}'
         print(binaryValue)
         for y in range(4):
-            match x:
-                case 0: thousands[y].value = int(binaryValue[y+2])
-                case 1: hundreds[y].value = int(binaryValue[y+2])
-                case 2: tens[y].value = int(binaryValue[y+2])
-                case 3: units[y].value = int(binaryValue[y+2])
-                case _: print("Counter Update Error")
+                if x==0: thousands[y].value(int(binaryValue[3-y]))
+                elif x==1: hundreds[y].value(int(binaryValue[3-y]))
+                elif x==2: tens[y].value(int(binaryValue[3-y]))
+                elif x==3: units[y].value(int(binaryValue[3-y]))
 
 # Main loop
 while True:
+    print(thousands[0])
     # Read Joystick Values
     xValue = readJoy(xAxis)
     yValue = readJoy(yAxis)
@@ -80,7 +77,7 @@ while True:
     dataTx = str(buttonValue + xValue*10 + yValue*10000)
 
     # Rx/Tx
-    dataRx = UARTrx(uart0)
+    dataRx = str(UARTrx(uart0))
     if dataRx:
         UARTtx(str(dataTx), uart0)
     
