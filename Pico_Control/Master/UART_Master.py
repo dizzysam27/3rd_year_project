@@ -11,6 +11,8 @@ uart0 = serial.Serial("/dev/serial0",
                       timeout=0)
 
 # Main Loop
+xValue = 0
+yValue = 0
 while True:
 
     # Update Joystick Values
@@ -21,7 +23,7 @@ while True:
             yValue = int(dataRx) - (xValue*10 + buttonValue) - 100        
     
     testData = str(xValue)[-2:-1] + str(yValue)[-2:-1]
-    uart0.write(b''+testData+'\n')
+    uart0.write(b'{testData}\n')
 
     time.sleep(0.1)
 

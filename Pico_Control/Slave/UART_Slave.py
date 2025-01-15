@@ -54,11 +54,9 @@ def readJoy(axis):
 
 # Update Values
 def counterUpdate(data):
-    data = '1237'
-    valueLength = len(data)
+    valueLength = len(str(data))
     for x in range(valueLength):
-        binaryValue = f'{int(data[x]):04b}'
-        print(binaryValue)
+        binaryValue = f'{data[x]:04b}'
         for y in range(4):
                 if x==0: thousands[y].value(int(binaryValue[3-y]))
                 elif x==1: hundreds[y].value(int(binaryValue[3-y]))
@@ -66,8 +64,8 @@ def counterUpdate(data):
                 elif x==3: units[y].value(int(binaryValue[3-y]))
 
 # Main loop
+data = '0000'
 while True:
-    print(thousands[0])
     # Read Joystick Values
     xValue = readJoy(xAxis)
     yValue = readJoy(yAxis)
@@ -77,11 +75,12 @@ while True:
     dataTx = str(buttonValue + xValue*10 + yValue*10000)
 
     # Rx/Tx
-    dataRx = str(UARTrx(uart0))
-    if dataRx:
-        UARTtx(str(dataTx), uart0)
-    
-    # Update Counter Value
-    counterUpdate(dataRx)
+    UARTtx(str(dataTx), uart0)
+    try:
+        dataRx = int(UARTrx(uart0))
+        # Update Counter Value
+        counterUpdate(dataRx)
+    except: pass
+        
 
     time.sleep(0.1)
