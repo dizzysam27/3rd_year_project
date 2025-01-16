@@ -44,6 +44,7 @@ def scroll_line1(padded_line1, max_scroll):
                 lcd.printout(segment_line1)
                 time.sleep(0.2)
             else:
+                lcd.clear()
                 break
 
 # Function to scroll line 2
@@ -62,6 +63,7 @@ def scroll_line2(padded_line2, max_scroll):
                 lcd.printout(segment_line2)
                 time.sleep(0.2)
             else:
+                lcd.clear()
                 break
             
 
@@ -105,15 +107,12 @@ def main():
         # Start the display thread in the background
         
         time.sleep(5)  # Simulating other tasks (replace with actual logic)
-      
-        time.sleep(0.1)
         update_messages("New York is the Worst", "San Jose is the best")
         time.sleep(7)
-        
-        time.sleep(0.1)
-        
+        update_messages("Choose","1      2      3")
+        time.sleep(5)
+        update_messages("Hello","Everyone")
 
-        update_messages("Choose Button","1      2      3")
 
         
 if __name__ == "__main__":
