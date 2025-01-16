@@ -17,7 +17,7 @@ def send_data_uart3(data):
 # Function to read data from Pico
 def read_data_uart0():
     if uart0.in_waiting > 0:
-        return uart0.read(uart0.in_waiting).decode('utf-8')
+        return uart0.readline(uart0.in_waiting).decode('utf-8')
     return None
 
 def read_data_uart3():
