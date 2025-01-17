@@ -2,8 +2,8 @@ from machine import Pin, UART, ADC
 import time
 import _thread
 
-uart0 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
-uart1 = UART(1, baudrate=9600, tx=Pin(4), rx=Pin(5))
+uart1 = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
+uart0 = UART(1, baudrate=9600, tx=Pin(4), rx=Pin(5))
 
 x_axis = ADC(27)  # Connect VRx to GP26 (ADC0)
 y_axis = ADC(26)  # Connect VRy to GP27 (ADC1)
@@ -40,7 +40,8 @@ def core1_joystick():
         y_percent = map_value(y_raw)
         
         button_state = not button.value()
-        send_data_uart1(f"X: {x_percent}%, Y: {y_percent}%, Button Pressed: {button_state}\n")
+        # send_data_uart1(f"X: {x_percent}%, Y: {y_percent}%, Button Pressed: {button_state}\n")
+        send_data_uart1(f"X: {x_percent}\n")
         time.sleep(0.1)
         
 def send_data_uart0(data):
