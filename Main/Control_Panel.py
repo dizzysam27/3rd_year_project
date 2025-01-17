@@ -182,9 +182,6 @@ class MODE_SELECTION:
     def cleanup(self):
         GPIO.cleanup()
     
-
-
-
     def mode_switcher(self,button,mode):
         print(mode)
         if mode == "Menu":
