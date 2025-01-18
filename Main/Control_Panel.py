@@ -144,15 +144,15 @@ class PHYSICAL_BUTTONS:
         self.mode_selection = MODE_SELECTION()
 
     def button1_callback(self, channel):
-        print("Button 1 pressed")
-        self.mode_selection.mode_switcher(1,"Menu")
+        # print("Button 1 pressed")
+        self.mode_selection.mode_switcher(1,None)
 
     def button2_callback(self, channel):
-        print("Button 2 pressed")
+        # print("Button 2 pressed")
         self.mode_selection.mode_switcher(2,None)
 
     def button3_callback(self, channel):
-        print("Button 3 pressed")
+        # print("Button 3 pressed")
         self.mode_selection.mode_switcher(3,None)
         
     def event_detect(self):

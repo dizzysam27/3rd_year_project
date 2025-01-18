@@ -2,19 +2,27 @@ import RPi.GPIO as GPIO
 from Control_Panel import LCD1602_WRITE
 
 class MODE_SELECTION:
-
+    
     def __init__(self):
-        self.mode = ""
+        self.mode = "Menu"  # Default mode
         self.lcd = LCD1602_WRITE()
-        
-    def start_program(self,mode):
+        self.mode_actions = {
+            "Menu": self.Menu,
+            "AI Solve": self.AI_Solve,
+            "Manual": self.Manual,
+            "Calibrate": self.Calibrate,
+            "Start": self.Start,
+            "Stop": self.Stop
+        }
+    
+    def start_program(self, mode):
+        # Set the initial mode and update the display
         self.mode = mode
-        self.mode_switcher(None,mode)
+        self.mode_actions.get(self.mode, self.Menu)()
 
-    def mode_switcher(self,button,mode):
-        print(mode)
-        if mode == "Menu":
-
+    def mode_switcher(self, button, _):
+        # Switch based on the current mode and button
+        if self.mode == "Menu":
             if button == 1:
                 self.AI_Solve()
             elif button == 2:
@@ -23,9 +31,8 @@ class MODE_SELECTION:
                 self.Calibrate()
             else:
                 self.Menu()
-
-        elif mode == "AI Solve":
-            
+        
+        elif self.mode == "AI Solve":
             if button == 1:
                 self.Start()
             elif button == 2:
@@ -35,8 +42,7 @@ class MODE_SELECTION:
             else:
                 self.AI_Solve()
 
-        elif mode == "Manual":
-
+        elif self.mode == "Manual":
             if button == 1:
                 self.Start()
             elif button == 2:
@@ -45,64 +51,53 @@ class MODE_SELECTION:
                 self.Menu()
             else:
                 self.Manual()
-        
-        elif mode == "Calibrate":
 
-            if button == 1:
-                pass
-            elif button == 2:
-                pass
+        elif self.mode == "Calibrate":
+            if button == 1 or button == 2:
+                pass  # You can define calibration actions later
             elif button == 3:
                 self.Menu()
             else:
                 self.Calibrate()
-        
-        elif mode == "Start":
 
-            if button == 1:
-                pass
-            elif button == 2:
+        elif self.mode == "Start":
+            if button == 2:
                 self.Stop()
             elif button == 3:
                 self.Menu()
             else:
                 self.Start()
-        
-        elif mode == "Stop":
 
-            if button == 1:
-                pass
-            elif button == 2:
-                pass
-            elif button == 3:
+        elif self.mode == "Stop":
+            if button == 3:
                 self.Menu()
             else:
                 self.Stop()
 
         else:
-            pass  
+            self.Menu()  # Default case
     
     def Menu(self):
         self.mode = "Menu"
-        self.lcd.update_messages("The Maze Game","AI    Man    Cal")
+        self.lcd.update_messages("The Maze Game", "AI    Man    Cal")
     
     def AI_Solve(self):
         self.mode = "AI Solve"
-        self.lcd.update_messages("AI Solver","Start Stop Menu")
+        self.lcd.update_messages("AI Solver", "Start Stop Menu")
     
     def Manual(self):
         self.mode = "Manual"
-        self.lcd.update_messages("Manual Solver","Start Stop Menu")
+        self.lcd.update_messages("Manual Solver", "Start Stop Menu")
     
     def Start(self):
         self.mode = "Start"
-        self.lcd.update_messages("Running","      Stop Menu")
+        self.lcd.update_messages("Running", "      Stop Menu")
     
     def Stop(self):
         self.mode = "Stop"
-        self.lcd.update_messages("Stopped","      Stop Menu")
+        self.lcd.update_messages("Stopped", "      Stop Menu")
     
     def Calibrate(self):
         self.mode = "Calibrate"
-        self.lcd.update_messages("Calibration Mode","Start Stop Menu")
+        self.lcd.update_messages("Calibration Mode", "Start Stop Menu")
 
