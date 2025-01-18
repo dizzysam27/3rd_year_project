@@ -7,7 +7,7 @@ def main():
     physical_buttons = PHYSICAL_BUTTONS()
     mode_selection.start_program("Menu")
     physical_buttons.event_detect()
-d
+
     while True:
         pass
 
