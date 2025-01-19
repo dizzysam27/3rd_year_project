@@ -12,7 +12,7 @@ class GUI:
         self.window.setWindowTitle("Group 12 Maze Game")
 
     def run(self):
-  
+        
         button1 = QPushButton("Menu")
         button1.clicked.connect(lambda: self.mode_selection.Menu())
         self.layout.addWidget(button1)

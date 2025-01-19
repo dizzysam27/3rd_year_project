@@ -1,6 +1,7 @@
 import time
 import RPi.GPIO as GPIO
 from smbus import SMBus
+from datetime import datetime
 
 
 b = SMBus(1)
@@ -108,6 +109,9 @@ class LCD1602_WRITE(LCD1602):
         self.message_line1 = "Welcome"
         self.message_line2 = "Group 12"
         self.flag = 0
+        self.previous_hour = ""
+        self.previous_minute = ""
+        self.previous_second = ""
 
     def update_messages(self, new_message_line1, new_message_line2):
         self.flag = 1
@@ -124,6 +128,39 @@ class LCD1602_WRITE(LCD1602):
         self.printout(message_line1)
         self.setCursor(0, 1)
         self.printout(message_line2)
+    
+    # def display_timer(self):
+    #     self.clear()
+    #     self.setCursor(2, 0)
+    #     self.printout(":")
+    #     self.setCursor(5, 0)
+    #     self.printout(":")
+
+    #     while True:
+    #         # Get the current time
+    #         current_time = datetime.now().strftime('%H:%M:%S')
+    #         current_hour, current_minute, current_second = current_time.split(':')
+            
+    #         # Update the hour if it has changed
+    #         if current_hour != self.previous_hour:
+    #             self.setCursor(0, 0)
+    #             self.printout(current_hour)
+    #             self.previous_hour = current_hour  # Update the previous hour
+
+    #         # Update the minute if it has changed
+    #         if current_minute != self.previous_minute:
+    #             self.setCursor(3, 0)  # 3 is the starting position of minutes
+    #             self.printout(current_minute)
+    #             self.previous_minute = current_minute  # Update the previous minute
+
+    #         # Update the second if it has changed
+    #         if current_second != self.previous_second:
+    #             self.setCursor(6, 0)  # 6 is the starting position of seconds
+    #             self.printout(current_second)
+    #             self.previous_second = current_second  # Update the previous second
+
+    #         # Wait for 1 second
+    #         time.sleep(1)
 
 class PHYSICAL_BUTTONS:
     
@@ -144,15 +181,13 @@ class PHYSICAL_BUTTONS:
         self.mode_selection = MODE_SELECTION()
 
     def button1_callback(self, channel):
-        # print("Button 1 pressed")
+
         self.mode_selection.mode_switcher(1,None)
 
     def button2_callback(self, channel):
-        # print("Button 2 pressed")
         self.mode_selection.mode_switcher(2,None)
 
     def button3_callback(self, channel):
-        # print("Button 3 pressed")
         self.mode_selection.mode_switcher(3,None)
         
     def event_detect(self):

@@ -1,11 +1,14 @@
 import RPi.GPIO as GPIO
 from Control_Panel import LCD1602_WRITE
+from Timer import Timer
+import time
 
 class MODE_SELECTION:
     
     def __init__(self):
         self.mode = "Menu"  # Default mode
         self.lcd = LCD1602_WRITE()
+        self.timer = Timer()
         self.mode_actions = {
             "Menu": self.Menu,
             "AI Solve": self.AI_Solve,
@@ -80,7 +83,8 @@ class MODE_SELECTION:
     def Menu(self):
         self.mode = "Menu"
         self.lcd.update_messages("The Maze Game", "AI    Man    Cal")
-    
+
+
     def AI_Solve(self):
         self.mode = "AI Solve"
         self.lcd.update_messages("AI Solver", "Start Stop Menu")
@@ -92,10 +96,12 @@ class MODE_SELECTION:
     def Start(self):
         self.mode = "Start"
         self.lcd.update_messages("Running", "      Stop Menu")
+        self.timer.start_timer()
     
     def Stop(self):
         self.mode = "Stop"
         self.lcd.update_messages("Stopped", "      Stop Menu")
+        self.timer.stop_timer()
     
     def Calibrate(self):
         self.mode = "Calibrate"
