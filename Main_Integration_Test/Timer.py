@@ -43,4 +43,3 @@ class TIMER:
                     self.lcd.update_messages(str(self.elapsed_time),"      Stop Menu")
         
             time.sleep(0.1)  # Reduce CPU usage
-

@@ -40,7 +40,8 @@ class MENU_MODE(MODE):
             return "Manual"
         elif button == 3:
             return "Calibrate"
-        return "Menu"
+        else:
+            return "Menu"
 
 class AI_MODE(MODE):
     def display(self):
@@ -57,7 +58,7 @@ class AI_MODE(MODE):
 
 class MANUAL_MODE(MODE):
     def display(self):
-        self.lcd.update_messages("AI Solver", "Start Stop Menu")
+        self.lcd.update_messages("Manual Solver", "Start Stop Menu")
 
     def handle_input(self, button):
         if button == 1:
@@ -71,7 +72,7 @@ class MANUAL_MODE(MODE):
 
 class CALIBRATE_MODE(MODE):
     def display(self):
-        self.lcd.update_messages("AI Solver", "Start Stop Menu")
+        self.lcd.update_messages("Calibration Mode", "Start Stop Menu")
 
     def handle_input(self, button):
         if button == 1:
@@ -84,7 +85,7 @@ class CALIBRATE_MODE(MODE):
 
 class START_MODE(MODE):
     def display(self):
-        self.lcd.update_messages("AI Solver", "Start Stop Menu")
+        self.lcd.update_messages("Start Mode", "Start Stop Menu")
 
     def handle_input(self, button):
         if button == 1:
@@ -97,7 +98,7 @@ class START_MODE(MODE):
 
 class STOP_MODE(MODE):
     def display(self):
-        self.lcd.update_messages("AI Solver", "Start Stop Menu")
+        self.lcd.update_messages("Stop", "Start Stop Menu")
 
     def handle_input(self, button):
         if button == 1:

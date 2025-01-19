@@ -2,8 +2,8 @@ from Controller import MODE_MANAGER
 from Physical_Buttons import PHYSICAL_BUTTONS
 from GUI import GUI
 
-def main():
 
+def main():
     try:
     
         mode_manager = MODE_MANAGER()
@@ -18,7 +18,7 @@ def main():
             pass
 
     except KeyboardInterrupt:
-
+        # Cleanup on exit
         PHYSICAL_BUTTONS.cleanup()
 
 if __name__ == "__main__":
