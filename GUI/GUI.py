@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel
 from PyQt5.QtCore import Qt
 import sys
-from controller import MODE_MANAGER
+from controller import MODE_MANAGER  # Import the controller
 
 class GUI:
     def __init__(self):
@@ -16,7 +16,7 @@ class GUI:
         self.layout.addWidget(self.dynamic_label)
 
         # Initialize the MODE_MANAGER and pass 'self' (GUI instance) to it
-        self.mode_manager = MODE_MANAGER(self)  # Pass GUI instance
+        self.mode_manager = MODE_MANAGER(self)  # Pass GUI instance to the controller
 
     def update_label(self, new_text):
         """Update the dynamic label text."""
