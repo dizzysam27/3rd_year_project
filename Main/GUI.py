@@ -1,38 +1,33 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout
 import sys
+from Controller import MODE_SELECTION
 
 class GUI:
+
     def __init__(self):
-        self.buttons = B
-    def on_button_click(button_number):
-        print(f"Button {button_number} clicked!")
+        self.mode_selection = MODE_SELECTION()
+        self.app = QApplication(sys.argv)
+        self.window = QWidget()
+        self.layout = QVBoxLayout()
+        self.window.setWindowTitle("Group 12 Maze Game")
 
-    # Create the application
-    app = QApplication(sys.argv)
+    def run(self):
+  
+        button1 = QPushButton("Menu")
+        button1.clicked.connect(lambda: self.mode_selection.Menu())
+        self.layout.addWidget(button1)
 
-    # Create the main window
-    window = QWidget()
-    window.setWindowTitle("3 Button Example")
+        button2 = QPushButton("AI Solver")
+        button2.clicked.connect(lambda: self.mode_selection.AI_Solve())
+        self.layout.addWidget(button2)
 
-    # Create a layout
-    layout = QVBoxLayout()
+        button3 = QPushButton("Manual")
+        button3.clicked.connect(lambda: self.mode_selection.Manual())
+        self.layout.addWidget(button3)
 
-    # Create buttons and add them to the layout
-    button1 = QPushButton("Menu")
-    button1.clicked.connect(lambda: buttons.Menu())
-    layout.addWidget(button1)
+        # Set the layout for the main window
+        self.window.setLayout(self.layout)
 
-    button2 = QPushButton("AI Solver")
-    button2.clicked.connect(lambda: buttons.AI_Solve())
-    layout.addWidget(button2)
-
-    button3 = QPushButton("Manual")
-    button3.clicked.connect(lambda: buttons.Manual())
-    layout.addWidget(button3)
-
-    # Set the layout for the main window
-    window.setLayout(layout)
-
-    # Show the window
-    window.show()
-    sys.exit(app.exec_())
+        # Show the window
+        self.window.show()
+        sys.exit(self.app.exec_())
