@@ -1,19 +1,17 @@
-import RPi.GPIO as GPIO
-from Control_Panel import LCD1602_WRITE
-from Timer import Timer
-import time
+from LCD_Display import LCD1602_WRITE
+from Timer import TIMER
 
-class ModeManager:
+class MODE_MANAGER:
     def __init__(self):
         self.lcd = LCD1602_WRITE()
-        self.timer = Timer()
+        self.timer = TIMER()
         self.modes = {
-            "Menu": MenuMode(self.lcd),
-            "AI Solve": AISolveMode(self.lcd, self.timer),
-            "Manual": ManualMode(self.lcd, self.timer),
-            "Start": StartMode(self.lcd, self.timer),
-            "Stop": StopMode(self.lcd, self.timer),
-            "Calibrate": CalibrateMode(self.lcd)
+            "Menu": MENU_MODE(self.lcd),
+            "AI Solve": AI_MODE(self.lcd, self.timer),
+            "Manual": MANUAL_MODE(self.lcd, self.timer),
+            "Start": START_MODE(self.lcd, self.timer),
+            "Stop": STOP_MODE(self.lcd, self.timer),
+            "Calibrate": CALIBRATE_MODE(self.lcd)
         }
         self.current_mode = self.modes["Menu"]
 
@@ -26,19 +24,12 @@ class ModeManager:
         if next_mode_name in self.modes:
             self.switch_mode(next_mode_name)
 
-
-class Mode:
+class MODE:
     def __init__(self, lcd, timer=None):
         self.lcd = lcd
         self.timer = timer
 
-    def handle_input(self, button):
-        pass  # To be overridden by subclasses
-
-    def display(self):
-        pass  # To be overridden by subclasses
-
-class MenuMode(Mode):
+class MENU_MODE(MODE):
     def display(self):
         self.lcd.update_messages("The Maze Game", "AI    Man    Cal")
 
@@ -51,7 +42,7 @@ class MenuMode(Mode):
             return "Calibrate"
         return "Menu"
 
-class AISolveMode(Mode):
+class AI_MODE(MODE):
     def display(self):
         self.lcd.update_messages("AI Solver", "Start Stop Menu")
 
@@ -64,7 +55,7 @@ class AISolveMode(Mode):
             return "Menu"
         return "AI Solve"
 
-class AISolveMode(Mode):
+class MANUAL_MODE(MODE):
     def display(self):
         self.lcd.update_messages("AI Solver", "Start Stop Menu")
 
@@ -77,5 +68,44 @@ class AISolveMode(Mode):
             return "Menu"
         return "AI Solve"
 
+
+class CALIBRATE_MODE(MODE):
+    def display(self):
+        self.lcd.update_messages("AI Solver", "Start Stop Menu")
+
+    def handle_input(self, button):
+        if button == 1:
+            return "Start"
+        elif button == 2:
+            return "Stop"
+        elif button == 3:
+            return "Menu"
+        return "AI Solve"
+
+class START_MODE(MODE):
+    def display(self):
+        self.lcd.update_messages("AI Solver", "Start Stop Menu")
+
+    def handle_input(self, button):
+        if button == 1:
+            return "Start"
+        elif button == 2:
+            return "Stop"
+        elif button == 3:
+            return "Menu"
+        return "AI Solve"
+
+class STOP_MODE(MODE):
+    def display(self):
+        self.lcd.update_messages("AI Solver", "Start Stop Menu")
+
+    def handle_input(self, button):
+        if button == 1:
+            return "Start"
+        elif button == 2:
+            return "Stop"
+        elif button == 3:
+            return "Menu"
+        return "AI Solve"
 
 

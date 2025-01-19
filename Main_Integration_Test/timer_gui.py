@@ -3,7 +3,7 @@ import time
 import threading
 from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
 from PyQt5.QtCore import pyqtSignal, QObject
-from Control_Panel import LCD1602_WRITE
+from Main_Integration_Test.LCD_Display import LCD1602_WRITE
 
 
 class TimerThread(QObject):

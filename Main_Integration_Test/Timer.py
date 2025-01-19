@@ -1,10 +1,10 @@
 import threading
 from datetime import datetime
-from Control_Panel import LCD1602_WRITE
+from LCD_Display import LCD1602_WRITE
 
 import time
 
-class Timer:
+class TIMER:
 
     def __init__(self):
 
