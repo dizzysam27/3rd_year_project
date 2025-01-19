@@ -3,7 +3,9 @@ from Controller import MODE_MANAGER
 
 class PHYSICAL_BUTTONS:
     
-    def __init__(self):
+    def __init__(self,gui):
+
+        self.gui = gui
 
         self.BUTTON_PIN_1 = 4
         self.BUTTON_PIN_2 = 17
@@ -15,7 +17,7 @@ class PHYSICAL_BUTTONS:
         GPIO.setup(self.BUTTON_PIN_2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.BUTTON_PIN_3, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-        self.mode_manager = MODE_MANAGER()
+        self.mode_manager = MODE_MANAGER(self.gui)
 
     def button1_callback(self, channel):
 

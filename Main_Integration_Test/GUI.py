@@ -6,7 +6,7 @@ from Controller import MODE_MANAGER
 class GUI:
 
     def __init__(self):
-        self.mode_manager = MODE_MANAGER()
+        self.mode_manager = MODE_MANAGER(self)
         self.app = QApplication(sys.argv)
         self.window = QWidget()
         self.layout = QVBoxLayout()
@@ -25,15 +25,15 @@ class GUI:
     def run(self):
         # Buttons
         button1 = QPushButton("Menu")
-        button1.clicked.connect(lambda: [self.mode_manager.handle_input(1), self.update_label("Menu Selected")])
+        button1.clicked.connect(lambda: [self.mode_manager.handle_input(1)])
         self.layout.addWidget(button1)
 
         button2 = QPushButton("AI Solver")
-        button2.clicked.connect(lambda: [self.mode_manager.handle_input(2), self.update_label("AI Solver Selected")])
+        button2.clicked.connect(lambda: [self.mode_manager.handle_input(2)])
         self.layout.addWidget(button2)
 
         button3 = QPushButton("Manual")
-        button3.clicked.connect(lambda: [self.mode_manager.handle_input(3), self.update_label("Manual Mode Selected")])
+        button3.clicked.connect(lambda: [self.mode_manager.handle_input(3)])
         self.layout.addWidget(button3)
 
         # Set the layout for the main window

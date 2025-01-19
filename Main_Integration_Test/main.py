@@ -6,9 +6,10 @@ from GUI import GUI
 def main():
     try:
     
-        mode_manager = MODE_MANAGER()
-        physical_buttons = PHYSICAL_BUTTONS()
+        
         gui = GUI()
+        mode_manager = MODE_MANAGER(gui)
+        physical_buttons = PHYSICAL_BUTTONS(gui)
 
         mode_manager.switch_mode("Menu")
         physical_buttons.event_detect()

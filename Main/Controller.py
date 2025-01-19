@@ -6,12 +6,12 @@ class MODE_MANAGER:
         self.lcd = LCD1602_WRITE()
         self.timer = TIMER()
         self.modes = {
-            "Menu": MENU_MODE(self.lcd),
+            "Menu": MENU_MODE(self.lcd,self.timer),
             "AI Solve": AI_MODE(self.lcd, self.timer),
             "Manual": MANUAL_MODE(self.lcd, self.timer),
             "Start": START_MODE(self.lcd, self.timer),
             "Stop": STOP_MODE(self.lcd, self.timer),
-            "Calibrate": CALIBRATE_MODE(self.lcd)
+            "Calibrate": CALIBRATE_MODE(self.lcd,self.timer)
         }
         self.current_mode = self.modes["Menu"]
 
@@ -25,7 +25,7 @@ class MODE_MANAGER:
             self.switch_mode(next_mode_name)
 
 class MODE:
-    def __init__(self, lcd, timer=None):
+    def __init__(self, lcd, timer):
         self.lcd = lcd
         self.timer = timer
 
@@ -86,9 +86,10 @@ class CALIBRATE_MODE(MODE):
 class START_MODE(MODE):
     def display(self):
         self.lcd.update_messages("Start Mode", "Start Stop Menu")
-
+        self.timer.start_timer()
     def handle_input(self, button):
         if button == 1:
+            
             return "Start"
         elif button == 2:
             return "Stop"
@@ -99,7 +100,7 @@ class START_MODE(MODE):
 class STOP_MODE(MODE):
     def display(self):
         self.lcd.update_messages("Stop", "Start Stop Menu")
-
+        self.timer.stop_timer()
     def handle_input(self, button):
         if button == 1:
             return "Start"

@@ -2,16 +2,17 @@ from LCD_Display import LCD1602_WRITE
 from Timer import TIMER
 
 class MODE_MANAGER:
-    def __init__(self):
+    def __init__(self,gui):
+        self.gui = gui
         self.lcd = LCD1602_WRITE()
-        self.timer = TIMER()
+        self.timer = TIMER(gui)
         self.modes = {
-            "Menu": MENU_MODE(self.lcd,self.timer),
-            "AI Solve": AI_MODE(self.lcd, self.timer),
-            "Manual": MANUAL_MODE(self.lcd, self.timer),
-            "Start": START_MODE(self.lcd, self.timer),
-            "Stop": STOP_MODE(self.lcd, self.timer),
-            "Calibrate": CALIBRATE_MODE(self.lcd,self.timer)
+            "Menu": MENU_MODE(self.lcd,self.timer,self.gui),
+            "AI Solve": AI_MODE(self.lcd, self.timer,self.gui),
+            "Manual": MANUAL_MODE(self.lcd, self.timer,self.gui),
+            "Start": START_MODE(self.lcd, self.timer,self.gui),
+            "Stop": STOP_MODE(self.lcd, self.timer,self.gui),
+            "Calibrate": CALIBRATE_MODE(self.lcd,self.timer,self.gui)
         }
         self.current_mode = self.modes["Menu"]
 
@@ -25,14 +26,16 @@ class MODE_MANAGER:
             self.switch_mode(next_mode_name)
 
 class MODE:
-    def __init__(self, lcd, timer):
+    def __init__(self, lcd, timer, gui):
         self.lcd = lcd
         self.timer = timer
+        self.gui = gui
 
 class MENU_MODE(MODE):
+
     def display(self):
         self.lcd.update_messages("The Maze Game", "AI    Man    Cal")
-
+        self.gui.update_label("Menu")
     def handle_input(self, button):
         if button == 1:
             return "AI Solve"
@@ -46,7 +49,7 @@ class MENU_MODE(MODE):
 class AI_MODE(MODE):
     def display(self):
         self.lcd.update_messages("AI Solver", "Start Stop Menu")
-
+        self.gui.update_label("AI Solver")
     def handle_input(self, button):
         if button == 1:
             return "Start"
@@ -59,7 +62,7 @@ class AI_MODE(MODE):
 class MANUAL_MODE(MODE):
     def display(self):
         self.lcd.update_messages("Manual Solver", "Start Stop Menu")
-
+        self.gui.update_label("Manual Solver")
     def handle_input(self, button):
         if button == 1:
             return "Start"
@@ -73,7 +76,7 @@ class MANUAL_MODE(MODE):
 class CALIBRATE_MODE(MODE):
     def display(self):
         self.lcd.update_messages("Calibration Mode", "Start Stop Menu")
-
+        self.gui.update_label("Calibration Mode")
     def handle_input(self, button):
         if button == 1:
             return "Start"

@@ -18,7 +18,6 @@ class PHYSICAL_BUTTONS:
         self.mode_manager = MODE_MANAGER()
 
     def button1_callback(self, channel):
-
         self.mode_manager.handle_input(1)
 
     def button2_callback(self, channel):

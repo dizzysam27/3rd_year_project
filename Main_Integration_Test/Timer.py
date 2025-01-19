@@ -1,12 +1,11 @@
 import threading
 from datetime import datetime
 from LCD_Display import LCD1602_WRITE
-
 import time
 
 class TIMER:
 
-    def __init__(self):
+    def __init__(self,gui):
 
         self.start_time = None
         self.timer_running = threading.Event()  # Event to control timer state
@@ -14,6 +13,7 @@ class TIMER:
         self.timer_thread.daemon = True  # Daemon thread stops with the main program
         self.timer_thread.start()
         self.lcd = LCD1602_WRITE()
+        self.gui = gui
         
 
     def start_timer(self):
@@ -41,5 +41,5 @@ class TIMER:
                     self.elapsed_time = datetime.now() - self.start_time
                     print(f"Elapsed time: {self.elapsed_time}", end="\r", flush=True)
                     self.lcd.update_messages(str(self.elapsed_time),"      Stop Menu")
-        
+                    self.gui.update_label(str(self.elapsed_time)) 
             time.sleep(0.1)  # Reduce CPU usage
