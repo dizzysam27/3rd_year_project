@@ -1,8 +1,5 @@
 import time
-import RPi.GPIO as GPIO
 from smbus import SMBus
-from datetime import datetime
-
 
 b = SMBus(1)
 
@@ -162,38 +159,3 @@ class LCD1602_WRITE(LCD1602):
     #         # Wait for 1 second
     #         time.sleep(1)
 
-class PHYSICAL_BUTTONS:
-    
-    def __init__(self):
-        
-        from Controller import MODE_SELECTION
-
-        self.BUTTON_PIN_1 = 4
-        self.BUTTON_PIN_2 = 17
-        self.BUTTON_PIN_3 = 20
-
-        GPIO.setmode(GPIO.BCM)
-
-        GPIO.setup(self.BUTTON_PIN_1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(self.BUTTON_PIN_2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(self.BUTTON_PIN_3, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-        self.mode_selection = MODE_SELECTION()
-
-    def button1_callback(self, channel):
-
-        self.mode_selection.mode_switcher(1,None)
-
-    def button2_callback(self, channel):
-        self.mode_selection.mode_switcher(2,None)
-
-    def button3_callback(self, channel):
-        self.mode_selection.mode_switcher(3,None)
-        
-    def event_detect(self):
-        GPIO.add_event_detect(self.BUTTON_PIN_1, GPIO.RISING, callback=self.button1_callback, bouncetime=500)
-        GPIO.add_event_detect(self.BUTTON_PIN_2, GPIO.RISING, callback=self.button2_callback, bouncetime=500)
-        GPIO.add_event_detect(self.BUTTON_PIN_3, GPIO.RISING, callback=self.button3_callback, bouncetime=500)
-    
-    def cleanup(self):
-        GPIO.cleanup()
