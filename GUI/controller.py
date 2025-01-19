@@ -16,6 +16,11 @@ class MODE_MANAGER:
             self.current_mode.display()  # Display the new mode
             self.gui.update_label(self.current_mode.label)  # Update the label
 
+    def update_gui_label(self, text):
+        """This method is called to update the GUI label directly from MODE_MANAGER."""
+        self.gui.update_label(text)  # Update the label in the GUI
+
+
 class Mode:
     def __init__(self, gui, label):
         self.gui = gui  # Store the GUI reference
@@ -24,12 +29,16 @@ class Mode:
     def display(self):
         pass  # Placeholder for display logic
 
+
 class Mode1(Mode):
     def __init__(self, gui):
         super().__init__(gui, "Mode 1 is Active!")
 
     def display(self):
         print("Displaying Mode 1")
+        # Example: Update GUI label from the mode
+        self.gui.update_label("Mode 1 is now active!")  # Directly update label in GUI
+
 
 class Mode2(Mode):
     def __init__(self, gui):
@@ -37,6 +46,9 @@ class Mode2(Mode):
 
     def display(self):
         print("Displaying Mode 2")
+        # Example: Update GUI label from the mode
+        self.gui.update_label("Mode 2 is now active!")  # Directly update label in GUI
+
 
 class Mode3(Mode):
     def __init__(self, gui):
@@ -44,3 +56,5 @@ class Mode3(Mode):
 
     def display(self):
         print("Displaying Mode 3")
+        # Example: Update GUI label from the mode
+        self.gui.update_label("Mode 3 is now active!")  # Directly update label in GUI
