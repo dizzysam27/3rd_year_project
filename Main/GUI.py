@@ -43,4 +43,3 @@ class GUI:
         self.window.show()
         sys.exit(self.app.exec_())
         
-

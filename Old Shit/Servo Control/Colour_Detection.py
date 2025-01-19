@@ -1,57 +1,49 @@
+import sys
 import cv2
-import  numpy as np
-from PIL import Image
+from PyQt5.QtCore import QTimer
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QWidget
 
-def get_limits(colour):
-    
-    c = np.uint8([[colour]])
-    hsvC = cv2.cvtColor(c, cv2.COLOR_BGR2HSV)
+class CameraApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        
+        self.setWindowTitle("Simple Camera Viewer")
+        self.setGeometry(100, 100, 800, 600)
 
-    lowerLimit = hsvC[0][0][0] - 1,100,100
-    upperLimit = hsvC[0][0][0] + 1,255,255
+        # Main widget and layout
+        self.main_widget = QWidget()
+        self.setCentralWidget(self.main_widget)
 
-    lowerLimit = np.array(lowerLimit, dtype=np.uint8)
-    upperLimit = np.array(upperLimit, dtype=np.uint8)
+        self.layout = QVBoxLayout()
+        self.main_widget.setLayout(self.layout)
 
-    return lowerLimit, upperLimit
+        # Camera feed label
+        self.camera_label = QLabel("Camera Feed")
+        self.camera_label.setStyleSheet("background-color: black;")
+        self.layout.addWidget(self.camera_label)
 
-cap = cv2.VideoCapture(1)
-yellow = [255, 0, 0]
+        # Camera setup
+        self.capture = cv2.VideoCapture(2)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_frame)
+        self.timer.start(30)
 
-while True:
-    ret, frame = cap.read()
-    hsvImage = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    def update_frame(self):
+        ret, frame = self.capture.read()
+        if ret:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            height, width, channel = frame.shape
+            step = channel * width
+            qimg = QImage(frame.data, width, height, step, QImage.Format_RGB888)
+            self.camera_label.setPixmap(QPixmap.fromImage(qimg))
 
-# Colour 1
-    lowerLimit, upperLimit = get_limits(colour=yellow)
-    mask = cv2.inRange(hsvImage, lowerLimit, upperLimit)
-    
-    mask_ = Image.fromarray(mask)
-    bbox1 = mask_.getbbox()
+    def closeEvent(self, event):
+        self.capture.release()
+        event.accept()
 
-    print(bbox1)
-
-    if bbox1 is not None:
-        x1,y1,x2,y2 = bbox1
-        frame = cv2.rectangle(frame,(x1,y1),(x2,y2),(0,255,255),5)
-
-# # Colour 2  
-#     lowerLimit, upperLimit = get_limits(colour=red)
-#     mask = cv2.inRange(hsvImage, lowerLimit, upperLimit)
-    
-#     mask_ = Image.fromarray(mask)
-#     bbox2 = mask_.getbbox()
-
-#     print(bbox2)
-
-#     if bbox2 is not None:
-#         x1,y1,x2,y2 = bbox2
-#         frame = cv2.rectangle(frame,(x1,y1),(x2,y2),(0,255,0),5)
-
-    cv2.imshow('frame',frame)
-
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-cap.release()
-cv2.destroyAllWindows()
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = CameraApp()
+    window.show()
+    sys.exit(app.exec_())
