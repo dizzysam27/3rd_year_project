@@ -12,7 +12,8 @@ class MODE_MANAGER:
             "Manual": MANUAL_MODE(self.lcd, self.timer,self.gui),
             "Start": START_MODE(self.lcd, self.timer,self.gui),
             "Stop": STOP_MODE(self.lcd, self.timer,self.gui),
-            "Calibrate": CALIBRATE_MODE(self.lcd,self.timer,self.gui)
+            "Calibrate": CALIBRATE_MODE(self.lcd,self.timer,self.gui),
+            "Reset": RESET_MODE(self.lcd,self.timer,self.gui)
         }
         self.current_mode = self.modes["Menu"]
 
@@ -35,7 +36,11 @@ class MENU_MODE(MODE):
 
     def display(self):
         self.lcd.update_messages("The Maze Game", "AI    Man    Cal")
-        self.gui.update_label("Menu")
+        self.gui.update_label("Welcome to the Maze Game")
+        self.gui.update_button_text(1,"AI Solve")
+        self.gui.update_button_text(2,"Manual Solve")
+        self.gui.update_button_text(3,"Menu")
+        
     def handle_input(self, button):
         if button == 1:
             return "AI Solve"
@@ -48,69 +53,108 @@ class MENU_MODE(MODE):
 
 class AI_MODE(MODE):
     def display(self):
-        self.lcd.update_messages("AI Solver", "Start Stop Menu")
+        self.lcd.update_messages("AI Solver", "Start       Menu")
         self.gui.update_label("AI Solver")
+        self.gui.update_button_text(1,"Start")
+        self.gui.update_button_text(2,"")
+        self.gui.update_button_text(3,"Menu")
     def handle_input(self, button):
         if button == 1:
             return "Start"
         elif button == 2:
-            return "Stop"
+            pass
         elif button == 3:
             return "Menu"
-        return "AI Solve"
+        else:
+            pass
 
 class MANUAL_MODE(MODE):
     def display(self):
-        self.lcd.update_messages("Manual Solver", "Start Stop Menu")
+        self.lcd.update_messages("Manual Solver", "Start       Menu")
         self.gui.update_label("Manual Solver")
+        self.gui.update_button_text(1,"Start")
+        self.gui.update_button_text(2,"")
+        self.gui.update_button_text(3,"Menu")
     def handle_input(self, button):
         if button == 1:
             return "Start"
         elif button == 2:
-            return "Stop"
+            pass
         elif button == 3:
             return "Menu"
-        return "AI Solve"
+        else:
+            pass
 
 
 class CALIBRATE_MODE(MODE):
     def display(self):
-        self.lcd.update_messages("Calibration Mode", "Start Stop Menu")
+        self.lcd.update_messages("Calibration Mode", "Start       Menu")
         self.gui.update_label("Calibration Mode")
+        self.gui.update_button_text(1,"Start")
+        self.gui.update_button_text(2,"")
+        self.gui.update_button_text(3,"Menu")
+        
     def handle_input(self, button):
         if button == 1:
             return "Start"
         elif button == 2:
-            return "Stop"
+            pass
         elif button == 3:
             return "Menu"
-        return "AI Solve"
+        else:
+            pass
 
 class START_MODE(MODE):
     def display(self):
-        self.lcd.update_messages("Start Mode", "Start Stop Menu")
+        self.gui.update_button_text(1,"")
+        self.gui.update_button_text(2,"Stop")
+        self.gui.update_button_text(3,"")
         self.timer.start_timer()
+        
+
     def handle_input(self, button):
         if button == 1:
-            
-            return "Start"
+            pass
         elif button == 2:
             return "Stop"
         elif button == 3:
-            return "Menu"
-        return "AI Solve"
+            pass
+        else:
+            pass
 
 class STOP_MODE(MODE):
     def display(self):
-        self.lcd.update_messages("Stop", "Start Stop Menu")
+        self.gui.update_button_text(1,"")
+        self.gui.update_button_text(2,"Reset")
+        self.gui.update_button_text(3,"Menu")
         self.timer.stop_timer()
+        
+    def handle_input(self, button):
+        if button == 1:
+            pass
+        elif button == 2:
+            return "Reset"
+        elif button == 3:
+            return "Menu"
+        else:
+            pass
+
+
+class RESET_MODE(MODE):
+    def display(self):
+        self.gui.update_button_text(1,"Start")
+        self.gui.update_button_text(2,"")
+        self.gui.update_button_text(3,"Menu")
+        self.timer.reset_timer()
+        
     def handle_input(self, button):
         if button == 1:
             return "Start"
         elif button == 2:
-            return "Stop"
+            pass
         elif button == 3:
             return "Menu"
-        return "AI Solve"
+        else:
+            pass
 
 
