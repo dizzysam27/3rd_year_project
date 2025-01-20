@@ -12,9 +12,9 @@ y_axis = ADC(26)  # Connect VRy to GP27 (ADC1)
 button = Pin(2, Pin.IN, Pin.PULL_UP)  # Connect SW to GP16 with pull-up
 
 # Function to send data to Raspberry Pi
-def send_data_uart1(data):
-    uart1.write(data)
-    print("CORE1 Sent - " ,data)
+def send_data_uart1(xdata):
+    uart1.write(xdata)
+    print(xdata)
     
 def read_data_uart1():
     if uart1.any():
@@ -44,25 +44,25 @@ def core1_joystick():
         send_data_uart1(f"{x_percent}")
         time.sleep(0.1)
         
-def send_data_uart0(data):
-    uart0.write(data)
-    print("CORE0 - Sent: " ,data)
-    
-def read_data_uart0():
-    if uart0.any():
-        data_uart0 = uart0.read().decode('utf-8')
-        print("CORE0 - Received on UART0: ", data_uart0)
-        return data_uart0
-    return None
+# def send_data_uart0(data):
+#     uart0.write(data)
+#     print("CORE0 - Sent: " ,data)
+#     
+# def read_data_uart0():
+#     if uart0.any():
+#         data_uart0 = uart0.read().decode('utf-8')
+#         print("CORE0 - Received on UART0: ", data_uart0)
+#         return data_uart0
+#     return None
 
-def core0_uart_comms():
-    while True:
-        data_uart0 = read_data_uart0()
-        if data_uart0:
-            send_data_uart0("Hello on UART0\n")
-        time.sleep(1)  # Delay before reading again
+# def core0_uart_comms():
+#     while True:
+#         data_uart0 = read_data_uart0()
+#         if data_uart0:
+#             send_data_uart0("Hello on UART0\n")
+#         time.sleep(1)  # Delay before reading again
 
-_thread.start_new_thread(core1_joystick, ())
-core0_uart_comms()
+core1_joystick()
+
 
 
