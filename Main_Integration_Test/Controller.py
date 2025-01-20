@@ -86,7 +86,6 @@ class MANUAL_MODE(MODE):
         else:
             pass
 
-
 class CALIBRATE_MODE(MODE):
     def display(self):
         self.lcd.update_messages("Calibration Mode", "Start       Menu")
@@ -141,7 +140,6 @@ class STOP_MODE(MODE):
             return "Menu"
         else:
             pass
-
 
 class RESET_MODE(MODE):
     def display(self):
