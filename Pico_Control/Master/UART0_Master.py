@@ -1,9 +1,9 @@
 import serial # type: ignore
 import time
 import tkinter as tk
-
+import PCA
 # Define UART Protocol
-uart0 = serial.Serial("/dev/serial0",
+uart0 = serial.Serial("/dev/ttyAMA0",
                       baudrate=9600,
                       parity=serial.PARITY_NONE,
                       stopbits=serial.STOPBITS_ONE,
@@ -20,10 +20,13 @@ while True:
     # Update Joystick Values
     if uart0.in_waiting > 0:
             dataRx = str(uart0.readline().decode('utf-8').strip())
-            buttonValue = int(dataRx[-1])
-            xValue = int(dataRx[-4:-2]) - 100
-            yValue = int(dataRx) - (xValue*10 + buttonValue) - 100
-            print("X: {xValue}, Y: {yValue}, Button Press: {buttonValue}")        
+            x,y,button = map(int, dataRx.split(','))
+            x=x-100
+            y=y-100
+            # buttonValue = int(dataRx[-1])
+            # xValue = int(dataRx[-4:-2]) - 100
+            # yValue = int(dataRx) - (xValue*10 + buttonValue) - 100
+            print(x,y,button)        
     
     testData += 1
     uart0.write(b'2')

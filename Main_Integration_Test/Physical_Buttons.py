@@ -7,9 +7,9 @@ class PHYSICAL_BUTTONS:
     def __init__(self, gui):
         self.gui = gui
 
-        self.BUTTON_PIN_1 = Button(4, pull_up=True)
-        self.BUTTON_PIN_2 = Button(17, pull_up=True)
-        self.BUTTON_PIN_3 = Button(20, pull_up=True)
+        self.BUTTON_PIN_1 = Button(4, pull_up=True,bounce_time=1000)
+        self.BUTTON_PIN_2 = Button(17, pull_up=True,bounce_time=1000)
+        self.BUTTON_PIN_3 = Button(20, pull_up=True,bounce_time=1000)
 
         self.mode_manager = MODE_MANAGER(self.gui)
 

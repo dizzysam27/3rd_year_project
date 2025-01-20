@@ -1,8 +1,10 @@
 import serial # type: ignore
 import time
 import tkinter as tk
-
+from PCA9685 import PCA9685
 # Define UART Protocol
+
+motors = PCA9685()
 uart0 = serial.Serial("/dev/ttyAMA0",
                       baudrate=9600,
                       parity=serial.PARITY_NONE,
@@ -10,23 +12,28 @@ uart0 = serial.Serial("/dev/ttyAMA0",
                       bytesize=serial.EIGHTBITS,
                       timeout=0)
 
-# Main Loop
 xValue = 0
 yValue = 0
+
+# Main Loop
+testData = 0
 while True:
 
     # Update Joystick Values
     if uart0.in_waiting > 0:
             dataRx = str(uart0.readline().decode('utf-8').strip())
-            buttonValue = int(dataRx[-1])
-            xValue = int(dataRx[-4:-2]) - 100
-            yValue = int(dataRx) - (xValue*10 + buttonValue) - 100        
+            y,x,button = map(int, dataRx.split(','))
+            x=x-100
+            y=y-100
+            motors.motorAngle(-x,-y)
+            print(x,y,button)        
     
-    testData = str(xValue)[-2:-1] + str(yValue)[-2:-1]
-    uart0.write(b'{testData}\n')
+    testData += 1
+    # uart0.write(b'2')
 
-    time.sleep(0.1)
+    time.sleep(0.001)
 
+uart0.close()
 
 while True:
     try:

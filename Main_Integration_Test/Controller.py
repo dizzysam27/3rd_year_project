@@ -1,11 +1,13 @@
 from LCD_Display import LCD1602_WRITE
 from Timer import TIMER
+from PCA9685 import PCA9685
 
 class MODE_MANAGER:
     def __init__(self,gui):
         self.gui = gui
         self.lcd = LCD1602_WRITE()
         self.timer = TIMER(gui)
+        
         self.modes = {
             "Menu": MENU_MODE(self.lcd,self.timer,self.gui),
             "AI Solve": AI_MODE(self.lcd, self.timer,self.gui),
@@ -31,6 +33,7 @@ class MODE:
         self.lcd = lcd
         self.timer = timer
         self.gui = gui
+        
 
 class MENU_MODE(MODE):
 
@@ -109,7 +112,8 @@ class START_MODE(MODE):
         self.gui.update_button_text(1,"")
         self.gui.update_button_text(2,"Stop")
         self.gui.update_button_text(3,"")
-        
+        self.pca9685 = PCA9685()
+        self.pca9685.run()
         self.timer.start_timer()
         
 
