@@ -12,7 +12,7 @@ def main():
         physical_buttons = PHYSICAL_BUTTONS(gui)
 
         mode_manager.switch_mode("Menu")
-        physical_buttons.event_detect()
+        physical_buttons
         gui.run()
 
         while True:
