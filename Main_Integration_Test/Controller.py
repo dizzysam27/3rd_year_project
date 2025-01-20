@@ -58,6 +58,7 @@ class AI_MODE(MODE):
         self.gui.update_button_text(1,"Start")
         self.gui.update_button_text(2,"")
         self.gui.update_button_text(3,"Menu")
+
     def handle_input(self, button):
         if button == 1:
             return "Start"
@@ -109,6 +110,7 @@ class START_MODE(MODE):
         self.gui.update_button_text(1,"")
         self.gui.update_button_text(2,"Stop")
         self.gui.update_button_text(3,"")
+        
         self.timer.start_timer()
         
 
@@ -128,6 +130,7 @@ class STOP_MODE(MODE):
         self.gui.update_button_text(2,"Reset")
         self.gui.update_button_text(3,"Menu")
         self.timer.stop_timer()
+        
         
     def handle_input(self, button):
         if button == 1:

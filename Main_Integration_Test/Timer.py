@@ -20,12 +20,12 @@ class TIMER:
     
         self.start_time = datetime.now()
         self.timer_running.set()  # Enable the timer
-        self.lcd.update_messages(str(self.elapsed_time),"      Stop      ")
+        self.lcd.update_messages("                ","      Stop      ")
 
     def stop_timer(self):
         
         self.timer_running.clear()  # Disable the timer
-        self.lcd.update_messages(str(self.elapsed_time),"      Reset Menu")
+        self.lcd.update_messages(str(self.elapsed_time),"     Reset  Menu")
 
     def reset_timer(self):
         

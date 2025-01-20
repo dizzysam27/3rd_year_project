@@ -18,9 +18,9 @@ class GUI:
         self.layout.addWidget(self.dynamic_label)
 
         # Store buttons as instance variables
-        self.button1 = QPushButton("Menu")
-        self.button2 = QPushButton("AI Solver")
-        self.button3 = QPushButton("Manual")
+        self.button1 = QPushButton()
+        self.button2 = QPushButton()
+        self.button3 = QPushButton()
 
     def update_label(self, new_text):
         """Update the dynamic label text."""
