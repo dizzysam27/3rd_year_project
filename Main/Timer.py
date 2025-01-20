@@ -20,10 +20,12 @@ class TIMER:
     
         self.start_time = datetime.now()
         self.timer_running.set()  # Enable the timer
+        print("Timer started.")
 
     def stop_timer(self):
         
         self.timer_running.clear()  # Disable the timer
+        print("Timer stopped.")
         self.lcd.update_messages(str(self.elapsed_time),"      Stop Menu")
 
     def reset_timer(self):
@@ -37,7 +39,7 @@ class TIMER:
             if self.timer_running.is_set():
                 if self.start_time:  # Ensure the timer has been started
                     self.elapsed_time = datetime.now() - self.start_time
-                    # print(f"Elapsed time: {self.elapsed_time}", end="\r", flush=True)
+                    print(f"Elapsed time: {self.elapsed_time}", end="\r", flush=True)
                     self.lcd.update_messages(str(self.elapsed_time),"      Stop Menu")
                     self.gui.update_label(str(self.elapsed_time)) 
             time.sleep(0.1)  # Reduce CPU usage
