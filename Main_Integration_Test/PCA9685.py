@@ -1,12 +1,6 @@
-#!/usr/bin/python
-
 import time
 import math
 import smbus
-
-# ============================================================================
-# Raspi PCA9685 16-Channel PWM Servo Driver
-# ============================================================================
 
 class PCA9685:
 
@@ -32,6 +26,9 @@ class PCA9685:
     if (self.debug):
       print("Reseting PCA9685")
     self.write(self.__MODE1, 0x00)
+    self.setPWMFreq(50)
+    self.calibrate()
+    print("Motors Calibrated and Initialised")
 	
   def write(self, reg, value):
     "Writes an 8-bit value to the specified register/address"
@@ -82,19 +79,89 @@ class PCA9685:
     self.setPWM(channel, 0, int(pulse))
 
   def motorAngle(self, motor1,motor2):
-    xoffset = -15
-    yoffset = -5
 
-    self.setServoPulse(1, 1915 + xoffset + (motor1 / 100.0) * 28) # motor1 is opposite the arduino unit
-    self.setServoPulse(0, 1915 + yoffset + (motor2 / 100.0) * 28)
+    self.setServoPulse(1, self.x_centre + self.x_offset + (motor1 / 100.0) * self.x_maxtilt)
+    self.setServoPulse(0, self.y_centre + self.y_offset + (motor2 / 100.0) * self.y_maxtilt)
+  
+  def calibrate(self):
 
+    self.x_offset = -15
+    self.y_offset = -5
+    self.x_maxtilt = 28
+    self.y_maxtilt = 28
+    self.x_centre = 1915
+    self.y_centre = 1915
+    self.motorAngle(0,0)
+  
+  def smoothMotorAngle(self, motor1_target, motor2_target, steps=20, delay=0.05):
+    motor1_start = (self.readMotorPulse(1) - self.x_centre - self.x_offset) / self.x_maxtilt * 100
+    motor2_start = (self.readMotorPulse(0) - self.y_centre - self.y_offset) / self.y_maxtilt * 100
+
+    for step in range(steps + 1):
+        motor1_step = motor1_start + (motor1_target - motor1_start) * step / steps
+        motor2_step = motor2_start + (motor2_target - motor2_start) * step / steps
+        self.motorAngle(motor1_step, motor2_step)
+        time.sleep(delay)
+    
+  def readMotorPulse(self, channel):
+    """Reads the pulse width for the specified channel."""
+    # Read the ON and OFF registers
+    on_l = self.read(self.__LED0_ON_L + 4 * channel)
+    on_h = self.read(self.__LED0_ON_H + 4 * channel)
+    off_l = self.read(self.__LED0_OFF_L + 4 * channel)
+    off_h = self.read(self.__LED0_OFF_H + 4 * channel)
+
+    # Combine high and low bytes to get the full ON and OFF counts
+    on_count = (on_h << 8) | on_l
+    off_count = (off_h << 8) | off_l
+
+    # The pulse width is the difference between ON and OFF counts
+    pulse_width = off_count - on_count
+
+    if self.debug:
+        print(f"Channel {channel}: ON={on_count}, OFF={off_count}, Pulse Width={pulse_width}")
+
+    return pulse_width
 
   def run(self):
-    pwm = PCA9685(0x40, debug=False)
-    pwm.setPWMFreq(50)
+    print("Starting motor test...")
+    self.motorAngle(0, 0)  # Center
+    time.sleep(1)
+    self.smoothMotorAngle(50, -50)  # Diagonal tilt
+    time.sleep(1)
+    self.smoothMotorAngle(-50, 50)  # Opposite diagonal
+    time.sleep(1)
+    self.resetMotors()  # Back to center
+    print("Motor test complete.")
 
-    pwm.motorAngle(0,0)
-    time.sleep(2)
+hello = PCA9685()
+hello.smoothMotorAngle(30,-30,steps=100,delay=0.02)
+hello.run()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     # pwm.motorAngle(100,100)
     # time.sleep(2)
 
