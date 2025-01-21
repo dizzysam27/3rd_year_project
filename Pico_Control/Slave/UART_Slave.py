@@ -10,8 +10,9 @@ class JOYSTICK_PICO:
         self.xAxis = ADC(27)
         self.yAxis = ADC(26)
         self.JoyButton = Pin(2, Pin.IN, Pin.PULL_UP)
+        self.led = Pin(25,Pin.OUT)
+        self.led.high()
         
-
     def UARTtx(self,dataIn, uartName):
         try:
             uartName.write(dataIn + "\n")
