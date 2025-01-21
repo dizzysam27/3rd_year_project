@@ -1,6 +1,5 @@
 import serial
 import time
-import tkinter as tk
 from PCA9685 import PCA9685
 
 class JOYSTICK_READ_DATA:
@@ -15,21 +14,17 @@ class JOYSTICK_READ_DATA:
                             bytesize=serial.EIGHTBITS,
                             timeout=0)
 
-        self.xValue = 0
-        self.yValue = 0
-        self.bValue = 0
-
     def read_data(self):
 
         while True:
 
             if self.uart0.in_waiting > 0:
                     dataRx = str(self.uart0.readline().decode('utf-8').strip())
-                    self.yValue,self.xValue,self.bValue = map(int, dataRx.split(','))
-                    self.xValue=self.xValue-100
-                    self.yValue=self.yValue-100
-                    self.motors.motorAngle(-self.xValue,-self.yValue)
-                    print(self.xValue,self.yValue,self.bValue)  
+                    yValue,xValue,bValue = map(int, dataRx.split(','))
+                    xValue=-(xValue-100)
+                    yValue=-(yValue-100)
+                    self.motors.motorAngle(xValue,yValue)
+                    print(xValue,yValue,bValue)  
             else:
                  pass      
             
