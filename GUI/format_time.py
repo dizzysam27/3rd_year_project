@@ -12,4 +12,5 @@ while True:
 
     elapsed_time = time.time() - start_time
     formatted_time = format_time(elapsed_time)
+   
     print(f"Elapsed time: {formatted_time}",flush=True)
