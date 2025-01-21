@@ -17,21 +17,27 @@ class JOYSTICK_READ_DATA:
     def read_data(self):
 
         while True:
-
-            if self.uart0.in_waiting > 0:
-                    dataRx = str(self.uart0.readline().decode('utf-8').strip())
-                    yValue,xValue,bValue = map(int, dataRx.split(','))
-                    xValue=-(xValue-100)
-                    yValue=-(yValue-100)
-                    self.motors.motorAngle(xValue,yValue)
-                    print(xValue,yValue,bValue)  
-            else:
-                 pass      
+            
+            try:
+                if self.uart0.in_waiting > 0:
+                        dataRx = str(self.uart0.readline().decode('utf-8').strip())
+                        yValue,xValue,bValue = map(int, dataRx.split(','))
+                        xValue=(xValue)
+                        yValue=(yValue)
+                        self.motors.motorAngle(xValue,yValue)
+                        print(xValue,yValue,bValue)  
+                else:
+                    pass      
+            except:
+                 pass
             
             time.sleep(0.001)
 
 
+joystick = JOYSTICK_READ_DATA()
 
+while True:
+    joystick.read_data()
         # uart0.close()
 
         # while True:
