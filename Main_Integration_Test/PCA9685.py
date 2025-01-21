@@ -94,7 +94,9 @@ class PCA9685:
     self.y_maxtilt = 28
     self.x_centre = 1915
     self.y_centre = 1915
+
     self.motorAngle(0,0)
+    
     self.previous_motor1_angle = 0
     self.previous_motor2_angle = 0
   
