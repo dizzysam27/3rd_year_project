@@ -3,8 +3,8 @@
 
 #include <FastLED.h>
 #define NUM_LEDS 30
-#define DATA_PIN 6
-#define DATA_PIN2 5
+#define DATA_PIN 5
+#define DATA_PIN2 6
 CRGB leds[NUM_LEDS];
 #define TIME_FACTOR_HUE 60
 #define TIME_FACTOR_SAT 100

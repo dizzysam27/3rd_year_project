@@ -1,51 +1,58 @@
 from machine import Pin, UART, ADC  # type: ignore
 import time
 
-# UART Protocol
-uart0 = UART(0, baudrate=9600, bits=8, parity=None, stop=1, tx=Pin(0), rx=Pin(1))
+class JOYSTICK:
+    
+    def __init__(self):
+        # UART Protocol
+        self.uart0 = UART(0, baudrate=9600, bits=8, parity=None, stop=1, tx=Pin(0), rx=Pin(1))
 
-# Joystick and Button
-xAxis = ADC(27)
-yAxis = ADC(26)
-JoyButton = Pin(2, Pin.IN, Pin.PULL_UP)
+        # Joystick and Button
+        self.xAxis = ADC(27)
+        self.yAxis = ADC(26)
+        self.JoyButton = Pin(2, Pin.IN, Pin.PULL_UP)
 
-# UART Transmit Function
-def UARTtx(dataIn, uartName):
-    try:
-        uartName.write(dataIn + "\n")
-        print("Sent:", dataIn)
-    except Exception as e:
-        print("Error sending data:", e)
+    # UART Transmit Function
+    def UARTtx(self,dataIn, uartName):
+        try:
+            uartName.write(dataIn + "\n")
+            print("Sent:", dataIn)
+        except Exception as e:
+            print("Error sending data:", e)
 
-# Read Joystick Value
-def readJoy(axis):
-    raw = axis.read_u16()
-    return int(((200 * raw)) / 65535)
+    # Read Joystick Value
+    def readJoy(self,axis):
+        raw = axis.read_u16()
+        return int(((200 * raw)) / 65535)
 
-# Main loop
-while True:
+    def run(self):
     
-    joyx = -(readJoy(xAxis))+100
-    joyy = -(readJoy(yAxis))+100
-    # Read Joystick and Button
-    
-    if (joyx < 100):
-        xValue = joyx
-    elif (joyx > 100):
-        xValue = joyx
-    
-    
-    if (joyy < 100):
-        yValue = joyy 
-    elif (joyy > 100):
-        yValue = joyy 
-    
+        joyx = -(self.readJoy(self.xAxis))+100
+        joyy = -(self.readJoy(self.yAxis))+100
+        # Read Joystick and Button
         
-    buttonValue = int(not JoyButton.value())
+        if (joyx < 100):
+            xValue = joyx
+        elif (joyx > 100):
+            xValue = joyx
+        
+        
+        if (joyy < 100):
+            yValue = joyy 
+        elif (joyy > 100):
+            yValue = joyy 
+        
+        
+        buttonValue = int(not self.JoyButton.value())
 
-    # Pack Data
-    dataTx = f"{joyx},{joyy},{buttonValue}"
+        # Pack Data
+        dataTx = f"{joyx},{joyy},{buttonValue}"
 
-    # Transmit Data
-    UARTtx(dataTx, uart0)
-    time.sleep(0.1)
+        # Transmit Data
+        self.UARTtx(dataTx, self.uart0)
+        time.sleep(0.1)
+
+while True:
+    JOYSTICK().run()
+   
+    
