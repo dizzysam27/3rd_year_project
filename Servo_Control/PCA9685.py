@@ -109,9 +109,9 @@ class PCA9685:
 
     time.sleep(2)
 
-# while True:
-#   PCA9685().calibrate()
-#   time.sleep(1)
-#   PCA9685().run()
-#   time.sleep(1)
+while True:
+  PCA9685().calibrate()
+  time.sleep(1)
+  PCA9685().run()
+  time.sleep(1)
 

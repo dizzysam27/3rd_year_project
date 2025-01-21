@@ -29,6 +29,7 @@ class PCA9685:
     self.setPWMFreq(50)
     self.calibrate()
     print("Motors Calibrated and Initialised")
+    
 	
   def write(self, reg, value):
     "Writes an 8-bit value to the specified register/address"
@@ -82,26 +83,32 @@ class PCA9685:
 
     self.setServoPulse(1, self.x_centre + self.x_offset + (motor1 / 100.0) * self.x_maxtilt)
     self.setServoPulse(0, self.y_centre + self.y_offset + (motor2 / 100.0) * self.y_maxtilt)
+    self.previous_motor1_angle = motor1
+    self.previous_motor2_angle = motor2
   
   def calibrate(self):
 
     self.x_offset = -15
-    self.y_offset = -5
+    self.y_offset = 5
     self.x_maxtilt = 28
     self.y_maxtilt = 28
     self.x_centre = 1915
     self.y_centre = 1915
     self.motorAngle(0,0)
+    self.previous_motor1_angle = 0
+    self.previous_motor2_angle = 0
   
-  def smoothMotorAngle(self, motor1_target, motor2_target, steps=20, delay=0.05):
-    motor1_start = (self.readMotorPulse(1) - self.x_centre - self.x_offset) / self.x_maxtilt * 100
-    motor2_start = (self.readMotorPulse(0) - self.y_centre - self.y_offset) / self.y_maxtilt * 100
+  def smoothMotorAngle(self, motor1_target, motor2_target):
+
+    motor1_start = self.previous_motor1_angle
+    motor2_start = self.previous_motor2_angle
+    steps = abs(int(motor1_target - motor1_start)+10)
+    print(steps)
 
     for step in range(steps + 1):
         motor1_step = motor1_start + (motor1_target - motor1_start) * step / steps
         motor2_step = motor2_start + (motor2_target - motor2_start) * step / steps
         self.motorAngle(motor1_step, motor2_step)
-        time.sleep(delay)
     
   def readMotorPulse(self, channel):
     """Reads the pulse width for the specified channel."""
@@ -125,18 +132,20 @@ class PCA9685:
 
   def run(self):
     print("Starting motor test...")
-    self.motorAngle(0, 0)  # Center
+    self.smoothMotorAngle(100, 100)  # Center
+
     time.sleep(1)
-    self.smoothMotorAngle(50, -50)  # Diagonal tilt
-    time.sleep(1)
-    self.smoothMotorAngle(-50, 50)  # Opposite diagonal
-    time.sleep(1)
-    self.resetMotors()  # Back to center
+    self.smoothMotorAngle(-100, -100)  # Center
     print("Motor test complete.")
+    time.sleep(1)
 
 hello = PCA9685()
-hello.smoothMotorAngle(30,-30,steps=100,delay=0.02)
-hello.run()
+hello.calibrate()
+
+# while True:
+#   hello.run()
+# # hello.smoothMotorAngle(30,-30,steps=100,delay=0.02)
+
 
 
 

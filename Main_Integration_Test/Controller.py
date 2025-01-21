@@ -112,8 +112,8 @@ class START_MODE(MODE):
         self.gui.update_button_text(1,"")
         self.gui.update_button_text(2,"Stop")
         self.gui.update_button_text(3,"")
-        self.pca9685 = PCA9685()
-        self.pca9685.run()
+        # self.pca9685 = PCA9685()
+        # self.pca9685.run()
         self.timer.start_timer()
         
 

@@ -37,7 +37,7 @@ class TIMER:
         
         self.start_time = time.time()  # Set a new start time
         print("Timer reset.")
-        self.lcd.update_messages(str(self.start_time),"Start       Menu")
+        self.lcd.update_messages(str(self.format_time(self.start_time)),"Start       Menu")
 
     def run_timer(self):
         
