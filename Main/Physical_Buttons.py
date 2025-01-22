@@ -1,38 +1,23 @@
-import RPi.GPIO as GPIO
+from gpiozero import Button
+from signal import pause
 from Controller import MODE_MANAGER
 
 class PHYSICAL_BUTTONS:
     
-    def __init__(self,gui):
-
+    def __init__(self, gui):
         self.gui = gui
 
-        self.BUTTON_PIN_1 = 4
-        self.BUTTON_PIN_2 = 17
-        self.BUTTON_PIN_3 = 27
-
-        GPIO.setmode(GPIO.BCM)
-
-        GPIO.setup(self.BUTTON_PIN_1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(self.BUTTON_PIN_2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(self.BUTTON_PIN_3, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        self.BUTTON_PIN_1 = Button(4, pull_up=True,bounce_time=0.1)
+        self.BUTTON_PIN_2 = Button(17, pull_up=True,bounce_time=0.1)
+        self.BUTTON_PIN_3 = Button(20, pull_up=True,bounce_time=0.1)
 
         self.mode_manager = MODE_MANAGER(self.gui)
 
-    def button1_callback(self, channel):
 
-        self.mode_manager.handle_input(1)
+        self.BUTTON_PIN_1.when_pressed = lambda: self.mode_manager.handle_input(1)
+        self.BUTTON_PIN_2.when_pressed = lambda: self.mode_manager.handle_input(2)
+        self.BUTTON_PIN_3.when_pressed = lambda: self.mode_manager.handle_input(3)
 
-    def button2_callback(self, channel):
-        self.mode_manager.handle_input(2)
-
-    def button3_callback(self, channel):
-        self.mode_manager.handle_input(3)
-        
-    def event_detect(self):
-        GPIO.add_event_detect(self.BUTTON_PIN_1, GPIO.RISING, callback=self.button1_callback, bouncetime=500)
-        GPIO.add_event_detect(self.BUTTON_PIN_2, GPIO.RISING, callback=self.button2_callback, bouncetime=500)
-        GPIO.add_event_detect(self.BUTTON_PIN_3, GPIO.RISING, callback=self.button3_callback, bouncetime=500)
-    
     def cleanup(self):
-        GPIO.cleanup()
+        # gpiozero does not require manual GPIO cleanup
+        pass
