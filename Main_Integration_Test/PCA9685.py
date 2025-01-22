@@ -33,6 +33,7 @@ class PCA9685:
       print("Reseting PCA9685")
     self.write(self.__MODE1, 0x00)
     self.calibrate()
+    self.motorAngle(0,0)
 
     #self.motorAngle(0,0)
     #time.sleep(2)
@@ -145,11 +146,7 @@ class PCA9685:
   def run(self):
     pwm = PCA9685(0x40, debug=False)
     pwm.setPWMFreq(50)
-
-    pwm.setServoPulse(0,1925)
-    pwm.setServoPulse(1,1903)
-
-    """ pwm.motorAngle(0,0)
+    pwm.motorAngle(0,0)
     time.sleep(2)
     pwm.motorAngle(100,100)
     time.sleep(2)
@@ -167,9 +164,10 @@ class PCA9685:
         pwm.setServoPulse(0, 1915 + (i / 100.0) * 85)   
       for i in range(100, -101, -10):  
         pwm.setServoPulse(1, 1915 + (i / 100.0) * 85) 
-        time.sleep(0.02)   """
+        time.sleep(0.02)   
 
 
 
 # hello = PCA9685()
-# hello.run()
+# while True:
+#   hello.run()

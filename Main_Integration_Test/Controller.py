@@ -175,17 +175,20 @@ class START_CALIBRATION(MODE):
         self.joystick = JOYSTICK_READ_DATA()
         while True:
             
+            try:
+                self.joystick.read_data()
+                x_gyro = self.gyro.read_gyroscope_x()
+                y_gyro = self.gyro.read_gyroscope_y()
+                z_gyro = self.gyro.read_gyroscope_z()
+                self.lcd.update_messages(f"X:{x_gyro} Y:{y_gyro} Z:{z_gyro}", "            Menu")
+                self.gui.update_label(f"X:{x_gyro} Y:{y_gyro} Z:{z_gyro}")
+                self.gui.update_button_text(1,"Start")
+                self.gui.update_button_text(2,"")
+                self.gui.update_button_text(3,"Menu")
             
-            self.joystick.read_data()
-            x_gyro = self.gyro.read_gyroscope_x()
-            y_gyro = self.gyro.read_gyroscope_y()
-            z_gyro = self.gyro.read_gyroscope_z()
-            self.lcd.update_messages(f"X:{x_gyro} Y:{y_gyro} Z:{z_gyro}", "            Menu")
-            self.gui.update_label(f"X:{x_gyro} Y:{y_gyro} Z:{z_gyro}")
-            self.gui.update_button_text(1,"Start")
-            self.gui.update_button_text(2,"")
-            self.gui.update_button_text(3,"Menu")
-        
+            except:
+                pass
+            
     def handle_input(self, button):
         if button == 1:
             return "Start Calibration"
