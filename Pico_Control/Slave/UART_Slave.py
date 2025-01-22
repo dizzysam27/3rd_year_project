@@ -52,7 +52,10 @@ class JOYSTICK:
         self.UARTtx(dataTx, self.uart0)
         time.sleep(0.1)
 
+joystick = JOYSTICK()
 while True:
-    JOYSTICK().run()
+    joystick.run()
+
+
    
     
