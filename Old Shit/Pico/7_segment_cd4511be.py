@@ -1,48 +1,87 @@
-import RPi.GPIO as GPIO
+from machine import Pin, UART, ADC # type: ignore
 import time
 
-# Define GPIO pins connected to the A, B, C, D inputs of CD4511BE
-BCD_PINS = {
-    "A": 26,  # GPIO17
-    "B": 16,  # GPIO27
-    "C": 20,  # GPIO22
-    "D": 21   # GPIO23
-}
+# Define UART Protocol
+uart0 = UART(0,
+             baudrate=9600,
+             bits=8,
+             parity=None,
+             stop=1,
+             tx=Pin(0),
+             rx=Pin(1))
 
-def setup():
-    """Setup GPIO pins."""
-    GPIO.setmode(GPIO.BCM)  # Use BCM pin numbering
-    for pin in BCD_PINS.values():
-        GPIO.setup(pin, GPIO.OUT)
-        GPIO.output(pin, GPIO.LOW)
+# Define Joystick axes and button
+xAxis = ADC(27)
+yAxis = ADC(26)
+JoyButton = Pin(2, Pin.IN, Pin.PULL_UP) # Pulled up signal
+led = Pin(25, Pin.OUT)
 
-def display_digit(digit):
-    """
-    Display a digit (0-9) on the 7-segment display.
 
-    :param digit: int, the digit to display (0-9).
-    """
-    if digit < 0 or digit > 9:
-        print("Invalid digit: Only 0-9 are supported.")
-        return
-    
-    # Convert digit to 4-bit BCD
-    bcd = [int(x) for x in f"{digit:04b}"]
-    for i, pin in enumerate(BCD_PINS.values()):
-        GPIO.output(pin, bcd[i])
 
-def cleanup():
-    """Cleanup GPIO pins."""
-    GPIO.cleanup()
+# Define 7 Segment Display Pins
+def segmentDefinition(pinouts):
+    return [Pin(pinouts[0], Pin.OUT, value=0),
+            Pin(pinouts[1], Pin.OUT, value=0),
+            Pin(pinouts[2], Pin.OUT, value=0),
+            Pin(pinouts[3], Pin.OUT, value=0)]
 
-if __name__ == "__main__":
+thousands = segmentDefinition([20, 28, 22, 21])
+hundreds = segmentDefinition([16, 19, 18, 17])
+tens = segmentDefinition([12, 15, 14, 13])
+units = segmentDefinition([8, 11, 10, 9])
+# Further displays can be added easily
+
+# UART Transmit Function
+def UARTtx(dataIn, uartName):
     try:
-        setup()
-        while True:
-            for i in range(10):  # Cycle through digits 0-9
-                display_digit(i)
-                time.sleep(1)  # Display each digit for 1 second
-    except KeyboardInterrupt:
-        print("Exiting program.")
-    finally:
-        cleanup()
+        uartName.write(dataIn)
+        print("Sent: ", dataIn)
+    except Exception as e:
+        print("Error sending data: ", e)
+
+# UART Recieve Function
+def UARTrx(uartName):
+    try:
+        if uartName.any():
+            dataOut = uartName.readline().decode("utf-8")
+            print("Recieved: ",dataOut)
+            return dataOut
+    except Exception as e:
+        print("Error reading data: ", e)
+    return None
+
+# Read Joystick Value Function
+def readJoy(axis):
+    raw = axis.read_u16()
+    return int(((200 * raw)/ 65535)/2)
+
+# Update Values
+def counterUpdate(data):
+#     data = '1234'
+    valueLength = len(data)
+    for x in range(valueLength):
+        binaryValue = f'{int(data[x]):04b}'
+        for y in range(4):
+                if x==0: thousands[y].value(int(binaryValue[3-y]))
+                elif x==1: hundreds[y].value(int(binaryValue[3-y]))
+                elif x==2: tens[y].value(int(binaryValue[3-y]))
+                elif x==3: units[y].value(int(binaryValue[3-y]))
+
+# Main loop
+while True:
+    xValue = readJoy(xAxis)
+    print(xValue)
+    if xValue <10:
+        xValue = ("0"+str(xValue))
+    yValue = readJoy(yAxis)
+    if yValue <10:
+        yValue = ("0"+str(yValue))
+    
+        
+    counterUpdate(str(xValue)+str(yValue))
+    
+    
+    # Update Counter Value
+#     counterUpdate(dataRx)
+
+    time.sleep(0.1)
