@@ -1,21 +1,25 @@
 from LCD_Display import LCD1602_WRITE
 from Timer import TIMER
+from Gyro import LSM6DS3
 from PCA9685 import PCA9685
+from Joystick_Master import JOYSTICK_READ_DATA
 
 class MODE_MANAGER:
     def __init__(self,gui):
         self.gui = gui
         self.lcd = LCD1602_WRITE()
         self.timer = TIMER(gui)
+        self.gyro = LSM6DS3()
         
         self.modes = {
-            "Menu": MENU_MODE(self.lcd,self.timer,self.gui),
-            "AI Solve": AI_MODE(self.lcd, self.timer,self.gui),
-            "Manual": MANUAL_MODE(self.lcd, self.timer,self.gui),
-            "Start": START_MODE(self.lcd, self.timer,self.gui),
-            "Stop": STOP_MODE(self.lcd, self.timer,self.gui),
-            "Calibrate": CALIBRATE_MODE(self.lcd,self.timer,self.gui),
-            "Reset": RESET_MODE(self.lcd,self.timer,self.gui)
+            "Menu": MENU_MODE(self.lcd,self.timer,self.gui,self.gyro),
+            "AI Solve": AI_MODE(self.lcd, self.timer,self.gui,self.gyro),
+            "Manual": MANUAL_MODE(self.lcd, self.timer,self.gui,self.gyro),
+            "Start": START_MODE(self.lcd, self.timer,self.gui,self.gyro),
+            "Stop": STOP_MODE(self.lcd, self.timer,self.gui,self.gyro),
+            "Calibrate": CALIBRATE_MODE(self.lcd,self.timer,self.gui,self.gyro),
+            "Start Calibration":START_CALIBRATION(self.lcd,self.timer,self.gui,self.gyro),
+            "Reset": RESET_MODE(self.lcd,self.timer,self.gui,self.gyro)
         }
         self.current_mode = self.modes["Menu"]
 
@@ -29,10 +33,13 @@ class MODE_MANAGER:
             self.switch_mode(next_mode_name)
 
 class MODE:
-    def __init__(self, lcd, timer, gui):
+    def __init__(self, lcd, timer, gui,gyro):
         self.lcd = lcd
         self.timer = timer
         self.gui = gui
+        self.gyro = gyro
+        self.motors = PCA9685()
+        
         
 
 class MENU_MODE(MODE):
@@ -42,7 +49,7 @@ class MENU_MODE(MODE):
         self.gui.update_label("Welcome to the Maze Game")
         self.gui.update_button_text(1,"AI Solve")
         self.gui.update_button_text(2,"Manual Solve")
-        self.gui.update_button_text(3,"Menu")
+        self.gui.update_button_text(3,"Calibrate")
         
     def handle_input(self, button):
         if button == 1:
@@ -91,6 +98,7 @@ class MANUAL_MODE(MODE):
 
 class CALIBRATE_MODE(MODE):
     def display(self):
+
         self.lcd.update_messages("Calibration Mode", "Start       Menu")
         self.gui.update_label("Calibration Mode")
         self.gui.update_button_text(1,"Start")
@@ -99,7 +107,7 @@ class CALIBRATE_MODE(MODE):
         
     def handle_input(self, button):
         if button == 1:
-            return "Start"
+            return "Start Calibration"
         elif button == 2:
             pass
         elif button == 3:
@@ -161,5 +169,35 @@ class RESET_MODE(MODE):
             return "Menu"
         else:
             pass
+
+class START_CALIBRATION(MODE):
+    def display(self):
+        self.joystick = JOYSTICK_READ_DATA()
+        while True:
+            
+            try:
+                self.joystick.read_data()
+                x_gyro = self.gyro.read_gyroscope_x()
+                y_gyro = self.gyro.read_gyroscope_y()
+                z_gyro = self.gyro.read_gyroscope_z()
+                self.lcd.update_messages(f"X:{x_gyro} Y:{y_gyro} Z:{z_gyro}", "            Menu")
+                self.gui.update_label(f"X:{x_gyro} Y:{y_gyro} Z:{z_gyro}")
+                self.gui.update_button_text(1,"Start")
+                self.gui.update_button_text(2,"")
+                self.gui.update_button_text(3,"Menu")
+            
+            except:
+                pass
+            
+    def handle_input(self, button):
+        if button == 1:
+            return "Start Calibration"
+        elif button == 2:
+            pass
+        elif button == 3:
+            return "Menu"
+        else:
+            pass
+
 
 
