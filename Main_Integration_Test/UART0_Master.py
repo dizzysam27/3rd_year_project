@@ -21,11 +21,11 @@ class JOYSTICK_READ_DATA:
             try:
                 if self.uart0.in_waiting > 0:
                         dataRx = str(self.uart0.readline().decode('utf-8').strip())
-                        yValue,xValue,bValue = map(int, dataRx.split(','))
+                        yValue,xValue = map(int, dataRx.split(','))
                         xValue=(xValue)
                         yValue=(yValue)
                         self.motors.motorAngle(xValue,yValue)
-                        print(xValue,yValue,bValue)  
+                        print(xValue,yValue)  
                 else:
                     pass      
             except:
@@ -37,7 +37,7 @@ class JOYSTICK_READ_DATA:
 joystick = JOYSTICK_READ_DATA()
 
 while True:
-    joystick.read_data()
+    print(joystick.read_data())
         # uart0.close()
 
         # while True:
