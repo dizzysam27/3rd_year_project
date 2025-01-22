@@ -1,7 +1,7 @@
 import serial # type: ignore
 import time
 import tkinter as tk
-import PCA
+
 # Define UART Protocol
 uart0 = serial.Serial("/dev/ttyAMA0",
                       baudrate=9600,

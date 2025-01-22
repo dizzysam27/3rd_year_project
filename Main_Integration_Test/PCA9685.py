@@ -32,6 +32,7 @@ class PCA9685:
     if (self.debug):
       print("Reseting PCA9685")
     self.write(self.__MODE1, 0x00)
+    self.calibrate()
 
     #self.motorAngle(0,0)
     #time.sleep(2)
@@ -97,10 +98,10 @@ class PCA9685:
   
   def calibrate(self):
 
-    self.x_offset = -15
-    self.y_offset = 5
-    self.x_maxtilt = 28
-    self.y_maxtilt = 28
+    self.x_offset = 0
+    self.y_offset = 20
+    self.x_maxtilt = 70
+    self.y_maxtilt = 70
     self.x_centre = 1915
     self.y_centre = 1915
 
@@ -170,5 +171,5 @@ class PCA9685:
 
 
 
-hello = PCA9685()
-hello.run()
+# hello = PCA9685()
+# hello.run()

@@ -1,31 +1,28 @@
 import smbus
 import time
 
-class LED_CONTROL:
+class LEDControl:
 
-    def __init__(self):
-        self.bus = smbus.SMBus(1)
-        self.arduino_address = 0x08  # Address of Arduino
+    def __init__(self, bus_number=1, arduino_address=0x08):
+        self.bus = smbus.SMBus(bus_number)  # Initialize the I2C bus
+        self.arduino_address = arduino_address
 
-    def send_color(self,color):
-        self.bus.write_byte_data(self.arduino_address, 0, ord(color[0]))  # Send the first character of the color
-        for char in color[1:]:
-            self.bus.write_byte(self.arduino_address, ord(char))  # Send the rest of the characters
-        print(f"Sent color: {color}")
+    def send_color(self, color):
+        # Prepare data as a list of ASCII values, appending a newline
+        data = [ord(char) for char in color] + [ord('\n')]
+        try:
+            # Send the data block
+            self.bus.write_i2c_block_data(self.arduino_address, 0, data)
+            print(f"Sent color: {color}")
+        except OSError as e:
+            print(f"Error sending color {color}: {e}")
 
-# Example usage to send color data
 
-LED_Control = LED_CONTROL()
-LED_Control.send_color("Red")  # Send Red color to Arduino
-time.sleep(1)
+# Example usage
+if __name__ == "__main__":
+    led_control = LEDControl()
 
-LED_Control.send_color("Green")  # Send Green color to Arduino
-time.sleep(1)
-
-LED_Control.send_color("Blue")  # Send Blue color to Arduino
-time.sleep(1)
-
-LED_Control.send_color("Chase")  # Start chase effect
-time.sleep(1)
-
-LED_Control.send_color("Red")  # Send Red again
+    colors = ["Red"]
+    for color in colors:
+        led_control.send_color(color)
+        time.sleep(1)  # Delay to observe the effect

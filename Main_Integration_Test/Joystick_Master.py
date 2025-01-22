@@ -7,6 +7,7 @@ class JOYSTICK_READ_DATA:
     def __init__(self):
 
         self.motors = PCA9685()
+        self.motors.calibrate()
         self.uart0 = serial.Serial("/dev/ttyAMA0",
                             baudrate=9600,
                             parity=serial.PARITY_NONE,
@@ -16,28 +17,20 @@ class JOYSTICK_READ_DATA:
 
     def read_data(self):
 
-        while True:
-            
-            try:
-                if self.uart0.in_waiting > 0:
-                        dataRx = str(self.uart0.readline().decode('utf-8').strip())
-                        yValue,xValue = map(int, dataRx.split(','))
-                        xValue=(xValue)
-                        yValue=(yValue)
-                        self.motors.motorAngle(xValue,yValue)
-                        print(xValue,yValue)  
-                else:
-                    pass      
-            except:
-                 pass
-            
-            time.sleep(0.001)
+        if self.uart0.in_waiting > 0:
+            dataRx = str(self.uart0.readline().decode('utf-8').strip())
+            yValue,xValue = map(int, dataRx.split(','))
+            xValue=(xValue)
+            yValue=(yValue)
+            self.motors.motorAngle(xValue,yValue)
+            print(xValue,yValue)  
 
 
-joystick = JOYSTICK_READ_DATA()
+# joystick = JOYSTICK_READ_DATA()
 
-while True:
-    print(joystick.read_data())
+
+# while True:
+#     joystick.read_data()
         # uart0.close()
 
         # while True:
