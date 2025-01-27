@@ -63,27 +63,17 @@ void runChaseEffect(CRGB color) {
 
 // Function to receive data from Raspberry Pi
 void receiveData(int byteCount) {
-  // Read the incoming data
-  receivedColor = "";
-  while (Wire.available()) {
-    receivedColor += (char)Wire.read();
-  }
-  
-  Serial.println("Received: " + receivedColor);  // Debugging info
+  receivedColor = ""; // Reset the string
 
-  // Process received color and set LEDs
-  if (receivedColor.equalsIgnoreCase("Red")) {
-    setLedsToColor(CRGB::Red);
-    chaseActive = false;
-  } else if (receivedColor.equalsIgnoreCase("Green")) {
-    setLedsToColor(CRGB::Green);
-    chaseActive = false;
-  } else if (receivedColor.equalsIgnoreCase("Blue")) {
-    setLedsToColor(CRGB::Blue);
-    chaseActive = false;
-  } else if (receivedColor.equalsIgnoreCase("Chase")) {
-    chaseActive = true;  // Activate chase effect
-  } else {
-    Serial.println("Unknown color received: " + receivedColor);
+  while (Wire.available()) {
+    char receivedChar = (char)Wire.read();
+    if (receivedChar == '\n') break; // End of message
+    receivedColor += receivedChar;  // Append character to the string
   }
+
+  Serial.println("Received: " + receivedColor);
+
+  // Process the message...
 }
+
+
