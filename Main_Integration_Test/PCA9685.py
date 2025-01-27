@@ -100,10 +100,12 @@ class PCA9685:
   
   def calibrate(self):
 
+    self.setPWMFreq(50)
+
     self.x_offset = 0
     self.y_offset = 20
-    self.x_maxtilt = 40
-    self.y_maxtilt = 40
+    self.x_maxtilt = 60
+    self.y_maxtilt = 60
     self.x_centre = 1915
     self.y_centre = 1915
 

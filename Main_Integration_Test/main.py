@@ -7,6 +7,7 @@ def main():
     try:
     
         gui = GUI()
+
         mode_manager = MODE_MANAGER(gui)
         physical_buttons = PHYSICAL_BUTTONS(gui)
 
