@@ -70,6 +70,7 @@ class PCA9685:
 
     oldmode = self.read(self.__MODE1);
     newmode = (oldmode & 0x7F) | 0x10        # sleep
+    self.write(self.__MODE1, newmode)        # go to s
     self.write(self.__MODE1, newmode)        # go to sleep
     self.write(self.__PRESCALE, int(math.floor(prescale)))
     self.write(self.__MODE1, oldmode)
@@ -101,8 +102,8 @@ class PCA9685:
 
     self.x_offset = 0
     self.y_offset = 20
-    self.x_maxtilt = 70
-    self.y_maxtilt = 70
+    self.x_maxtilt = 40
+    self.y_maxtilt = 40
     self.x_centre = 1915
     self.y_centre = 1915
 
@@ -166,8 +167,7 @@ class PCA9685:
         pwm.setServoPulse(1, 1915 + (i / 100.0) * 85) 
         time.sleep(0.02)   
 
-
-
 # hello = PCA9685()
 # while True:
-#   hello.run()
+#    hello.run()
+# hello.calibrate()
