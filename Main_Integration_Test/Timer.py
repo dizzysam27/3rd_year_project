@@ -3,6 +3,10 @@ import time
 from LCD_Display import LCD1602_WRITE
 import time
 
+"""
+This class has a function run_timer that runs in its own thread. This means it can continue to run in a while loop until a threading event is detected.
+
+"""
 class TIMER:
 
     def __init__(self,gui):
