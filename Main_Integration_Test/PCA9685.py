@@ -104,8 +104,8 @@ class PCA9685:
 
     self.x_offset = 0
     self.y_offset = 20
-    self.x_maxtilt = 60
-    self.y_maxtilt = 60
+    self.x_maxtilt = 30
+    self.y_maxtilt = 30
     self.x_centre = 1915
     self.y_centre = 1915
 
@@ -156,16 +156,16 @@ class PCA9685:
 
     while True:
       
-      for i in range(-100, 101, 10):  
+      for i in range(-100, 101, 1):  
         pwm.setServoPulse(0, 1915 + (i / 100.0) * 85)  
   
-      for i in range(-100, 101, 10):  
+      for i in range(-100, 101, 1):  
         pwm.setServoPulse(1, 1915 + (i / 100.0) * 85)  
         time.sleep(0.02)
 
-      for i in range(100, -101, -10):  
+      for i in range(100, -101, -1):  
         pwm.setServoPulse(0, 1915 + (i / 100.0) * 85)   
-      for i in range(100, -101, -10):  
+      for i in range(100, -101, -1):  
         pwm.setServoPulse(1, 1915 + (i / 100.0) * 85) 
         time.sleep(0.02)   
 

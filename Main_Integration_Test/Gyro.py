@@ -99,15 +99,15 @@ class LSM6DS3:
         output_int = two_complement_two_bytes(f"{output_high_bin}{output_low_bin}")
         return output_int
 
-# lsm6ds3 = LSM6DS3()
+lsm6ds3 = LSM6DS3()
 
-# while True:
-#     try:
-#         acc_x = lsm6ds3.read_gyroscope_x()
-#         acc_y = lsm6ds3.read_gyroscope_y()
-#         acc_z = lsm6ds3.read_gyroscope_z()
-#         print(acc_x,acc_y,acc_z)
+while True:
+    try:
+        acc_x = lsm6ds3.read_gyroscope_x()
+        acc_y = lsm6ds3.read_gyroscope_y()
+        acc_z = lsm6ds3.read_gyroscope_z()
+        print(acc_x,acc_y,acc_z)
         
-#     except IOError as e:
-#         print("Unable to read from accelerometer, check the setup and try again. Error is: ")
-#         print(e)
+    except IOError as e:
+        print("Unable to read from accelerometer, check the setup and try again. Error is: ")
+        print(e)
