@@ -43,6 +43,9 @@ LCD_2LINE = 0x08
 LCD_1LINE = 0x00
 LCD_5x8DOTS = 0x00
 
+"""
+This class was rovided by waveshare to assign the memory addresses used by the LCD. DO NOT EDIT!!!!!
+"""
 class LCD1602:
     def __init__(self, col, row):
         self._row = row
@@ -100,6 +103,10 @@ class LCD1602:
         self._showmode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT
         self.command(LCD_ENTRYMODESET | self._showmode)
 
+"""
+This class controls what is written on the LCD. The useful function is update_messages which crazily updates the messages
+"""
+
 class LCD1602_WRITE(LCD1602): 
     def __init__(self):
         super().__init__(16, 2)
@@ -111,22 +118,26 @@ class LCD1602_WRITE(LCD1602):
         self.previous_second = ""
 
     def update_messages(self, new_message_line1, new_message_line2):
-        self.flag = 1
+        self.flag = 1 # Message incoming
         self.message_line1 = new_message_line1
         self.message_line2 = new_message_line2
         print(self.message_line1 + "    \r", end="", flush=True)  # Clear the rest of the line with spaces
 
-
-        self.clear()
+        self.clear() # Clears display ready for incoming message
         self.display_lines(self.message_line1, self.message_line2)
+    
+    #Displays the messages on each line of the LCD
 
     def display_lines(self, message_line1, message_line2):
-        self.flag = 0
+        self.flag = 0 # Message has been displayed
         self.setCursor(0, 0)
         self.printout(message_line1)
         self.setCursor(0, 1)
         self.printout(message_line2)
     
+# This function stops the flickering of the bottom line by only updating the changing digits. 
+# This needs editing to work with our current time format.
+
     # def display_timer(self):
     #     self.clear()
     #     self.setCursor(2, 0)

@@ -4,6 +4,15 @@ from Gyro import LSM6DS3
 from PCA9685 import PCA9685
 from Joystick_Master import JOYSTICK_READ_DATA
 
+
+"""
+This is the file which determines which mode of operation we are currently in. The GUI, buttons and input method change depending on which mode we are in.
+"""
+
+"""
+This class detects an input either from the gui or buttons. This stores the mode we are currently in and determines which mode is being requested based upon the number
+of the button pressed.
+"""
 class MODE_MANAGER:
     def __init__(self,gui):
         self.gui = gui
@@ -32,6 +41,9 @@ class MODE_MANAGER:
         if next_mode_name in self.modes:
             self.switch_mode(next_mode_name)
 
+"""
+These classes control what happens in each mode. Class MODE is a parent and all the individual states are children inheriting the constructor which saves me writing it out loads :)
+"""
 class MODE:
     def __init__(self, lcd, timer, gui,gyro):
         self.lcd = lcd
@@ -40,13 +52,13 @@ class MODE:
         self.gyro = gyro
         self.motors = PCA9685()
         
-        
-
 class MENU_MODE(MODE):
 
     def display(self):
+        # Update LCD
         self.lcd.update_messages("The Maze Game", "AI    Man    Cal")
         self.gui.update_label("Welcome to the Maze Game")
+        # Update GUI
         self.gui.update_button_text(1,"AI Solve")
         self.gui.update_button_text(2,"Manual Solve")
         self.gui.update_button_text(3,"Calibrate")
