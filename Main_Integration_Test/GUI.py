@@ -5,8 +5,8 @@ from Controller import MODE_MANAGER
 
 class GUI:
 
-    def __init__(self):
-        self.mode_manager = MODE_MANAGER(self)  # Pass GUI instance to MODE_MANAGER
+    def __init__(self, led_control):
+        self.mode_manager = MODE_MANAGER(self, led_control)  # Pass GUI instance to MODE_MANAGER
         self.app = QApplication(sys.argv)
         self.window = QWidget()
         self.layout = QVBoxLayout()

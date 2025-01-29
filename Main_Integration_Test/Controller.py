@@ -3,6 +3,7 @@ from Timer import TIMER
 from Gyro import LSM6DS3
 from PCA9685 import PCA9685
 from Joystick_Master import JOYSTICK_READ_DATA
+from Physical_Buttons import PHYSICAL_BUTTONS, LED_CONTROL
 
 
 """
@@ -14,21 +15,22 @@ This class detects an input either from the gui or buttons. This stores the mode
 of the button pressed.
 """
 class MODE_MANAGER:
-    def __init__(self,gui):
+    def __init__(self,gui,led):
         self.gui = gui
         self.lcd = LCD1602_WRITE()
         self.timer = TIMER(gui)
         self.gyro = LSM6DS3()
-        
+        self.led = led
+
         self.modes = {
-            "Menu": MENU_MODE(self.lcd,self.timer,self.gui,self.gyro),
-            "AI Solve": AI_MODE(self.lcd, self.timer,self.gui,self.gyro),
-            "Manual": MANUAL_MODE(self.lcd, self.timer,self.gui,self.gyro),
-            "Start": START_MODE(self.lcd, self.timer,self.gui,self.gyro),
-            "Stop": STOP_MODE(self.lcd, self.timer,self.gui,self.gyro),
-            "Calibrate": CALIBRATE_MODE(self.lcd,self.timer,self.gui,self.gyro),
-            "Start Calibration":START_CALIBRATION(self.lcd,self.timer,self.gui,self.gyro),
-            "Reset": RESET_MODE(self.lcd,self.timer,self.gui,self.gyro)
+            "Menu": MENU_MODE(self.lcd,self.timer,self.gui,self.gyro,self.led),
+            "AI Solve": AI_MODE(self.lcd, self.timer,self.gui,self.gyro,self.led),
+            "Manual": MANUAL_MODE(self.lcd, self.timer,self.gui,self.gyro,self.led),
+            "Start": START_MODE(self.lcd, self.timer,self.gui,self.gyro,self.led),
+            "Stop": STOP_MODE(self.lcd, self.timer,self.gui,self.gyro,self.led),
+            "Calibrate": CALIBRATE_MODE(self.lcd,self.timer,self.gui,self.gyro,self.led),
+            "Start Calibration":START_CALIBRATION(self.lcd,self.timer,self.gui,self.gyro,self.led),
+            "Reset": RESET_MODE(self.lcd,self.timer,self.gui,self.gyro,self.led)
         }
         self.current_mode = self.modes["Menu"]
 
@@ -45,14 +47,18 @@ class MODE_MANAGER:
 These classes control what happens in each mode. Class MODE is a parent and all the individual states are children inheriting the constructor which saves me writing it out loads :)
 """
 class MODE:
-    def __init__(self, lcd, timer, gui,gyro):
+    def __init__(self, lcd, timer, gui,gyro, led):
         self.lcd = lcd
         self.timer = timer
         self.gui = gui
         self.gyro = gyro
         self.motors = PCA9685()
+        self.led = led
+
         
 class MENU_MODE(MODE):
+
+    
 
     def display(self):
         # Update LCD
@@ -62,6 +68,8 @@ class MENU_MODE(MODE):
         self.gui.update_button_text(1,"AI Solve")
         self.gui.update_button_text(2,"Manual Solve")
         self.gui.update_button_text(3,"Calibrate")
+        self.led.set_led(1,1,1)
+        
         
     def handle_input(self, button):
         if button == 1:
@@ -72,6 +80,8 @@ class MENU_MODE(MODE):
             return "Calibrate"
         else:
             return "Menu"
+        
+
 
 class AI_MODE(MODE):
     def display(self):
@@ -80,6 +90,8 @@ class AI_MODE(MODE):
         self.gui.update_button_text(1,"Start")
         self.gui.update_button_text(2,"")
         self.gui.update_button_text(3,"Menu")
+        self.led.set_led(1,0,1)
+        
 
     def handle_input(self, button):
         if button == 1:
@@ -98,6 +110,7 @@ class MANUAL_MODE(MODE):
         self.gui.update_button_text(1,"Start")
         self.gui.update_button_text(2,"")
         self.gui.update_button_text(3,"Menu")
+        self.led.set_led(1,0,1)
     def handle_input(self, button):
         if button == 1:
             return "Start"
@@ -116,6 +129,7 @@ class CALIBRATE_MODE(MODE):
         self.gui.update_button_text(1,"Start")
         self.gui.update_button_text(2,"")
         self.gui.update_button_text(3,"Menu")
+        self.led.set_led(1,0,1)
         
     def handle_input(self, button):
         if button == 1:
@@ -132,6 +146,7 @@ class START_MODE(MODE):
         self.gui.update_button_text(1,"")
         self.gui.update_button_text(2,"Stop")
         self.gui.update_button_text(3,"")
+        self.led.set_led(0,1,0)
         # self.pca9685 = PCA9685()
         # self.pca9685.run()
         self.timer.start_timer()
@@ -152,6 +167,7 @@ class STOP_MODE(MODE):
         self.gui.update_button_text(1,"")
         self.gui.update_button_text(2,"Reset")
         self.gui.update_button_text(3,"Menu")
+        self.led.set_led(0,1,1)
         self.timer.stop_timer()
         
         
@@ -170,6 +186,7 @@ class RESET_MODE(MODE):
         self.gui.update_button_text(1,"Start")
         self.gui.update_button_text(2,"")
         self.gui.update_button_text(3,"Menu")
+        self.led.set_led(1,0,1)
         self.timer.reset_timer()
         
     def handle_input(self, button):
