@@ -4,6 +4,7 @@ from Gyro import LSM6DS3
 from PCA9685 import PCA9685
 from Joystick_Master import JOYSTICK_READ_DATA
 from Physical_Buttons import PHYSICAL_BUTTONS, LED_CONTROL
+from LED_Control_Master_Test import ARDUINO
 
 
 """
@@ -54,6 +55,7 @@ class MODE:
         self.gyro = gyro
         self.motors = PCA9685()
         self.led = led
+        self.led_strip = ARDUINO()
 
         
 class MENU_MODE(MODE):
@@ -69,6 +71,7 @@ class MENU_MODE(MODE):
         self.gui.update_button_text(2,"Manual Solve")
         self.gui.update_button_text(3,"Calibrate")
         self.led.set_led(1,1,1)
+        self.led_strip.write_to_arduino(4)
         
         
     def handle_input(self, button):
@@ -91,6 +94,7 @@ class AI_MODE(MODE):
         self.gui.update_button_text(2,"")
         self.gui.update_button_text(3,"Menu")
         self.led.set_led(1,0,1)
+        self.led_strip.write_to_arduino(1)
         
 
     def handle_input(self, button):
@@ -111,6 +115,7 @@ class MANUAL_MODE(MODE):
         self.gui.update_button_text(2,"")
         self.gui.update_button_text(3,"Menu")
         self.led.set_led(1,0,1)
+        self.led_strip.write_to_arduino(2)
     def handle_input(self, button):
         if button == 1:
             return "Start"
@@ -130,6 +135,7 @@ class CALIBRATE_MODE(MODE):
         self.gui.update_button_text(2,"")
         self.gui.update_button_text(3,"Menu")
         self.led.set_led(1,0,1)
+        self.led_strip.write_to_arduino(3)
         
     def handle_input(self, button):
         if button == 1:
@@ -149,6 +155,7 @@ class START_MODE(MODE):
         self.led.set_led(0,1,0)
         # self.pca9685 = PCA9685()
         # self.pca9685.run()
+        self.led_strip.write_to_arduino(5)
         self.timer.start_timer()
         
 
@@ -214,6 +221,7 @@ class START_CALIBRATION(MODE):
                 self.gui.update_button_text(1,"Start")
                 self.gui.update_button_text(2,"")
                 self.gui.update_button_text(3,"Menu")
+                
             
             except:
                 pass
