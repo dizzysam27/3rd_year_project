@@ -11,11 +11,12 @@ from LED_Control_Master_Test import ARDUINO
 This is the file which determines which mode of operation we are currently in. The GUI, buttons and input method change depending on which mode we are in.
 """
 
-"""
-This class detects an input either from the gui or buttons. This stores the mode we are currently in and determines which mode is being requested based upon the number
-of the button pressed.
-"""
+# MODE MANAGER class
 class MODE_MANAGER:
+    # Init function
+    # Required inputs: GUI class
+    #                  |   LED_CONTROL class
+    #                  V   V
     def __init__(self,gui,led):
         self.gui = gui
         self.lcd = LCD1602_WRITE()
@@ -23,6 +24,7 @@ class MODE_MANAGER:
         self.gyro = LSM6DS3()
         self.led = led
 
+        # List of modes with required inputs
         self.modes = {
             "Menu": MENU_MODE(self.lcd,self.timer,self.gui,self.gyro,self.led),
             "AI Solve": AI_MODE(self.lcd, self.timer,self.gui,self.gyro,self.led),
@@ -35,18 +37,24 @@ class MODE_MANAGER:
         }
         self.current_mode = self.modes["Menu"]
 
+    # Switch mode function called by handle_input
+    # Required input:     New mode name (list in __init__.modes)
+    #                     V
     def switch_mode(self, mode_name):
         self.current_mode = self.modes[mode_name]
         self.current_mode.display()
 
+    # Handle input function, takes in GUI press or button press
+    # Required input:      Button number pressed (1: Green, 2: Red, 3: Blue)
+    #                      V
     def handle_input(self, button):
+        # Find next mode name by running handle_input function specific to current_mode
         next_mode_name = self.current_mode.handle_input(button)
+        # Check if next mode name is possible, call switch_mode function to change
         if next_mode_name in self.modes:
             self.switch_mode(next_mode_name)
 
-"""
-These classes control what happens in each mode. Class MODE is a parent and all the individual states are children inheriting the constructor which saves me writing it out loads :)
-"""
+# Parent class of each mode. Prevents repetition of code to define self.variables
 class MODE:
     def __init__(self, lcd, timer, gui,gyro, led):
         self.lcd = lcd
@@ -60,8 +68,6 @@ class MODE:
         
 class MENU_MODE(MODE):
 
-    
-
     def display(self):
         # Update LCD
         self.lcd.update_messages("The Maze Game", "AI    Man    Cal")
@@ -70,10 +76,12 @@ class MENU_MODE(MODE):
         self.gui.update_button_text(1,"AI Solve")
         self.gui.update_button_text(2,"Manual Solve")
         self.gui.update_button_text(3,"Calibrate")
+        # Update button LEDs
         self.led.set_led(1,1,1)
+        # Update LED strip
         self.led_strip.write_to_arduino(4)
         
-        
+    # current_mode specific handle_input function
     def handle_input(self, button):
         if button == 1:
             return "AI Solve"
@@ -83,10 +91,9 @@ class MENU_MODE(MODE):
             return "Calibrate"
         else:
             return "Menu"
-        
-
 
 class AI_MODE(MODE):
+
     def display(self):
         self.lcd.update_messages("AI Solver", "Start       Menu")
         self.gui.update_label("AI Solver")
@@ -95,7 +102,6 @@ class AI_MODE(MODE):
         self.gui.update_button_text(3,"Menu")
         self.led.set_led(1,0,1)
         self.led_strip.write_to_arduino(1)
-        
 
     def handle_input(self, button):
         if button == 1:
@@ -108,6 +114,7 @@ class AI_MODE(MODE):
             pass
 
 class MANUAL_MODE(MODE):
+
     def display(self):
         self.lcd.update_messages("Manual Solver", "Start       Menu")
         self.gui.update_label("Manual Solver")
@@ -116,6 +123,7 @@ class MANUAL_MODE(MODE):
         self.gui.update_button_text(3,"Menu")
         self.led.set_led(1,0,1)
         self.led_strip.write_to_arduino(2)
+
     def handle_input(self, button):
         if button == 1:
             return "Start"
@@ -127,8 +135,8 @@ class MANUAL_MODE(MODE):
             pass
 
 class CALIBRATE_MODE(MODE):
+    
     def display(self):
-
         self.lcd.update_messages("Calibration Mode", "Start       Menu")
         self.gui.update_label("Calibration Mode")
         self.gui.update_button_text(1,"Start")
@@ -148,6 +156,7 @@ class CALIBRATE_MODE(MODE):
             pass
 
 class START_MODE(MODE):
+    
     def display(self):
         self.gui.update_button_text(1,"")
         self.gui.update_button_text(2,"Stop")
@@ -156,8 +165,7 @@ class START_MODE(MODE):
         # self.pca9685 = PCA9685()
         # self.pca9685.run()
         self.led_strip.write_to_arduino(5)
-        self.timer.start_timer()
-        
+        self.timer.start_timer()  
 
     def handle_input(self, button):
         if button == 1:
@@ -170,13 +178,13 @@ class START_MODE(MODE):
             pass
 
 class STOP_MODE(MODE):
+
     def display(self):
         self.gui.update_button_text(1,"")
         self.gui.update_button_text(2,"Reset")
         self.gui.update_button_text(3,"Menu")
         self.led.set_led(0,1,1)
         self.timer.stop_timer()
-        
         
     def handle_input(self, button):
         if button == 1:
@@ -189,6 +197,7 @@ class STOP_MODE(MODE):
             pass
 
 class RESET_MODE(MODE):
+
     def display(self):
         self.gui.update_button_text(1,"Start")
         self.gui.update_button_text(2,"")
@@ -206,11 +215,12 @@ class RESET_MODE(MODE):
         else:
             pass
 
+# Calibration mode - unique mode
 class START_CALIBRATION(MODE):
+
     def display(self):
         self.joystick = JOYSTICK_READ_DATA()
         while True:
-            
             try:
                 self.joystick.read_data()
                 x_gyro = self.gyro.read_gyroscope_x()
@@ -221,8 +231,6 @@ class START_CALIBRATION(MODE):
                 self.gui.update_button_text(1,"Start")
                 self.gui.update_button_text(2,"")
                 self.gui.update_button_text(3,"Menu")
-                
-            
             except:
                 pass
             
@@ -235,6 +243,3 @@ class START_CALIBRATION(MODE):
             return "Menu"
         else:
             pass
-
-
-
