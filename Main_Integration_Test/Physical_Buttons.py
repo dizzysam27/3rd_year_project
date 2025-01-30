@@ -1,4 +1,4 @@
-from gpiozero import Button, LED
+from gpiozero import Button, LED # type: ignore
 from signal import pause
 
 import config
@@ -44,7 +44,7 @@ class LED_CONTROL:
         # Define LED pin numbers according to config file
         GREEN_LED = LED(config.GREEN_LED_PIN)
         RED_LED = LED(config.RED_LED_PIN)
-        BLUE_LED = LED(config.BLUE_LED_PIN))
+        BLUE_LED = LED(config.BLUE_LED_PIN)
 
     # Set LED funnction
     # Required input: Green LED State (1 or 0)
