@@ -6,7 +6,7 @@ void setup() {
   Wire.begin(SLAVE_ADDRESS); // Initialize as I2C slave
   Wire.onRequest(requestEvent); // Register callback for data requests
   Wire.onReceive(receiveEvent); // Register callback for data reception
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 void loop() {
