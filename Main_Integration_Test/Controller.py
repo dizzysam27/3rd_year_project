@@ -4,7 +4,7 @@ from Gyro import LSM6DS3
 from PCA9685 import PCA9685
 from Joystick_Master import JOYSTICK_READ_DATA
 from Physical_Buttons import PHYSICAL_BUTTONS, LED_CONTROL
-from LED_Control_Master_Test import ARDUINO
+from LED_Strip_Control import ARDUINO
 
 
 """
