@@ -175,6 +175,7 @@ class STOP_MODE(MODE):
         self.gui.update_button_text(2,"Reset")
         self.gui.update_button_text(3,"Menu")
         self.led.set_led(0,1,1)
+        self.led_strip.write_to_arduino(2)
         self.timer.stop_timer()
         
         

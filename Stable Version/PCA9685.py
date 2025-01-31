@@ -104,8 +104,8 @@ class PCA9685:
 
     self.x_offset = 0
     self.y_offset = 20
-    self.x_maxtilt = 30
-    self.y_maxtilt = 30
+    self.x_maxtilt = 1000
+    self.y_maxtilt = 1000
     self.x_centre = 1915
     self.y_centre = 1915
 
