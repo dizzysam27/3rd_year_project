@@ -1,25 +1,30 @@
-from gpiozero import Button, LED
+from gpiozero import Button, LED # type: ignore
 from signal import pause
+
+import config
 # import time
 
-"""
-This class controls the physical buttons on the control panel. Initialising this class creates a callback for when each button is pressed.
-The buttons are also illuminated to indicate the options available to the user. 
-"""
+# PHYSICAL BUTTONS class
 class PHYSICAL_BUTTONS:
     
+    # Init function
+    # Required input:  GUI Class
+    #                  |    LED Control Class
+    #                  V    V
     def __init__(self, gui, led_control):
-        from Controller import MODE_MANAGER
 
         self.gui = gui
 
-        self.BUTTON_PIN_1 = Button(26, pull_up=True,bounce_time=0.1)
-        self.BUTTON_PIN_2 = Button(19, pull_up=True,bounce_time=0.1)
-        self.BUTTON_PIN_3 = Button(13, pull_up=True,bounce_time=0.1)
+        # Define LED button numbers according to config file
+        self.BUTTON_PIN_1 = Button(config.GREEN_BUTTON_PIN, pull_up=True,bounce_time=0.1)
+        self.BUTTON_PIN_2 = Button(config.RED_BUTTON_PIN, pull_up=True,bounce_time=0.1)
+        self.BUTTON_PIN_3 = Button(config.BLUE_BUTTON_PIN, pull_up=True,bounce_time=0.1)
 
+        # Create instance of MODE_MANAGER
+        from Controller import MODE_MANAGER
         self.mode_manager = MODE_MANAGER(self.gui, led_control)
 
-
+        # gpiozero when_pressed triggers mode_handle.input to the relevant button
         self.BUTTON_PIN_1.when_pressed = lambda: self.mode_manager.handle_input(1)
         self.BUTTON_PIN_2.when_pressed = lambda: self.mode_manager.handle_input(2)
         self.BUTTON_PIN_3.when_pressed = lambda: self.mode_manager.handle_input(3)
@@ -29,17 +34,23 @@ class PHYSICAL_BUTTONS:
         # gpiozero does not require manual GPIO cleanup
         pass
 
-
+# LED CONTROL Class
 class LED_CONTROL:
 
+    # Init function - no dependencies
     def __init__(self):
         global GREEN_LED, RED_LED, BLUE_LED
 
-        GREEN_LED = LED(21)
-        RED_LED = LED(16)
-        BLUE_LED = LED(20)
+        # Define LED pin numbers according to config file
+        GREEN_LED = LED(config.GREEN_LED_PIN)
+        RED_LED = LED(config.RED_LED_PIN)
+        BLUE_LED = LED(config.BLUE_LED_PIN)
 
-
+    # Set LED funnction
+    # Required input: Green LED State (1 or 0)
+    #                 |      Red LED State (1 or 0)
+    #                 |      |    Blue LED State (1 or 0)
+    #                 V      V    V
     def set_led(self, green, red, blue):
 
         if green == 1:
@@ -56,11 +67,3 @@ class LED_CONTROL:
             BLUE_LED.on()
         else:
             BLUE_LED.off()
-
-# a = LED_CONTROL()
-# while True:
-#     a.set_led(1,1,1)
-#     time.sleep(1)
-#     a.set_led(0,0,0)
-#     time.sleep(1)
-

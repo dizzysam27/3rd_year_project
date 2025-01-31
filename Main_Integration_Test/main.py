@@ -8,10 +8,11 @@ This is the main function which runs the program. This initialises the GUI, MODE
 
 def main():
     try:
-
-
+        # Create instance of LED_CONTROL class
         led_control = LED_CONTROL()
+        # Create instance of GUI class (requires LED_CONTROL class to run)
         gui = GUI(led_control)
+        # Mode
         mode_manager = MODE_MANAGER(gui, led_control)
         physical_buttons = PHYSICAL_BUTTONS(gui, led_control)
       
