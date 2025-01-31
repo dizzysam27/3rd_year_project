@@ -1,10 +1,10 @@
-from Main_Integration_Test.Peripherals.LCD_Control import LCD1602_WRITE
+from Peripherals.LCD_Control import LCD1602_WRITE
 from Timer import TIMER
-from Main_Integration_Test.Peripherals.Gyro_Control import LSM6DS3
-from Main_Integration_Test.Peripherals.Motor_Control import PCA9685
-from Main_Integration_Test.Peripherals.Joystick_Control import JOYSTICK_READ_DATA
-from Main_Integration_Test.Peripherals.Physical_Button_Control import PHYSICAL_BUTTONS, LED_CONTROL
-from Main_Integration_Test.Peripherals.LED_Strip_Control import ARDUINO
+from Peripherals.Gyro_Control import LSM6DS3
+from Peripherals.Motor_Control import PCA9685
+from Peripherals.Joystick_Control import JOYSTICK_READ_DATA
+# from Peripherals.Physical_Button_Control import PHYSICAL_BUTTONS, LED_CONTROL
+from Peripherals.LED_Strip_Control import ARDUINO
 
 
 """
