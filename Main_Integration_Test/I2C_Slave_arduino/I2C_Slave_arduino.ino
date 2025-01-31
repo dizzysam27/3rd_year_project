@@ -22,7 +22,7 @@ void setup() {
 
 void loop() {
     if (chaseActive) {
-        runChaseEffect(CRGB::Blue);  // Run chase effect in Blue
+        runChaseEffect(CRGB::White);  // Run chase effect in Blue
     }
 }
 
@@ -42,7 +42,7 @@ void runChaseEffect(CRGB color) {
 
     // Reset all LEDs to off (Black)
     for (int i = 0; i < NUM_LEDS; i++) {
-        leds[i] = CRGB::Black;
+        leds[i] = CRGB::Red;
     }
 
     // Light up the current LED
