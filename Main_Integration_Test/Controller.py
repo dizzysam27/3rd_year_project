@@ -31,14 +31,14 @@ class MODE_MANAGER:
 
         # Dictionary of modes with required inputs
         self.modes = {
-            "Menu": MENU_MODE(mode_arguments),
-            "AI Solve": AI_MODE(mode_arguments),
-            "Manual": MANUAL_MODE(mode_arguments),
-            "Start": START_MODE(mode_arguments),
-            "Stop": STOP_MODE(mode_arguments),
-            "Calibrate": CALIBRATE_MODE(mode_arguments),
-            "Start Calibration":START_CALIBRATION(mode_arguments),
-            "Reset": RESET_MODE(mode_arguments)
+            "Menu": MENU_MODE(lcd,timer,gui,gyro,led,motors,led_strip),
+            "AI Solve": AI_MODE(lcd,timer,gui,gyro,led,motors,led_strip),
+            "Manual": MANUAL_MODE(lcd,timer,gui,gyro,led,motors,led_strip),
+            "Start": START_MODE(lcd,timer,gui,gyro,led,motors,led_strip),
+            "Stop": STOP_MODE(lcd,timer,gui,gyro,led,motors,led_strip),
+            "Calibrate": CALIBRATE_MODE(lcd,timer,gui,gyro,led,motors,led_strip),
+            "Start Calibration":START_CALIBRATION(lcd,timer,gui,gyro,led,motors,led_strip),
+            "Reset": RESET_MODE(lcd,timer,gui,gyro,led,motors,led_strip)
         }
 
         # Initialises the program to Menu Mode on start up

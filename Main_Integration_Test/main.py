@@ -1,5 +1,5 @@
 from Controller import MODE_MANAGER
-from Main_Integration_Test.Peripherals.Physical_Button_Control import PHYSICAL_BUTTONS, LED_CONTROL
+from Peripherals.Physical_Button_Control import PHYSICAL_BUTTONS, LED_CONTROL
 from GUI import GUI
 
 """

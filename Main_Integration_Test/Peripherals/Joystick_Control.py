@@ -1,5 +1,5 @@
 import serial
-from Main_Integration_Test.Peripherals.Motor_Control import PCA9685
+from Peripherals.Motor_Control import PCA9685
 
 """
 This class reads the data provided by the joystick over UART. The UART connection is initalised and the motors are calibrated to their starting point.
