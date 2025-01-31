@@ -1,5 +1,5 @@
 from Controller import MODE_MANAGER
-from Physical_Buttons import PHYSICAL_BUTTONS, LED_CONTROL
+from Main_Integration_Test.Peripherals.Physical_Button_Control import PHYSICAL_BUTTONS, LED_CONTROL
 from GUI import GUI
 
 """
@@ -14,9 +14,8 @@ def main():
         gui = GUI(led_control)
         # Mode
         mode_manager = MODE_MANAGER(gui, led_control)
-        physical_buttons = PHYSICAL_BUTTONS(gui, led_control)
-      
 
+        PHYSICAL_BUTTONS(gui, led_control)
         mode_manager.switch_mode("Menu")
         gui.run()
 

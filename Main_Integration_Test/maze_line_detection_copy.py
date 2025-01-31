@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from PCA9685 import PCA9685
+from Main_Integration_Test.Peripherals.Motor_Control import PCA9685
 import time
 
 class IMAGEPROCESSING:

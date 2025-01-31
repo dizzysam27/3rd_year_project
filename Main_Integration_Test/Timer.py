@@ -1,6 +1,6 @@
 import threading
 import time
-from LCD_Display import LCD1602_WRITE
+from Main_Integration_Test.Peripherals.LCD_Control import LCD1602_WRITE
 import time
 
 """

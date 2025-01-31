@@ -1,14 +1,14 @@
-from LCD_Display import LCD1602_WRITE
+from Main_Integration_Test.Peripherals.LCD_Control import LCD1602_WRITE
 from Timer import TIMER
-from Gyro import LSM6DS3
-from PCA9685 import PCA9685
-from Joystick_Master import JOYSTICK_READ_DATA
-from Physical_Buttons import PHYSICAL_BUTTONS, LED_CONTROL
-from LED_Strip_Control import ARDUINO
+from Main_Integration_Test.Peripherals.Gyro_Control import LSM6DS3
+from Main_Integration_Test.Peripherals.Motor_Control import PCA9685
+from Main_Integration_Test.Peripherals.Joystick_Control import JOYSTICK_READ_DATA
+from Main_Integration_Test.Peripherals.Physical_Button_Control import PHYSICAL_BUTTONS, LED_CONTROL
+from Main_Integration_Test.Peripherals.LED_Strip_Control import ARDUINO
 
 
 """
-This is the file which determines which mode of operation we are currently in. The GUI, buttons and input method change depending on which mode we are in.
+This is the file which determines which mode of operation we are currently in
 """
 
 # MODE MANAGER class
@@ -18,23 +18,30 @@ class MODE_MANAGER:
     #                  |   LED_CONTROL class
     #                  V   V
     def __init__(self,gui,led):
-        self.gui = gui
-        self.lcd = LCD1602_WRITE()
-        self.timer = TIMER(gui)
-        self.gyro = LSM6DS3()
-        self.led = led
 
-        # List of modes with required inputs
+        # Creates instances of the classes
+        lcd = LCD1602_WRITE()
+        timer = TIMER(gui)
+        gyro = LSM6DS3()
+        motors = PCA9685()
+        led_strip = ARDUINO()
+
+        # Collection of arguments required for each mode class
+        mode_arguments = lcd,timer,gui,gyro,led,motors,led_strip
+
+        # Dictionary of modes with required inputs
         self.modes = {
-            "Menu": MENU_MODE(self.lcd,self.timer,self.gui,self.gyro,self.led),
-            "AI Solve": AI_MODE(self.lcd, self.timer,self.gui,self.gyro,self.led),
-            "Manual": MANUAL_MODE(self.lcd, self.timer,self.gui,self.gyro,self.led),
-            "Start": START_MODE(self.lcd, self.timer,self.gui,self.gyro,self.led),
-            "Stop": STOP_MODE(self.lcd, self.timer,self.gui,self.gyro,self.led),
-            "Calibrate": CALIBRATE_MODE(self.lcd,self.timer,self.gui,self.gyro,self.led),
-            "Start Calibration":START_CALIBRATION(self.lcd,self.timer,self.gui,self.gyro,self.led),
-            "Reset": RESET_MODE(self.lcd,self.timer,self.gui,self.gyro,self.led)
+            "Menu": MENU_MODE(mode_arguments),
+            "AI Solve": AI_MODE(mode_arguments),
+            "Manual": MANUAL_MODE(mode_arguments),
+            "Start": START_MODE(mode_arguments),
+            "Stop": STOP_MODE(mode_arguments),
+            "Calibrate": CALIBRATE_MODE(mode_arguments),
+            "Start Calibration":START_CALIBRATION(mode_arguments),
+            "Reset": RESET_MODE(mode_arguments)
         }
+
+        # Initialises the program to Menu Mode on start up
         self.current_mode = self.modes["Menu"]
 
     # Switch mode function called by handle_input
@@ -56,16 +63,16 @@ class MODE_MANAGER:
 
 # Parent class of each mode. Prevents repetition of code to define self.variables
 class MODE:
-    def __init__(self, lcd, timer, gui,gyro, led):
+    def __init__(self, lcd, timer, gui, gyro, led, motors, led_strip):
         self.lcd = lcd
         self.timer = timer
         self.gui = gui
         self.gyro = gyro
-        self.motors = PCA9685()
         self.led = led
-        self.led_strip = ARDUINO()
+        self.motors = motors
+        self.led_strip = led_strip
 
-        
+# Determines what we want to happen when system is in Menu Mode 
 class MENU_MODE(MODE):
 
     def display(self):
@@ -92,6 +99,7 @@ class MENU_MODE(MODE):
         else:
             return "Menu"
 
+# Determines what we want to happen when system is in AI Mode
 class AI_MODE(MODE):
 
     def display(self):
@@ -103,6 +111,7 @@ class AI_MODE(MODE):
         self.led.set_led(1,0,1)
         self.led_strip.write_to_arduino(1)
 
+    # Function determines which mode the program goes into after a button press interupt 
     def handle_input(self, button):
         if button == 1:
             return "Start"
@@ -113,6 +122,7 @@ class AI_MODE(MODE):
         else:
             pass
 
+# Determines what we want to happen when system is in Manual Mode 
 class MANUAL_MODE(MODE):
 
     def display(self):
@@ -124,6 +134,7 @@ class MANUAL_MODE(MODE):
         self.led.set_led(1,0,1)
         self.led_strip.write_to_arduino(2)
 
+    # Function determines which mode the program goes into after a button press interupt 
     def handle_input(self, button):
         if button == 1:
             return "Start"
@@ -134,6 +145,7 @@ class MANUAL_MODE(MODE):
         else:
             pass
 
+# Determines what we want to happen when system is in Calibration Mode 
 class CALIBRATE_MODE(MODE):
     
     def display(self):
@@ -145,6 +157,7 @@ class CALIBRATE_MODE(MODE):
         self.led.set_led(1,0,1)
         self.led_strip.write_to_arduino(3)
         
+    # Function determines which mode the program goes into after a button press interupt 
     def handle_input(self, button):
         if button == 1:
             return "Start Calibration"
@@ -155,6 +168,7 @@ class CALIBRATE_MODE(MODE):
         else:
             pass
 
+# Determines what we want to happen when system is in Start Mode 
 class START_MODE(MODE):
     
     def display(self):
@@ -167,6 +181,7 @@ class START_MODE(MODE):
         self.led_strip.write_to_arduino(5)
         self.timer.start_timer()  
 
+    # Function determines which mode the program goes into after a button press interupt 
     def handle_input(self, button):
         if button == 1:
             pass
@@ -177,6 +192,7 @@ class START_MODE(MODE):
         else:
             pass
 
+# Determines what we want to happen when system is in Stop Mode 
 class STOP_MODE(MODE):
 
     def display(self):
@@ -185,7 +201,8 @@ class STOP_MODE(MODE):
         self.gui.update_button_text(3,"Menu")
         self.led.set_led(0,1,1)
         self.timer.stop_timer()
-        
+
+    # Function determines which mode the program goes into after a button press interupt    
     def handle_input(self, button):
         if button == 1:
             pass
@@ -196,6 +213,7 @@ class STOP_MODE(MODE):
         else:
             pass
 
+# Determines what we want to happen when system is in Reset Mode 
 class RESET_MODE(MODE):
 
     def display(self):
@@ -220,19 +238,20 @@ class START_CALIBRATION(MODE):
 
     def display(self):
         self.joystick = JOYSTICK_READ_DATA()
-        while True:
-            try:
-                self.joystick.read_data()
-                x_gyro = self.gyro.read_gyroscope_x()
-                y_gyro = self.gyro.read_gyroscope_y()
-                z_gyro = self.gyro.read_gyroscope_z()
-                self.lcd.update_messages(f"X:{x_gyro} Y:{y_gyro} Z:{z_gyro}", "            Menu")
-                self.gui.update_label(f"X:{x_gyro} Y:{y_gyro} Z:{z_gyro}")
-                self.gui.update_button_text(1,"Start")
-                self.gui.update_button_text(2,"")
-                self.gui.update_button_text(3,"Menu")
-            except:
-                pass
+
+        # while True:
+        #     try:
+        #         self.joystick.read_data()
+        #         x_gyro = self.gyro.read_gyroscope_x()
+        #         y_gyro = self.gyro.read_gyroscope_y()
+        #         z_gyro = self.gyro.read_gyroscope_z()
+        #         self.lcd.update_messages(f"X:{x_gyro} Y:{y_gyro} Z:{z_gyro}", "            Menu")
+        #         self.gui.update_label(f"X:{x_gyro} Y:{y_gyro} Z:{z_gyro}")
+        #         self.gui.update_button_text(1,"Start")
+        #         self.gui.update_button_text(2,"")
+        #         self.gui.update_button_text(3,"Menu")
+        #     except:
+        #         pass
             
     def handle_input(self, button):
         if button == 1:
