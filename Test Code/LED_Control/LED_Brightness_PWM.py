@@ -1,18 +1,27 @@
-import pigpio 
-import math
-import time
+import RPi.GPIO as GPIO
+from time import sleep
+from gpiozero.pins.pigpio import PiGPIOFactory
+myFactory = PiGPIOFactory()
+from gpiozero import Servo as LEDPWM
+LED1 = LEDPWM(18,min_pulse_width = 0.01/1000,max_pulse_width=8/10,pin_factory=myFactory)
+LED1.value = -1
 
-LED_drive = pigpio.pi()
-Max_Duty = 70
-LED_drive.set_mode(18, pigpio.OUTPUT)	#Is this line needed? The line below should automatically take care of it, no?
-LED_drive.hardware_PWM(18,1000,Max_Duty*1000)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(18,GPIO.OUT)
+pwm=GPIO.PWM(18,1000)
 
+pwm.start(0)
 
-# testing
-for x in range (0,Max_Duty,1):
-   LED_drive.hardware_PWM(18,1000,x*1000)
-   time.sleep(0.1)
+pwm.ChangeDutyCycle(7.5)
+sleep(2)
 
+pwm.ChangeDutyCycle(8.5)
+sleep(2)
+pwm.ChangeDutyCycle(6.5)
+sleep(2)
+pwm.ChangeDutyCycle(7.5)
+sleep(2)
+pwm.stop() 
 # while True:
 #     for y in range (0,np.pi,0.01):
 #         test_duty = Max_Duty * np.sin(y)
