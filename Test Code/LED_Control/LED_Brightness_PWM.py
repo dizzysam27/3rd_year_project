@@ -1,27 +1,39 @@
-import RPi.GPIO as GPIO
+from gpiozero import PWMLED
 from time import sleep
-from gpiozero.pins.pigpio import PiGPIOFactory
-myFactory = PiGPIOFactory()
-from gpiozero import Servo as LEDPWM
-LED1 = LEDPWM(18,min_pulse_width = 0.01/1000,max_pulse_width=8/10,pin_factory=myFactory)
-LED1.value = -1
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(18,GPIO.OUT)
-pwm=GPIO.PWM(18,1000)
+led = PWMLED(18)
 
-pwm.start(0)
+while True:
+    led.value = 0 
+    sleep(2)
+    led.value = 0.009
+    sleep(2)
+    led.value = 0.01  
+    sleep(2)
+    led.value = 1  
+    sleep(2)
+# from gpiozero.pins.pigpio import PiGPIOFactory
+# myFactory = PiGPIOFactory()
+# from gpiozero import LED
+# LED1 = LED(18,pin_factory=myFactory)
+# LED1.value = -1
+# LED=18 
+# GPIO.setmode( GPIO.BCM )
+# GPIO.setup(LED, GPIO.OUT )
+# pwm=GPIO.PWM(LED,1000)
 
-pwm.ChangeDutyCycle(7.5)
-sleep(2)
+# pwm.start(5)
 
-pwm.ChangeDutyCycle(8.5)
-sleep(2)
-pwm.ChangeDutyCycle(6.5)
-sleep(2)
-pwm.ChangeDutyCycle(7.5)
-sleep(2)
-pwm.stop() 
+# pwm.ChangeDutyCycle(7.5)
+# sleep(2)
+
+# pwm.ChangeDutyCycle(8.5)
+# sleep(2)
+# pwm.ChangeDutyCycle(6.5)
+# sleep(2)
+# pwm.ChangeDutyCycle(7.5)
+# sleep(2)
+# pwm.stop() 
 # while True:
 #     for y in range (0,np.pi,0.01):
 #         test_duty = Max_Duty * np.sin(y)
