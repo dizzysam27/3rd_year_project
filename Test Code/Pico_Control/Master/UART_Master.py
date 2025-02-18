@@ -18,9 +18,7 @@ while True:
     # Update Joystick Values
     if uart0.in_waiting > 0:
             dataRx = str(uart0.readline().decode('utf-8').strip())
-            buttonValue = int(dataRx[-1])
-            xValue = int(dataRx[-4:-2]) - 100
-            yValue = int(dataRx) - (xValue*10 + buttonValue) - 100        
+            print(dataRx)   
     
     testData = str(xValue)[-2:-1] + str(yValue)[-2:-1]
     uart0.write(b'{testData}\n')
