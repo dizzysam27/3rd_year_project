@@ -235,9 +235,9 @@ class IMAGEPROCESSING:
                     print(f"Ball offset: x={offset_x}, y={offset_y}")
                     changex = 300
                     changey = 300
-                    defaultx = 1903
+                    defaultx = 1870
                     defaulty = 1925
-                    change = 12
+                    change = 50
                     # Control logic to move motors based on the offsets
                     if offset_x > 20:  # Threshold for moving motor on X axis
                         
@@ -285,11 +285,11 @@ class IMAGEPROCESSING:
                         motors.setServoPulse(1,defaultx)
                         motors.setServoPulse(0,defaulty)
                 else:
-                    motors.setServoPulse(1,1903)
-                    motors.setServoPulse(0,1925)
+                    motors.setServoPulse(1,defaultx)
+                    motors.setServoPulse(0,defaulty)
             else:
-                motors.setServoPulse(1,1903)
-                motors.setServoPulse(0,1925)
+                motors.setServoPulse(1,defaultx)
+                motors.setServoPulse(0,defaulty)
 
             time.sleep(0.001)
                     
@@ -307,7 +307,7 @@ class IMAGEPROCESSING:
             closed_thresh = cv2.morphologyEx(filled_frame2, cv2.MORPH_CLOSE, kernel)
             #cv2.imshow('Closed Image', closed_thresh)  # Show the closed image
             # Display the filled frame
-            #cv2.imshow('Filled Contours', filled_frame)
+            cv2.imshow('Filled Contours', filled_frame)
             # Display the closed frame
             #cv2.imshow('Filled Contours After Morphology', closed_thresh)
             # Combine the green and black filled contours after morphology
