@@ -5,7 +5,7 @@ class main_LED:
 
     def __init__(self):
         # Initialise the LED 
-        LED = PWMLED(18, frequency = 2000)
+        self.LED = PWMLED(18, frequency = 2000)
         self.SetMax_value(1.0)
         self.LED_level(0.1)
 
@@ -19,7 +19,7 @@ class main_LED:
             pass
         
         self.LED_value = (LED_value * self.Max_value)
-        LED.value = (self.LED_value)
+        self.LED.value = (self.LED_value)
         print(f"New LED Value : {self.LED_value}")
 
 
@@ -45,3 +45,7 @@ class main_LED:
                 self.LED_level(y)
                 sleep(0.01)
                 test =+1
+
+led1 = main_LED()
+
+led1.sinewave_test()

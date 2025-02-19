@@ -67,3 +67,7 @@ class LED_CONTROL:
             BLUE_LED.on()
         else:
             BLUE_LED.off()
+            
+# leds = LED_CONTROL()
+# while True:
+#     leds.set_led(1,1,1)
