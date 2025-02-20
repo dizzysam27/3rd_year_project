@@ -102,7 +102,7 @@ class PCA9685:
 
     self.setPWMFreq(50)
 
-    self.x_offset = 0
+    self.x_offset = -50
     self.y_offset = 20
     self.x_maxtilt = 30
     self.y_maxtilt = 30

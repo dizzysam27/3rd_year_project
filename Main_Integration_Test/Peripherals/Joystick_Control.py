@@ -1,5 +1,5 @@
 import serial
-from Peripherals.Motor_Control import PCA9685
+from Motor_Control import PCA9685
 
 """
 This class reads the data provided by the joystick over UART. The UART connection is initalised and the motors are calibrated to their starting point.
@@ -27,5 +27,10 @@ class JOYSTICK_READ_DATA:
             yValue,xValue = map(int, dataRx.split(',')) # Splits the data into x and y values
             xValue=(xValue)
             yValue=(yValue)
-            self.motors.motorAngle(xValue,yValue) # Sends joystick data to the motors
+            self.motors.motorAngle(yValue,xValue) # Sends joystick data to the motors
             print(xValue,yValue)  
+
+joy = JOYSTICK_READ_DATA()
+
+while True:
+    joy.read_data()
