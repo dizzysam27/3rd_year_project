@@ -7,6 +7,7 @@ import threading
 class IMAGEPROCESSING:
     
     def __init__(self):
+        # Initialize motor control and camera
         self.motors = PCA9685()
         self.cap = cv2.VideoCapture(0)
 
@@ -17,8 +18,6 @@ class IMAGEPROCESSING:
         self.line_coordinates = []
         self.min_contour_area = 1000  # Adjust this value to fit your needs
         self.kernel = np.ones((15, 15), np.uint8)  # Larger kernels will help close larger gaps
-
-        self.lock = threading.Lock()  # To handle shared resources safely
 
         # Start the image processing thread
         self.processing_thread = threading.Thread(target=self.process_frame)
@@ -39,58 +38,57 @@ class IMAGEPROCESSING:
             self.process_image(frame)
 
     def process_image(self, frame):
-        with self.lock:
-            # Image processing code goes here (cropping, HSV conversion, contour detection, etc.)
-            frame_height, frame_width = frame.shape[:2]
-            crop_width = 1000
-            crop_height = 700
-            x_offset = 30
-            y_offset = 30
+        # Process the image frame (contour detection, circle detection, etc.)
+        frame_height, frame_width = frame.shape[:2]
+        crop_width = 1000
+        crop_height = 700
+        x_offset = 30
+        y_offset = 30
 
-            start_x = (frame_width - crop_width) // 2
-            end_x = start_x + crop_width
+        start_x = (frame_width - crop_width) // 2
+        end_x = start_x + crop_width
 
-            start_y = (frame_height - crop_height) // 2
-            end_y = start_y + crop_height
+        start_y = (frame_height - crop_height) // 2
+        end_y = start_y + crop_height
 
-            cropped_frame = frame[start_y + y_offset :end_y + y_offset, start_x + x_offset :end_x + x_offset]
+        cropped_frame = frame[start_y + y_offset :end_y + y_offset, start_x + x_offset :end_x + x_offset]
 
-            # Perform image processing (you can keep the same processing logic)
-            hsv = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2HSV)
+        # Perform image processing (you can keep the same processing logic)
+        hsv = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2HSV)
 
-            # Example: Detect green contours
-            lower_green = np.array([35, 50, 50])  # Lower bound of green
-            upper_green = np.array([85, 255, 255])  # Upper bound of green
-            gmask = cv2.inRange(hsv, lower_green, upper_green)
-            gcontours, ghierarchy = cv2.findContours(gmask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # Example: Detect green contours
+        lower_green = np.array([35, 50, 50])  # Lower bound of green
+        upper_green = np.array([85, 255, 255])  # Upper bound of green
+        gmask = cv2.inRange(hsv, lower_green, upper_green)
+        gcontours, ghierarchy = cv2.findContours(gmask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-            gfilled_frame = cropped_frame.copy()
-            for contour in gcontours:
-                area = cv2.contourArea(contour)
-                if area > self.min_contour_area:
-                    x, y, w, h = cv2.boundingRect(contour)
-                    cx, cy = x + w // 2, y + h // 2
-                    self.line_coordinates.append((cx, cy))
-                    cv2.drawContours(gfilled_frame, [contour], -1, (0, 0, 255), thickness=cv2.FILLED)
+        gfilled_frame = cropped_frame.copy()
+        for contour in gcontours:
+            area = cv2.contourArea(contour)
+            if area > self.min_contour_area:
+                x, y, w, h = cv2.boundingRect(contour)
+                cx, cy = x + w // 2, y + h // 2
+                self.line_coordinates.append((cx, cy))
+                cv2.drawContours(gfilled_frame, [contour], -1, (0, 0, 255), thickness=cv2.FILLED)
 
-            # Example: Detect circles (ball detection using HoughCircles)
-            circles = cv2.HoughCircles(gmask, cv2.HOUGH_GRADIENT, 1, 20, param1=130, param2=20, minRadius=2, maxRadius=20)
-            if circles is not None:
-                circles = circles[0, :]
-                largest_circle = max(circles, key=lambda c: c[2], default=None)  # Find the largest circle
-                if largest_circle:
-                    # Ball's center coordinates
-                    ball_center = (largest_circle[0], largest_circle[1])
-                    print(f"Largest Circle Center: ({ball_center[0]:.2f}, {ball_center[1]:.2f})")
+        # Example: Detect circles (ball detection using HoughCircles)
+        circles = cv2.HoughCircles(gmask, cv2.HOUGH_GRADIENT, 1, 20, param1=130, param2=20, minRadius=2, maxRadius=20)
+        if circles is not None:
+            circles = circles[0, :]
+            largest_circle = max(circles, key=lambda c: c[2], default=None)  # Find the largest circle
+            if largest_circle:
+                # Ball's center coordinates
+                ball_center = (largest_circle[0], largest_circle[1])
+                print(f"Largest Circle Center: ({ball_center[0]:.2f}, {ball_center[1]:.2f})")
 
-                    # Perform motor control based on ball position
-                    self.control_motors(ball_center)
+                # Perform motor control based on ball position
+                self.control_motors(ball_center)
 
-            # Display the processed frame
-            cv2.imshow('Processed Frame', gfilled_frame)
-    
+        # Display the processed frame
+        cv2.imshow('Processed Frame', gfilled_frame)
+
     def control_motors(self, ball_center):
-        # Motor control logic based on the ball position (use same logic as your code)
+        # Motor control logic based on the ball position (same logic as before)
         gx = 510
         gy = 390
         bx, by = ball_center
@@ -145,7 +143,6 @@ class IMAGEPROCESSING:
 
     def main_loop(self):
         while True:
-            # Main loop to capture and display the frame
             ret, frame = self.cap.read()
             if not ret:
                 print("Error: Failed to capture frame.")
