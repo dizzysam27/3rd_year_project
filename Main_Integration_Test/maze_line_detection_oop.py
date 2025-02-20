@@ -1,13 +1,12 @@
 import cv2
 import numpy as np
-import threading
 from Peripherals.Motor_Control import PCA9685
 
 class ImageProcessing:
     def __init__(self):
         self.motors = PCA9685()
         self.cap = cv2.VideoCapture(0)
-        self.running = True  # Control flag for the threads
+        self.running = True  # Control flag for the loop
 
         if not self.cap.isOpened():
             print("Error: Could not open webcam.")
@@ -16,42 +15,21 @@ class ImageProcessing:
         self.line_coordinates = []
         self.min_contour_area = 1000
         self.kernel = np.ones((15, 15), np.uint8)
-        
-        self.latest_frame = None  # Shared variable to store the latest frame
-        self.frame_lock = threading.Lock()  # Lock to ensure thread-safety for frame access
 
-        # Start the capture and processing in separate threads
-        self.capture_thread = threading.Thread(target=self.capture_frames)
-        self.process_thread = threading.Thread(target=self.process_video)
-
-        self.capture_thread.start()
-        self.process_thread.start()
-
-    def capture_frames(self):
+    def process_video(self):
         while self.running:
             ret, frame = self.cap.read()
             if not ret:
                 print("Error: Failed to capture frame.")
                 break
 
-            # Lock the frame access while updating
-            with self.frame_lock:
-                self.latest_frame = frame
+            cropped_frame = self.crop_frame(frame)
+            processed_frame, ball_center = self.detect_objects(cropped_frame)
 
-    def process_video(self):
-        while self.running:
-            if self.latest_frame is not None:
-                # Lock the frame access while processing
-                with self.frame_lock:
-                    frame = self.latest_frame.copy()
+            if ball_center:
+                self.control_motors(ball_center)
 
-                cropped_frame = self.crop_frame(frame)
-                processed_frame, ball_center = self.detect_objects(cropped_frame)
-
-                if ball_center:
-                    self.control_motors(ball_center)
-
-                cv2.imshow('Processed Frame', processed_frame)
+            cv2.imshow('Processed Frame', processed_frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.running = False
@@ -70,14 +48,24 @@ class ImageProcessing:
                      start_x + x_offset:start_x + x_offset + crop_width]
 
     def detect_objects(self, frame):
+        # Convert frame to HSV color space for better color segmentation
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        lower_green, upper_green = np.array([35, 50, 50]), np.array([85, 255, 255])
+
+        # Define the HSV range for detecting a green ball (or your target color)
+        lower_green = np.array([35, 50, 50])  # Adjust for your environment
+        upper_green = np.array([85, 255, 255])
+        
+        # Create mask for green color
         gmask = cv2.inRange(hsv, lower_green, upper_green)
+        gmask = cv2.morphologyEx(gmask, cv2.MORPH_CLOSE, self.kernel)  # Clean the mask
+
+        # Find contours in the mask
         gcontours, _ = cv2.findContours(gmask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         filled_frame = frame.copy()
         ball_center = None
 
+        # Process contours to filter out small objects
         for contour in gcontours:
             area = cv2.contourArea(contour)
             if area > self.min_contour_area:
@@ -86,35 +74,44 @@ class ImageProcessing:
                 self.line_coordinates.append((cx, cy))
                 cv2.drawContours(filled_frame, [contour], -1, (0, 0, 255), thickness=cv2.FILLED)
 
-        # Detect ball using a more robust method
+        # Debug: Show the green mask and contours
+        cv2.imshow('Green Mask', gmask)
+
+        # Additional ball detection using adaptive thresholding and contour checking
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (15, 15), 0)
         threshball = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                            cv2.THRESH_BINARY, 11, 6)
 
+        # Find contours for ball-like objects
         contours, _ = cv2.findContours(threshball, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         largest_circle = None
         largest_radius = 0
 
+        # Process contours to find the largest circular object
         for contour in contours:
             area = cv2.contourArea(contour)
-            if area > 10:  # Threshold for ball size
+            if area > 100:  # Threshold for ball size
                 x, y, w, h = cv2.boundingRect(contour)
                 radius = max(w, h) // 2
 
-                # Check aspect ratio to find more circular objects
+                # Check for circularity (aspect ratio should be close to 1)
                 aspect_ratio = float(w) / float(h)
-                if aspect_ratio > 0.8 and aspect_ratio < 1.2:  # Ball should have an aspect ratio close to 1
+                if 0.8 < aspect_ratio < 1.2:  # Ball should be nearly circular
                     if radius > largest_radius:
                         largest_radius = radius
                         largest_circle = (x + w // 2, y + h // 2, radius)
 
+        # If we found a ball, draw it
         if largest_circle:
             x, y, r = largest_circle
             cv2.circle(filled_frame, (x, y), r, (255, 0, 0), 2)
             cv2.circle(filled_frame, (x, y), 2, (0, 255, 0), 3)
             ball_center = (x, y)
+
+        # Debug: Show the thresholded image
+        cv2.imshow('Thresholded Image', threshball)
 
         return filled_frame, ball_center
 
@@ -156,4 +153,5 @@ class ImageProcessing:
         print("Processing stopped and coordinates saved.")
 
 if __name__ == "__main__":
-    ImageProcessing()
+    ip = ImageProcessing()
+    ip.process_video()
