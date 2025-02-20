@@ -116,4 +116,45 @@ class ImageProcessing:
             cv2.circle(filled_frame, (x, y), 2, (0, 255, 0), 3)
             ball_center = (x, y)
 
-        return filled_frame, ball_
+        return filled_frame, ball_center
+
+    def control_motors(self, ball_center):
+        gx, gy = 510, 390
+        bx, by = ball_center
+        offset_x, offset_y = gx - bx, gy - by
+
+        changex, changey = 300, 300
+        defaultx, defaulty = 1870, 1925
+        change = 50
+
+        if offset_x > 20:
+            changey = 100
+        elif offset_x < -20:
+            changey = -100
+        if offset_y > 20:
+            changex = 100
+        elif offset_y < -20:
+            changex = -100
+
+        if changex == 300 and changey != 300:
+            self.motors.setServoPulse(0, defaulty - change if changey < 0 else defaulty + change)
+        elif changey == 300 and changex != 300:
+            self.motors.setServoPulse(1, defaultx - change if changex < 0 else defaultx + change)
+        elif changex != 300 and changey != 300:
+            self.motors.setServoPulse(1, defaultx - change if changex < 0 else defaultx + change)
+            self.motors.setServoPulse(0, defaulty - change if changey < 0 else defaulty + change)
+        else:
+            self.motors.setServoPulse(1, defaultx)
+            self.motors.setServoPulse(0, defaulty)
+
+    def cleanup(self):
+        self.cap.release()
+        cv2.destroyAllWindows()
+        with open('line_coordinates.txt', 'w') as f:
+            for coord in self.line_coordinates:
+                f.write(f"{coord}\n")
+        print("Processing stopped and coordinates saved.")
+
+if __name__ == "__main__":
+    ImageProcessing()
+
