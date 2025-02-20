@@ -9,27 +9,20 @@ class BallTracker:
             print("Error: Could not open webcam.")
             exit()
         
-        # Reduce resolution for better performance
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        
         self.min_contour_area = 1000
-        self.kernel = np.ones((5, 5), np.uint8)  # Smaller kernel for speed
+        self.kernel = np.ones((15, 15), np.uint8)
         self.line_coordinates = []
-        self.frame_count = 0
         self.running = True
         cv2.namedWindow('Video')
-        
+    
     def process_frame(self, frame):
-        self.frame_count += 1
         cropped_frame = self.crop_frame(frame)
         gmask = self.get_green_mask(cropped_frame)
+        gclosed_thresh = self.process_contours(cropped_frame, gmask, color=(0, 0, 255))
+        ball_center = self.detect_ball(cropped_frame)
         
-        # Run heavy processing every 5th frame to improve speed
-        if self.frame_count % 5 == 0:
-            ball_center = self.detect_ball(cropped_frame)
-            if ball_center:
-                self.control_motors(ball_center)
+        if ball_center:
+            self.control_motors(ball_center)
         
         cv2.imshow('Video', cropped_frame)
     
@@ -48,15 +41,19 @@ class BallTracker:
         lower_green, upper_green = np.array([35, 50, 50]), np.array([85, 255, 255])
         return cv2.inRange(hsv, lower_green, upper_green)
     
+    def process_contours(self, frame, mask, color):
+        contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        filled_frame = np.zeros_like(frame)
+        for contour in contours:
+            if cv2.contourArea(contour) > self.min_contour_area:
+                cv2.drawContours(filled_frame, [contour], -1, color, thickness=cv2.FILLED)
+        return cv2.morphologyEx(filled_frame, cv2.MORPH_CLOSE, self.kernel)
+    
     def detect_ball(self, frame):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)  # Reduce noise
-        
-        # Adaptive thresholding
-        threshball = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 6)
+        threshball = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 6)
         cleaned_thresh = cv2.morphologyEx(threshball, cv2.MORPH_OPEN, self.kernel)
-        
-        circles = cv2.HoughCircles(cleaned_thresh, cv2.HOUGH_GRADIENT, 1.2, 30, param1=100, param2=30, minRadius=5, maxRadius=20)
+        circles = cv2.HoughCircles(cleaned_thresh, cv2.HOUGH_GRADIENT, 1, 20, param1=130, param2=20, minRadius=2, maxRadius=20)
         
         if circles is not None:
             largest_circle = max(circles[0, :], key=lambda c: c[2])
@@ -81,7 +78,7 @@ class BallTracker:
     def motor_control(self, x, y):
         pass  # Implement motor control logic here
     
-    def process_loop(self):
+    def capture_loop(self):
         while self.running:
             ret, frame = self.cap.read()
             if not ret:
@@ -93,10 +90,11 @@ class BallTracker:
                 break
         self.cap.release()
         cv2.destroyAllWindows()
-
+    
     def run(self):
-        processing_thread = Thread(target=self.process_loop, daemon=True)
-        processing_thread.start()
+        capture_thread = Thread(target=self.capture_loop, daemon=True)
+        capture_thread.start()
+        
         while self.running:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.running = False
