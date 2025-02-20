@@ -33,8 +33,8 @@ class IMAGEPROCESSING:
             frame_height, frame_width = frame.shape[:2]
             crop_width = 1000
             crop_height = 700
-            x_offset = 90
-            y_offset = 100
+            x_offset = 30
+            y_offset = 30
 
             # Calculate start and end coordinates for the central region
             start_x = (frame_width - crop_width) // 2
@@ -241,17 +241,17 @@ class IMAGEPROCESSING:
                     # Control logic to move motors based on the offsets
                     if offset_x > 20:  # Threshold for moving motor on X axis
                         
-                        changey = 100
+                        changex = 100
 
                     if offset_x < -20:  # Threshold for moving motor on X axis
                         
-                        changey = -100
+                        changex = -100
                     if offset_y > 20:  #Threshold for moving motor on Y axis
                         
-                        changex = 100
+                        changey = 100
                     if offset_y < -20:  # Threshold for moving motor on Y axis
                         
-                        changex = -100
+                        changey = -100
                     print(changex,changey)
                     if changex == 300:
                         if changey != 300:
