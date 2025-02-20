@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 import threading
-import time
-from queue import Queue
 from Peripherals.Motor_Control import PCA9685
 
 class ImageProcessing:
@@ -10,7 +8,6 @@ class ImageProcessing:
         self.motors = PCA9685()
         self.cap = cv2.VideoCapture(0)
         self.running = True  # Control flag for the threads
-        self.frame_queue = Queue(maxsize=1)  # Buffer for storing frames
 
         if not self.cap.isOpened():
             print("Error: Could not open webcam.")
@@ -19,6 +16,9 @@ class ImageProcessing:
         self.line_coordinates = []
         self.min_contour_area = 1000
         self.kernel = np.ones((15, 15), np.uint8)
+        
+        self.latest_frame = None  # Shared variable to store the latest frame
+        self.frame_lock = threading.Lock()  # Lock to ensure thread-safety for frame access
 
         # Start the capture and processing in separate threads
         self.capture_thread = threading.Thread(target=self.capture_frames)
@@ -33,18 +33,18 @@ class ImageProcessing:
             if not ret:
                 print("Error: Failed to capture frame.")
                 break
-            
-            # Only put the frame into the queue if it's not full
-            if not self.frame_queue.full():
-                self.frame_queue.put(frame)
 
-        self.cleanup()
+            # Lock the frame access while updating
+            with self.frame_lock:
+                self.latest_frame = frame
 
     def process_video(self):
         while self.running:
-            # Wait for a frame to be available in the queue
-            if not self.frame_queue.empty():
-                frame = self.frame_queue.get()
+            if self.latest_frame is not None:
+                # Lock the frame access while processing
+                with self.frame_lock:
+                    frame = self.latest_frame.copy()
+
                 cropped_frame = self.crop_frame(frame)
                 processed_frame, ball_center = self.detect_objects(cropped_frame)
 
@@ -157,4 +157,3 @@ class ImageProcessing:
 
 if __name__ == "__main__":
     ImageProcessing()
-
