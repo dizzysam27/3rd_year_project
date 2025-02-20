@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import threading
 import time
+from queue import Queue
 from Peripherals.Motor_Control import PCA9685
 
 class ImageProcessing:
@@ -9,6 +10,7 @@ class ImageProcessing:
         self.motors = PCA9685()
         self.cap = cv2.VideoCapture(0)
         self.running = True  # Control flag for the threads
+        self.frame_queue = Queue(maxsize=1)  # Buffer for storing frames
 
         if not self.cap.isOpened():
             print("Error: Could not open webcam.")
@@ -18,24 +20,38 @@ class ImageProcessing:
         self.min_contour_area = 1000
         self.kernel = np.ones((15, 15), np.uint8)
 
-        # Start the processing and motor control in separate threads
-        self.image_thread = threading.Thread(target=self.process_video)
-        self.image_thread.start()
+        # Start the capture and processing in separate threads
+        self.capture_thread = threading.Thread(target=self.capture_frames)
+        self.process_thread = threading.Thread(target=self.process_video)
 
-    def process_video(self):
+        self.capture_thread.start()
+        self.process_thread.start()
+
+    def capture_frames(self):
         while self.running:
             ret, frame = self.cap.read()
             if not ret:
                 print("Error: Failed to capture frame.")
                 break
+            
+            # Only put the frame into the queue if it's not full
+            if not self.frame_queue.full():
+                self.frame_queue.put(frame)
 
-            cropped_frame = self.crop_frame(frame)
-            processed_frame, ball_center = self.detect_objects(cropped_frame)
+        self.cleanup()
 
-            if ball_center:
-                self.control_motors(ball_center)
+    def process_video(self):
+        while self.running:
+            # Wait for a frame to be available in the queue
+            if not self.frame_queue.empty():
+                frame = self.frame_queue.get()
+                cropped_frame = self.crop_frame(frame)
+                processed_frame, ball_center = self.detect_objects(cropped_frame)
 
-            cv2.imshow('Processed Frame', processed_frame)
+                if ball_center:
+                    self.control_motors(ball_center)
+
+                cv2.imshow('Processed Frame', processed_frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.running = False
@@ -70,10 +86,12 @@ class ImageProcessing:
                 self.line_coordinates.append((cx, cy))
                 cv2.drawContours(filled_frame, [contour], -1, (0, 0, 255), thickness=cv2.FILLED)
 
-        # Detect ball
+        # Detect ball using a more robust method
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        threshball = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        blurred = cv2.GaussianBlur(gray, (15, 15), 0)
+        threshball = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                            cv2.THRESH_BINARY, 11, 6)
+
         contours, _ = cv2.findContours(threshball, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         largest_circle = None
@@ -81,12 +99,16 @@ class ImageProcessing:
 
         for contour in contours:
             area = cv2.contourArea(contour)
-            if area > 10:
+            if area > 10:  # Threshold for ball size
                 x, y, w, h = cv2.boundingRect(contour)
                 radius = max(w, h) // 2
-                if radius > largest_radius:
-                    largest_radius = radius
-                    largest_circle = (x + w // 2, y + h // 2, radius)
+
+                # Check aspect ratio to find more circular objects
+                aspect_ratio = float(w) / float(h)
+                if aspect_ratio > 0.8 and aspect_ratio < 1.2:  # Ball should have an aspect ratio close to 1
+                    if radius > largest_radius:
+                        largest_radius = radius
+                        largest_circle = (x + w // 2, y + h // 2, radius)
 
         if largest_circle:
             x, y, r = largest_circle
@@ -94,44 +116,4 @@ class ImageProcessing:
             cv2.circle(filled_frame, (x, y), 2, (0, 255, 0), 3)
             ball_center = (x, y)
 
-        return filled_frame, ball_center
-
-    def control_motors(self, ball_center):
-        gx, gy = 510, 390
-        bx, by = ball_center
-        offset_x, offset_y = gx - bx, gy - by
-
-        changex, changey = 300, 300
-        defaultx, defaulty = 1870, 1925
-        change = 50
-
-        if offset_x > 20:
-            changey = 100
-        elif offset_x < -20:
-            changey = -100
-        if offset_y > 20:
-            changex = 100
-        elif offset_y < -20:
-            changex = -100
-
-        if changex == 300 and changey != 300:
-            self.motors.setServoPulse(0, defaulty - change if changey < 0 else defaulty + change)
-        elif changey == 300 and changex != 300:
-            self.motors.setServoPulse(1, defaultx - change if changex < 0 else defaultx + change)
-        elif changex != 300 and changey != 300:
-            self.motors.setServoPulse(1, defaultx - change if changex < 0 else defaultx + change)
-            self.motors.setServoPulse(0, defaulty - change if changey < 0 else defaulty + change)
-        else:
-            self.motors.setServoPulse(1, defaultx)
-            self.motors.setServoPulse(0, defaulty)
-
-    def cleanup(self):
-        self.cap.release()
-        cv2.destroyAllWindows()
-        with open('line_coordinates.txt', 'w') as f:
-            for coord in self.line_coordinates:
-                f.write(f"{coord}\n")
-        print("Processing stopped and coordinates saved.")
-
-if __name__ == "__main__":
-    ImageProcessing()
+        return filled_frame, ball_
