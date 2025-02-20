@@ -3,169 +3,159 @@ import numpy as np
 from Peripherals.Motor_Control import PCA9685
 import time
 
-class IMAGEPROCESSING:
+class ImageProcessor:
     
     def __init__(self):
         self.motors = PCA9685()
         self.cap = cv2.VideoCapture(0)
+        self.line_coordinates = []
+        self.min_contour_area = 1000
+        self.kernel = np.ones((15, 15), np.uint8)
+        self.defaultx = 1870
+        self.defaulty = 1925
+        self.change = 50
+        self.gx, self.gy = 510, 390
 
         if not self.cap.isOpened():
             print("Error: Could not open webcam.")
             exit()
 
-        # Crop parameters (unchanged)
-        self.crop_width = 1000
-        self.crop_height = 700
-        self.x_offset = 90
-        self.y_offset = 100
+    def crop_frame(self, frame):
+        frame_height, frame_width = frame.shape[:2]
+        crop_width = 1000
+        crop_height = 700
+        x_offset = 90
+        y_offset = 100
 
-        self.min_contour_area = 1000  # Minimum contour area threshold
-        self.kernel = np.ones((15, 15), np.uint8)  # Kernel for morphological operations
+        start_x = (frame_width - crop_width) // 2
+        end_x = start_x + crop_width
+
+        start_y = (frame_height - crop_height) // 2
+        end_y = start_y + crop_height
+
+        return frame[start_y + y_offset : end_y + y_offset, start_x + x_offset : end_x + x_offset]
 
     def process_frame(self, frame):
-        # Get frame dimensions
-        frame_height, frame_width = frame.shape[:2]
-        
-        # Calculate start and end coordinates for the central region
-        start_x = (frame_width - self.crop_width) // 2
-        end_x = start_x + self.crop_width
-        start_y = (frame_height - self.crop_height) // 2
-        end_y = start_y + self.crop_height
-
-        # Perform cropping
-        cropped_frame = frame[start_y + self.y_offset :end_y + self.y_offset, start_x + self.x_offset :end_x + self.x_offset]
-        
-        return cropped_frame
-
-    def find_green_contours(self, cropped_frame):
-        # Convert to HSV and create a green mask
+        cropped_frame = self.crop_frame(frame)
         hsv = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2HSV)
-        lower_green = np.array([35, 50, 50])
-        upper_green = np.array([85, 255, 255])
-        gmask = cv2.inRange(hsv, lower_green, upper_green)
-        
-        # Find contours of green regions
-        gcontours, _ = cv2.findContours(gmask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        
-        return gcontours
 
-    def find_ball(self, cropped_frame):
-        # Convert to grayscale and apply thresholding
+        # Process green regions
+        gmask = self.detect_color(hsv, np.array([35, 50, 50]), np.array([85, 255, 255]))
+        gfilled_frame, gcontours = self.find_and_fill_contours(gmask, cropped_frame)
+
+        # Process black regions
         gray = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
-        threshball = cv2.adaptiveThreshold(
-            gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 6
-        )
+        thresh = cv2.threshold(gray, 80, 255, cv2.THRESH_BINARY_INV)[1]
+        bfilled_frame, bcontours = self.find_and_fill_contours(thresh, cropped_frame)
 
-        # Use HoughCircles to find the ball
-        circles = cv2.HoughCircles(
-            threshball, cv2.HOUGH_GRADIENT, 1, 20, param1=130, param2=20, minRadius=2, maxRadius=20
-        )
+        # Process ball detection
+        ball_center = self.detect_ball(cropped_frame)
 
-        return circles, threshball
+        return gfilled_frame, bfilled_frame, ball_center
 
-    def control_motors(self, offset_x, offset_y):
-        # Control logic for motors based on offsets
-        changex = 300
-        changey = 300
-        defaultx = 1870
-        defaulty = 1925
-        change = 50
+    def detect_color(self, hsv, lower_color, upper_color):
+        return cv2.inRange(hsv, lower_color, upper_color)
 
-        if offset_x > 20:
-            changey = 100
-        if offset_x < -20:
-            changey = -100
-        if offset_y > 20:
-            changex = 100
-        if offset_y < -20:
-            changex = -100
+    def find_and_fill_contours(self, mask, frame):
+        contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        filled_frame = frame.copy()
+        for contour in contours:
+            area = cv2.contourArea(contour)
+            if area > self.min_contour_area:
+                x, y, w, h = cv2.boundingRect(contour)
+                cx, cy = x + w // 2, y + h // 2
+                self.line_coordinates.append((cx, cy))
+                cv2.drawContours(filled_frame, [contour], -1, (0, 0, 255), thickness=cv2.FILLED)
+        return filled_frame, contours
 
-        if changex == 300:
-            if changey != 300:
-                if changey < 0:
-                    self.motors.setServoPulse(0, defaulty - change)
-                if changey > 0:
-                    self.motors.setServoPulse(0, defaulty + change)
-        elif changey == 300:
-            if changex != 300:
-                if changex > 0:
-                    self.motors.setServoPulse(1, defaultx + change)
-                if changex < 0:
-                    self.motors.setServoPulse(1, defaultx - change)
-        elif changex != 300 and changey != 300:
-            if changey < 0:
-                if changex > 0:
-                    self.motors.setServoPulse(1, defaultx + change)
-                    self.motors.setServoPulse(0, defaulty - change)
-                if changex < 0:
-                    self.motors.setServoPulse(1, defaultx - change)
-                    self.motors.setServoPulse(0, defaulty - change)
-            if changey > 0:
-                if changex > 0:
-                    self.motors.setServoPulse(1, defaultx + change)
-                    self.motors.setServoPulse(0, defaulty + change)
-                if changex < 0:
-                    self.motors.setServoPulse(1, defaultx - change)
-                    self.motors.setServoPulse(0, defaulty + change)
+    def detect_ball(self, cropped_frame):
+        # Detect circles using HoughCircles
+        gray = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
+        cleaned_thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 6)
+        circles = cv2.HoughCircles(cleaned_thresh, cv2.HOUGH_GRADIENT, 1, 20, param1=130, param2=20, minRadius=2, maxRadius=20)
+        
+        if circles is not None:
+            circles = circles[0, :]
+            largest_circle = max(circles, key=lambda c: c[2], default=None)
+            if largest_circle:
+                return (largest_circle[0], largest_circle[1])
+        return None
+
+    def move_motors(self, ball_center):
+        if ball_center:
+            bx, by = ball_center
+            offset_x = self.gx - bx
+            offset_y = self.gy - by
+            changex = changey = 300
+
+            if offset_x > 20:
+                changey = 100
+            elif offset_x < -20:
+                changey = -100
+
+            if offset_y > 20:
+                changex = 100
+            elif offset_y < -20:
+                changex = -100
+
+            if changex == 300:
+                if changey != 300:
+                    self.adjust_motor(0, changey)
+            elif changey == 300:
+                if changex != 300:
+                    self.adjust_motor(1, changex)
+            else:
+                self.adjust_motor(1, changex)
+                self.adjust_motor(0, changey)
         else:
-            self.motors.setServoPulse(1, defaultx)
-            self.motors.setServoPulse(0, defaulty)
+            self.reset_motors()
 
-    def process(self):
+    def adjust_motor(self, motor_index, change):
+        if motor_index == 0:
+            if change < 0:
+                self.motors.setServoPulse(0, self.defaulty - self.change)
+            elif change > 0:
+                self.motors.setServoPulse(0, self.defaulty + self.change)
+        elif motor_index == 1:
+            if change < 0:
+                self.motors.setServoPulse(1, self.defaultx - self.change)
+            elif change > 0:
+                self.motors.setServoPulse(1, self.defaultx + self.change)
+
+    def reset_motors(self):
+        self.motors.setServoPulse(1, self.defaultx)
+        self.motors.setServoPulse(0, self.defaulty)
+
+    def run(self):
         while True:
             ret, frame = self.cap.read()
             if not ret:
                 print("Error: Failed to capture frame.")
                 break
 
-            cropped_frame = self.process_frame(frame)
-            gcontours = self.find_green_contours(cropped_frame)
-            
-            # Handle the contours
-            for contour in gcontours:
-                area = cv2.contourArea(contour)
-                if area > self.min_contour_area:
-                    # Handle green contours here
-                    pass
+            gfilled_frame, bfilled_frame, ball_center = self.process_frame(frame)
+            self.move_motors(ball_center)
 
-            circles, threshball = self.find_ball(cropped_frame)
+            # Combine the green and black filled contours after morphology
+            combined_image = cv2.addWeighted(gfilled_frame, 0.5, bfilled_frame, 0.5, 0)
+            cv2.imshow('Combined Filled Contours', combined_image)
 
-            if circles is not None:
-                circles = circles[0, :]  # Extract circles
-
-                # Find the largest circle
-                largest_circle = max(circles, key=lambda c: c[2], default=None)
-
-                if largest_circle:
-                    x, y, r = largest_circle  # Get circle center and radius
-                    print(f"Largest Circle Center: ({x:.2f}, {y:.2f}), Radius: {r:.2f}")
-
-                    # Ball's center coordinates
-                    ball_center = (x, y)
-
-                    # Reference center (adjust this as needed)
-                    gx, gy = 510, 390
-
-                    # Calculate offsets
-                    offset_x = gx - ball_center[0]
-                    offset_y = gy - ball_center[1]
-
-                    # Control motors based on offsets
-                    self.control_motors(offset_x, offset_y)
-
-            time.sleep(0.001)  # Optional sleep to control loop speed
-
-            # Show processed frames
-            cv2.imshow('Processed Frame', cropped_frame)
-
-            # Exit on 'q' key press
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-        # Release resources
+        self.save_coordinates()
+        self.cleanup()
+
+    def save_coordinates(self):
+        with open('line_coordinates.txt', 'w') as f:
+            for coord in self.line_coordinates:
+                f.write(f"{coord}\n")
+
+    def cleanup(self):
         self.cap.release()
         cv2.destroyAllWindows()
+        print("Coordinates of black line segments have been saved to 'line_coordinates.txt'.")
 
-# Run the processing
-run = IMAGEPROCESSING()
-run.process()
+# Run the processor
+processor = ImageProcessor()
+processor.run()
