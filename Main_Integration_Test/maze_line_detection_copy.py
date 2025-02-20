@@ -1,9 +1,8 @@
 import cv2
 import numpy as np
-import threading
-import time
-from queue import Queue
 from Peripherals.Motor_Control import PCA9685
+import time
+import threading
 
 class IMAGEPROCESSING:
     
@@ -16,129 +15,150 @@ class IMAGEPROCESSING:
             exit()
 
         self.line_coordinates = []
-        self.min_contour_area = 1000
-        self.kernel = np.ones((15, 15), np.uint8)
-        
-        # Queue for passing frames between threads
-        self.frame_queue = Queue(maxsize=10)
+        self.min_contour_area = 1000  # Adjust this value to fit your needs
+        self.kernel = np.ones((15, 15), np.uint8)  # Larger kernels will help close larger gaps
 
-        self.running = True  # Control flag for all threads
+        self.lock = threading.Lock()  # To handle shared resources safely
 
-        # Start the threads
-        self.capture_thread = threading.Thread(target=self.capture_frames)
-        self.capture_thread.start()
+        # Start the image processing thread
+        self.processing_thread = threading.Thread(target=self.process_frame)
+        self.processing_thread.daemon = True
+        self.processing_thread.start()
 
-        self.process_thread = threading.Thread(target=self.process_frames)
-        self.process_thread.start()
+        # Main loop for frame capture
+        self.main_loop()
 
-    def capture_frames(self):
-        while self.running:
+    def process_frame(self):
+        while True:
             ret, frame = self.cap.read()
-            if ret:
-                # Put the captured frame in the queue for processing
-                if not self.frame_queue.full():
-                    self.frame_queue.put(frame)
-            else:
+            if not ret:
                 print("Error: Failed to capture frame.")
+                break
 
-    def process_frames(self):
-        while self.running:
-            if not self.frame_queue.empty():
-                frame = self.frame_queue.get()
-                processed_frame, ball_center = self.detect_objects(frame)
-                self.control_motors(ball_center)
-                self.display_frame(processed_frame)
-            time.sleep(0.01)  # Allow time for other threads to run
+            # Process frame (image processing code goes here)
+            self.process_image(frame)
 
-    def detect_objects(self, frame):
-        # Process the frame to detect objects (similar to your original processing)
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        lower_green = np.array([35, 50, 50])
-        upper_green = np.array([85, 255, 255])
-        gmask = cv2.inRange(hsv, lower_green, upper_green)
-        gcontours, _ = cv2.findContours(gmask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    def process_image(self, frame):
+        with self.lock:
+            # Image processing code goes here (cropping, HSV conversion, contour detection, etc.)
+            frame_height, frame_width = frame.shape[:2]
+            crop_width = 1000
+            crop_height = 700
+            x_offset = 30
+            y_offset = 30
 
-        filled_frame = frame.copy()
-        ball_center = None
+            start_x = (frame_width - crop_width) // 2
+            end_x = start_x + crop_width
 
-        for contour in gcontours:
-            area = cv2.contourArea(contour)
-            if area > self.min_contour_area:
-                x, y, w, h = cv2.boundingRect(contour)
-                cx, cy = x + w // 2, y + h // 2
-                self.line_coordinates.append((cx, cy))
-                cv2.drawContours(filled_frame, [contour], -1, (0, 0, 255), thickness=cv2.FILLED)
+            start_y = (frame_height - crop_height) // 2
+            end_y = start_y + crop_height
 
-        # Ball detection (same as your original approach)
-        gray = cv2.cvtColor(filled_frame, cv2.COLOR_BGR2GRAY)
-        threshball = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                           cv2.THRESH_BINARY, 11, 6)
-        contours, _ = cv2.findContours(threshball, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            cropped_frame = frame[start_y + y_offset :end_y + y_offset, start_x + x_offset :end_x + x_offset]
 
-        largest_circle = None
-        largest_radius = 0
+            # Perform image processing (you can keep the same processing logic)
+            hsv = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2HSV)
 
-        for contour in contours:
-            area = cv2.contourArea(contour)
-            if area > 10:
-                x, y, w, h = cv2.boundingRect(contour)
-                radius = max(w, h) // 2
-                if radius > largest_radius:
-                    largest_radius = radius
-                    largest_circle = (x + w // 2, y + h // 2, radius)
+            # Example: Detect green contours
+            lower_green = np.array([35, 50, 50])  # Lower bound of green
+            upper_green = np.array([85, 255, 255])  # Upper bound of green
+            gmask = cv2.inRange(hsv, lower_green, upper_green)
+            gcontours, ghierarchy = cv2.findContours(gmask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-        if largest_circle:
-            x, y, r = largest_circle
-            cv2.circle(filled_frame, (x, y), r, (255, 0, 0), 2)
-            cv2.circle(filled_frame, (x, y), 2, (0, 255, 0), 3)
-            ball_center = (x, y)
+            gfilled_frame = cropped_frame.copy()
+            for contour in gcontours:
+                area = cv2.contourArea(contour)
+                if area > self.min_contour_area:
+                    x, y, w, h = cv2.boundingRect(contour)
+                    cx, cy = x + w // 2, y + h // 2
+                    self.line_coordinates.append((cx, cy))
+                    cv2.drawContours(gfilled_frame, [contour], -1, (0, 0, 255), thickness=cv2.FILLED)
 
-        return filled_frame, ball_center
+            # Example: Detect circles (ball detection using HoughCircles)
+            circles = cv2.HoughCircles(gmask, cv2.HOUGH_GRADIENT, 1, 20, param1=130, param2=20, minRadius=2, maxRadius=20)
+            if circles is not None:
+                circles = circles[0, :]
+                largest_circle = max(circles, key=lambda c: c[2], default=None)  # Find the largest circle
+                if largest_circle:
+                    # Ball's center coordinates
+                    ball_center = (largest_circle[0], largest_circle[1])
+                    print(f"Largest Circle Center: ({ball_center[0]:.2f}, {ball_center[1]:.2f})")
 
+                    # Perform motor control based on ball position
+                    self.control_motors(ball_center)
+
+            # Display the processed frame
+            cv2.imshow('Processed Frame', gfilled_frame)
+    
     def control_motors(self, ball_center):
-        if ball_center:
-            gx, gy = 510, 390  # Green center (hardcoded)
-            bx, by = ball_center
-            offset_x, offset_y = gx - bx, gy - by
+        # Motor control logic based on the ball position (use same logic as your code)
+        gx = 510
+        gy = 390
+        bx, by = ball_center
+        offset_x = gx - bx
+        offset_y = gy - by
 
-            changex, changey = 300, 300
-            defaultx, defaulty = 1870, 1925
-            change = 50
+        changex = 300
+        changey = 300
+        defaultx = 1870
+        defaulty = 1925
+        change = 50
 
-            if offset_x > 20:
-                changey = 100
-            elif offset_x < -20:
-                changey = -100
-            if offset_y > 20:
-                changex = 100
-            elif offset_y < -20:
-                changex = -100
+        if offset_x > 20:
+            changex = 100
+        if offset_x < -20:
+            changex = -100
+        if offset_y > 20:
+            changey = 100
+        if offset_y < -20:
+            changey = -100
 
-            if changex == 300 and changey != 300:
-                self.motors.setServoPulse(0, defaulty - change if changey < 0 else defaulty + change)
-            elif changey == 300 and changex != 300:
-                self.motors.setServoPulse(1, defaultx - change if changex < 0 else defaultx + change)
-            elif changex != 300 and changey != 300:
-                self.motors.setServoPulse(1, defaultx - change if changex < 0 else defaultx + change)
-                self.motors.setServoPulse(0, defaulty - change if changey < 0 else defaulty + change)
-            else:
-                self.motors.setServoPulse(1, defaultx)
-                self.motors.setServoPulse(0, defaulty)
+        if changex == 300:
+            if changey != 300:
+                if changey < 0:
+                    self.motors.setServoPulse(0, defaulty - change)
+                if changey > 0:
+                    self.motors.setServoPulse(0, defaulty + change)
+        elif changey == 300:
+            if changex != 300:
+                if changex > 0:
+                    self.motors.setServoPulse(1, defaultx + change)
+                if changex < 0:
+                    self.motors.setServoPulse(1, defaultx - change)
+        elif changex != 300 and changey != 300:
+            if changey < 0:
+                if changex > 0:
+                    self.motors.setServoPulse(1, defaultx + change)
+                    self.motors.setServoPulse(0, defaulty - change)
+                if changex < 0:
+                    self.motors.setServoPulse(1, defaultx - change)
+                    self.motors.setServoPulse(0, defaulty - change)
+            if changey > 0:
+                if changex > 0:
+                    self.motors.setServoPulse(1, defaultx + change)
+                    self.motors.setServoPulse(0, defaulty + change)
+                if changex < 0:
+                    self.motors.setServoPulse(1, defaultx - change)
+                    self.motors.setServoPulse(0, defaulty + change)
+        else:
+            self.motors.setServoPulse(1, defaultx)
+            self.motors.setServoPulse(0, defaulty)
 
-    def display_frame(self, frame):
-        # Display the frame, and handle closing the window
-        cv2.imshow('Processed Frame', frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            self.running = False
+    def main_loop(self):
+        while True:
+            # Main loop to capture and display the frame
+            ret, frame = self.cap.read()
+            if not ret:
+                print("Error: Failed to capture frame.")
+                break
 
-    def cleanup(self):
+            # Display the frame
+            cv2.imshow('Webcam Feed', frame)
+
+            # Break the loop on 'q' key press
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
         self.cap.release()
         cv2.destroyAllWindows()
-        with open('line_coordinates.txt', 'w') as f:
-            for coord in self.line_coordinates:
-                f.write(f"{coord}\n")
-        print("Processing stopped and coordinates saved.")
 
-if __name__ == "__main__":
-    processor = IMAGEPROCESSING()
-    processor.cleanup()
+run = IMAGEPROCESSING()
