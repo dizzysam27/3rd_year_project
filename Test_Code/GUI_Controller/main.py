@@ -5,21 +5,22 @@ import sys
 import cv2
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread
 import numpy as np
+import imageProcessing
 
 class VideoThread(QThread):
     change_pixmap_signal = pyqtSignal(np.ndarray)
 
     def run(self):
         # capture from web cam
-        #cv_img = imageProcessor.croppedFrame
-        #self.change_pixmap_signal.emit(cv_img)
-
-        cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(0)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         while True:
-            ret, cv_img = cap.read()
-            if ret:
-                self.change_pixmap_signal.emit(cv_img)
-
+            ret, cv_img = self.cap.read()
+            if not ret:
+                break
+            self.cv_img = processor.run(cv_img)
+            self.change_pixmap_signal.emit(cv_img)
 
 class App(QWidget):
     def __init__(self):
@@ -30,6 +31,7 @@ class App(QWidget):
         # create the label that holds the image
         self.image_label = QLabel(self)
         self.image_label.resize(self.disply_width, self.display_height)
+        self.image_label.resize(320, 240)
         # create a text label
         self.textLabel = QLabel('Webcam')
 
@@ -64,7 +66,8 @@ class App(QWidget):
         p = convert_to_Qt_format.scaled(self.disply_width, self.display_height, Qt.KeepAspectRatio)
         return QPixmap.fromImage(p)
 
-# app = QApplication(sys.argv)
-# a = App()
-# a.show()
-# sys.exit(app.exec_())
+processor = imageProcessing.ImageProcessor()
+app = QApplication(sys.argv)
+a = App()
+a.show()
+sys.exit(app.exec_())
