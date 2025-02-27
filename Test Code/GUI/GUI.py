@@ -1,49 +1,66 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel
-from PyQt5.QtCore import Qt
+from PyQt5 import QtWidgets
+from PyQt5.QtGui import QImage,QPixmap
+from PyQt5.QtCore import QThread,pyqtSignal as Signal,pyqtSlot as Slot
+import cv2
 import sys
-from controller import MODE_MANAGER  # Import the controller
 
-class GUI:
-    def __init__(self):
-        self.app = QApplication(sys.argv)
-        self.window = QWidget()
-        self.layout = QVBoxLayout()
-        self.window.setWindowTitle("Mode Switcher Demo")
-
-        # Add a dynamic label for displaying updates
-        self.dynamic_label = QLabel("Welcome to the Mode Switcher!", self.window)
-        self.dynamic_label.setAlignment(Qt.AlignCenter)
-        self.layout.addWidget(self.dynamic_label)
-
-        # Initialize the MODE_MANAGER and pass 'self' (GUI instance) to it
-        self.mode_manager = MODE_MANAGER(self)  # Pass GUI instance to the controller
-
-    def update_label(self, new_text):
-        """Update the dynamic label text."""
-        self.dynamic_label.setText(new_text)
+class MyThread(QThread):
+    frame_signal = Signal(QImage)
 
     def run(self):
-        # Buttons to trigger mode changes
-        button1 = QPushButton("Switch to Mode 1")
-        button1.clicked.connect(lambda: self.mode_manager.switch_mode(1))
-        self.layout.addWidget(button1)
+        self.cap = cv2.VideoCapture(0)
+        while self.cap.isOpened():
+            _,frame = self.cap.read()
+            frame = self.cvimage_to_label(frame)
+            self.frame_signal.emit(frame)
+    
+    def cvimage_to_label(self,image):
+        image = cv2.resize(image, (640,480))
+        image = cv2.line(image, (0,0), (100,100), (0,255,0), 10)
+        image = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
+        image = QImage(image,
+                       image.shape[1],
+                       image.shape[0],
+                       QImage.Format_RGB888)
+        return image
 
-        button2 = QPushButton("Switch to Mode 2")
-        button2.clicked.connect(lambda: self.mode_manager.switch_mode(2))
-        self.layout.addWidget(button2)
+class MainApp(QtWidgets.QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.init_ui()
+        self.show()
+    
+    def init_ui(self):
+        self.setFixedSize(640,640)
+        self.setWindowTitle("Camera FeedBack")
 
-        button3 = QPushButton("Switch to Mode 3")
-        button3.clicked.connect(lambda: self.mode_manager.switch_mode(3))
-        self.layout.addWidget(button3)
+        widget = QtWidgets.QWidget(self)
 
-        # Set the layout for the main window
-        self.window.setLayout(self.layout)
+        layout = QtWidgets.QVBoxLayout()
+        widget.setLayout(layout)
 
-        # Show the window
-        self.window.show()
-        sys.exit(self.app.exec_())
+        self.label = QtWidgets.QLabel()
+        layout.addWidget(self.label)
 
-# Run the GUI application
+        self.open_btn = QtWidgets.QPushButton("Open The Camera", clicked=self.open_camera)
+        layout.addWidget(self.open_btn)
+
+        self.camera_thread = MyThread()
+        self.camera_thread.frame_signal.connect(self.setImage)
+
+        self.setCentralWidget(widget)
+    
+    def open_camera(self):        
+        self.camera_thread.start()
+        print(self.camera_thread.isRunning())
+
+    @Slot(QImage)
+    def setImage(self,image):
+        self.label.setPixmap(QPixmap.fromImage(image))
+
+
+
 if __name__ == "__main__":
-    gui = GUI()
-    gui.run()
+    app = QtWidgets.QApplication([])
+    main_window = MainApp()
+    sys.exit(app.exec())
