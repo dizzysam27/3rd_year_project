@@ -13,7 +13,7 @@ class ImageProcessor:
         self.kernel = np.ones((15, 15), np.uint8)
         self.defaultx = 1870
         self.defaulty = 1925
-        self.change = 10
+        self.change = 20
         self.gx, self.gy = 510, 390
 
         if not self.cap.isOpened():
@@ -37,36 +37,11 @@ class ImageProcessor:
 
     def process_frame(self, frame):
         cropped_frame = self.crop_frame(frame)
-        hsv = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2HSV)
-
-        # Process green regions
-        gmask = self.detect_color(hsv, np.array([35, 50, 50]), np.array([85, 255, 255]))
-        gfilled_frame, gcontours = self.find_and_fill_contours(gmask, cropped_frame)
-
-        # Process black regions
-        gray = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2GRAY)
-        thresh = cv2.threshold(gray, 80, 255, cv2.THRESH_BINARY_INV)[1]
-        bfilled_frame, bcontours = self.find_and_fill_contours(thresh, cropped_frame)
 
         # Process ball detection
         ball_center = self.detect_ball(cropped_frame)
 
-        return gfilled_frame, bfilled_frame, ball_center
-
-    def detect_color(self, hsv, lower_color, upper_color):
-        return cv2.inRange(hsv, lower_color, upper_color)
-
-    def find_and_fill_contours(self, mask, frame):
-        contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        filled_frame = frame.copy()
-        for contour in contours:
-            area = cv2.contourArea(contour)
-            if area > self.min_contour_area:
-                x, y, w, h = cv2.boundingRect(contour)
-                cx, cy = x + w // 2, y + h // 2
-                self.line_coordinates.append((cx, cy))
-                cv2.drawContours(filled_frame, [contour], -1, (0, 255, 0), thickness=cv2.FILLED)
-        return filled_frame, contours
+        return ball_center
 
     def detect_ball(self, cropped_frame):
         # Detect circles using HoughCircles
@@ -114,35 +89,45 @@ class ImageProcessor:
         if motor_index == 0:
             if change < 0:
                 self.motors.setServoPulse(0, self.defaulty - self.change)
+                     
             elif change > 0:
                 self.motors.setServoPulse(0, self.defaulty + self.change)
+         
         elif motor_index == 1:
             if change < 0:
                 self.motors.setServoPulse(1, self.defaultx - self.change)
+   
             elif change > 0:
                 self.motors.setServoPulse(1, self.defaultx + self.change)
+             
 
     def reset_motors(self):
         self.motors.setServoPulse(1, self.defaultx)
         self.motors.setServoPulse(0, self.defaulty)
 
     def run(self):
+        frame_rate = 30
+        prev = 0
         while True:
-            ret, frame = self.cap.read()
-            if not ret:
-                print("Error: Failed to capture frame.")
-                break
+  
+            while True:
+                time_elapsed = time.time() - prev
+                ret, image = self.cap.read()
 
-            gfilled_frame, bfilled_frame, ball_center = self.process_frame(frame)
-            self.move_motors(ball_center)
+                if not ret:
+                    print("Error: Failed to capture frame.")
+                    break
 
-            # Combine the green and black filled contours after morphology
-            combined_image = cv2.addWeighted(gfilled_frame, 0.5, bfilled_frame, 0.5, 0)
-            cv2.imshow('Combined Filled Contours', combined_image)
+                if time_elapsed > 1./frame_rate:
+                    prev = time.time()
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+                    # Do something with your image here.
+                    ball_center = self.process_frame(image)
+                    self.move_motors(ball_center)
 
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
+            
         self.save_coordinates()
         self.cleanup()
 

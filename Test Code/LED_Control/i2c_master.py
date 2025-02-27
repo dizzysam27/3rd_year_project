@@ -9,7 +9,7 @@ bus = smbus.SMBus(1)  # Use 1 for Raspberry Pi 3/4/5
 def communicate_with_arduino():
     try:
         # Send a test byte (100) to the Arduino
-        bus.write_byte(SLAVE_ADDRESS, 100)
+        bus.write_byte(SLAVE_ADDRESS, 7)
         print("Sent to Arduino: 100")
         
         time.sleep(0.1)  # Delay to allow Arduino to process the data

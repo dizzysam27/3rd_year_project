@@ -97,6 +97,7 @@ class PCA9685:
     self.setServoPulse(0, self.y_centre + self.y_offset + (motor2 / 100.0) * self.y_maxtilt)
     self.previous_motor1_angle = motor1
     self.previous_motor2_angle = motor2
+    print(motor1,motor2)
   
   def calibrate(self):
 
@@ -104,8 +105,8 @@ class PCA9685:
 
     self.x_offset = -50
     self.y_offset = 20
-    self.x_maxtilt = 30
-    self.y_maxtilt = 30
+    self.x_maxtilt = 50
+    self.y_maxtilt = 50
     self.x_centre = 1915
     self.y_centre = 1915
 
@@ -169,7 +170,7 @@ class PCA9685:
         pwm.setServoPulse(1, 1915 + (i / 100.0) * 85) 
         time.sleep(0.02)   
 
-# hello = PCA9685()
-# while True:
-#    hello.run()
+hello = PCA9685()
+#while True:
+#   hello.run()
 # hello.calibrate() 
