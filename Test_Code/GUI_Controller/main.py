@@ -1,73 +1,108 @@
-from PyQt5 import QtGui
-from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout
-from PyQt5.QtGui import QPixmap
+# General Imports
 import sys
 import cv2
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread
 import numpy as np
-import imageProcessing
 
-class VideoThread(QThread):
-    change_pixmap_signal = pyqtSignal(np.ndarray)
+# PyQt5 Imports
+from PyQt5 import QtGui
+from PyQt5 import QtCore
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread, QTimer, QDateTime
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QPushButton, QHBoxLayout
 
-    def run(self):
-        # capture from web cam
-        self.cap = cv2.VideoCapture(0)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        while True:
-            ret, cv_img = self.cap.read()
-            if not ret:
-                break
-            self.cv_img = processor.run(cv_img)
-            self.change_pixmap_signal.emit(cv_img)
+# Maze Game Module Imports
+from imageProcessing import ImageProcessor
 
+# Main GUI App Class
 class App(QWidget):
     def __init__(self):
+        # Inherit QWidget features
         super().__init__()
-        self.setWindowTitle("Qt live label demo")
-        self.disply_width = 640
-        self.display_height = 480
-        # create the label that holds the image
-        self.image_label = QLabel(self)
-        self.image_label.resize(self.disply_width, self.display_height)
-        self.image_label.resize(320, 240)
-        # create a text label
-        self.textLabel = QLabel('Webcam')
 
-        # create a vertical box layout and add the two labels
-        vbox = QVBoxLayout()
-        vbox.addWidget(self.image_label)
-        vbox.addWidget(self.textLabel)
-        # set the vbox layout as the widgets layout
-        self.setLayout(vbox)
+        # Image Size Definition
+        self.imageWidth = 1374
+        self.imageHeight = 1219
 
-        # create the video capture thread
-        self.thread = VideoThread()
-        # connect its signal to the update_image slot
-        self.thread.change_pixmap_signal.connect(self.update_image)
-        # start the thread
-        self.thread.start()
+        # Overall GUI appearance
+        self.setWindowTitle("Group 15 - Maze Game")
+        self.showFullScreen()
 
+        # Layout Boxes
+        gridLayout = QGridLayout()
+        self.setLayout(gridLayout)
+        hBoxLayout = QHBoxLayout()
+        gridLayout.addLayout(hBoxLayout,
+                             2, 1,
+                             1, 1)
 
+        # Title GUI
+        self.TitleLabel = QLabel('Welcome to the Maze Game! Sponsored by Kendama Playtime')
+        self.TitleLabel.setStyleSheet('border: 5px solid black; padding: 15px; font-size: 50px; background-color: rgb(200,200,200);')
+        self.TitleLabel.setAlignment(QtCore.Qt.AlignCenter)
+        gridLayout.addWidget(self.TitleLabel,
+                             0, 0,
+                             1, 2)
 
+        # Video GUI
+        self.VideoLabel = QLabel('Video Output')
+        self.VideoLabel.resize(self.imageWidth, self.imageHeight)
+        self.VideoLabel.setStyleSheet('border: 5px solid black')
+        self.VideoLabel.setAlignment(QtCore.Qt.AlignCenter)
+        gridLayout.addWidget(self.VideoLabel,
+                             1, 0,
+                             10, 1)
+        # Video Capture Thread
+        processor.cameraVideo.connect(self.updateImage) # Run updateImage when cameraVideo is modified in ImageProcessor()
+        processor.start()
+        
+        # Timer GUI
+        self.TimerLabel = QLabel('Time: 00:00.000')
+        self.TimerLabel.setStyleSheet('border: 5px solid black; padding: 15px; font-size: 50px; background-color: rgb(200,200,200);')
+        self.TimerLabel.setAlignment(QtCore.Qt.AlignCenter)
+        gridLayout.addWidget(self.TimerLabel,
+                             1, 1,
+                             1, 1)
+        # Start/Stop Timer Test Buttons
+        self.TimerStart = QPushButton('Start')
+        self.TimerStop = QPushButton('Stop')
+        hBoxLayout.addWidget(self.TimerStart)
+        hBoxLayout.addWidget(self.TimerStop)
+        # Timer Stuff?
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.updateTimer)
+        self.TimerStart.clicked.connect(self.startTimer)
+        self.TimerStop.clicked.connect(self.stopTimer)
+
+    # PyQt Slot for updating image contents
     @pyqtSlot(np.ndarray)
-    def update_image(self, cv_img):
-        """Updates the image_label with a new opencv image"""
-        qt_img = self.convert_cv_qt(cv_img)
-        self.image_label.setPixmap(qt_img)
-    
-    def convert_cv_qt(self, cv_img):
-        """Convert from an opencv image to QPixmap"""
-        rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
-        h, w, ch = rgb_image.shape
-        bytes_per_line = ch * w
-        convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format_RGB888)
-        p = convert_to_Qt_format.scaled(self.disply_width, self.display_height, Qt.KeepAspectRatio)
-        return QPixmap.fromImage(p)
+    # Image conversion from opencv image to QT pixel map
+    def updateImage(self, image):
+        rgbImage = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        h, w, ch = rgbImage.shape
+        lineSize = ch * w
+        qtImage = QtGui.QImage(rgbImage.data, w, h, lineSize, QtGui.QImage.Format_RGB888)
+        scaledImage = qtImage.scaled(self.imageWidth, self.imageHeight, Qt.KeepAspectRatio)
+        pixmapImage = QPixmap.fromImage(scaledImage)
+        self.VideoLabel.setPixmap(pixmapImage)
 
-processor = imageProcessing.ImageProcessor()
-app = QApplication(sys.argv)
-a = App()
-a.show()
-sys.exit(app.exec_())
+    def updateTimer(self):
+        currentTime = QDateTime.currentDateTime()
+        formatted_time = currentTime.toString('yyyy-MM-dd hh:mm:ss dddd')
+        self.TimerLabel.setText(formatted_time)
+
+    def startTimer(self):
+        self.timer.start(1000)
+        self.TimerStart.setEnabled(False)
+        self.TimerStop.setEnabled(True)
+
+    def stopTimer(self):
+        self.timer.stop()
+        self.TimerStart.setEnabled(True)
+        self.TimerStop.setEnabled(False)
+
+processor = ImageProcessor()
+while True:
+    app = QApplication(sys.argv)
+    mainWindow = App()
+    mainWindow.show()
+    sys.exit(app.exec_())
