@@ -27,6 +27,9 @@ class ImageProcessor:
         self.pid_x.output_limits = (-self.PID_output_limits, self.PID_output_limits)
         self.pid_y.output_limits = (-self.PID_output_limits, self.PID_output_limits)
 
+        self.gx, self.gy = 0, 0  # Initialize goal coordinates
+        self.ball_pos = None  # Initialize ball position
+
         if not self.cap.isOpened():
             print("Error: Could not open webcam.")
             exit()
