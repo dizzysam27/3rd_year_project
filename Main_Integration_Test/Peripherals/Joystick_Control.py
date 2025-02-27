@@ -1,36 +1,59 @@
 import serial
-from Motor_Control import PCA9685
-
-"""
-This class reads the data provided by the joystick over UART. The UART connection is initalised and the motors are calibrated to their starting point.
-The data is read and the output is sent to the motors.
-"""
-
+import threading
+from Peripherals.Motor_Control import PCA9685
 class JOYSTICK_READ_DATA:
-
     def __init__(self):
-
-        self.motors = PCA9685()
-        self.motors.calibrate() # Motors are calibrated to their starting position
-        # The UART communication protocol is now initalised
         self.uart0 = serial.Serial("/dev/ttyAMA0",
-                            baudrate=9600,
-                            parity=serial.PARITY_NONE,
-                            stopbits=serial.STOPBITS_ONE,
-                            bytesize=serial.EIGHTBITS,
-                            timeout=0)
+                                   baudrate=9600,
+                                   parity=serial.PARITY_NONE,
+                                   stopbits=serial.STOPBITS_ONE,
+                                   bytesize=serial.EIGHTBITS,
+                                   timeout=0)
+        self.running = False
+        self.thread = None  # Initialize without a thread
+        self.motors = PCA9685()
 
     def read_data(self):
+        while self.running:
+            if self.uart0.in_waiting > 0:
+                dataRx = self.uart0.readline().decode('utf-8').strip()
+                try:
+                    yValue, xValue = map(int, dataRx.split(','))
+                    print(f"x: {xValue}, y: {yValue}")
+                    self.motors.setServoPulse(1,1870+yValue/2) # Sends joystick data to the motors
+                    self.motors.setServoPulse(0,1925+xValue/2)
+                except ValueError:
+                    print("Invalid data received")
 
-        if self.uart0.in_waiting > 0:
-            dataRx = str(self.uart0.readline().decode('utf-8').strip()) # Reads the incoming data over the UART connection
-            yValue,xValue = map(int, dataRx.split(',')) # Splits the data into x and y values
-            xValue=(xValue)
-            yValue=(yValue)
-            self.motors.motorAngle(yValue,xValue) # Sends joystick data to the motors
-            print(xValue,yValue)  
+    def start_reading(self):
+        if self.thread is None or not self.thread.is_alive():
+            self.running = True
+            self.thread = threading.Thread(target=self.read_data, daemon=True)
+            self.thread.start()
+            print("Joystick reading started.")
+            
+        else:
+            print("Thread is already running!")
 
-joy = JOYSTICK_READ_DATA()
+    def stop_reading(self):
+        if self.thread and self.thread.is_alive():
+            self.running = False
+            self.thread.join()
+            print("Joystick reading stopped.")
 
-while True:
-    joy.read_data()
+# # Usage example
+# joystick = JOYSTICK_READ_DATA()
+
+# # Start the thread
+# joystick.start_reading()
+
+# # Simulating other tasks
+# import time
+# time.sleep(5)
+
+# # Stop the thread
+# joystick.stop_reading()
+
+# # Restart the thread
+# time.sleep(2)
+# joystick.start_reading()

@@ -1,7 +1,6 @@
 from gpiozero import Button, LED # type: ignore
 from signal import pause
 
-import config
 # import time
 
 # PHYSICAL BUTTONS class
@@ -16,9 +15,9 @@ class PHYSICAL_BUTTONS:
         self.gui = gui
 
         # Define LED button numbers according to config file
-        self.BUTTON_PIN_1 = Button(config.GREEN_BUTTON_PIN, pull_up=True,bounce_time=0.1)
-        self.BUTTON_PIN_2 = Button(config.RED_BUTTON_PIN, pull_up=True,bounce_time=0.1)
-        self.BUTTON_PIN_3 = Button(config.BLUE_BUTTON_PIN, pull_up=True,bounce_time=0.1)
+        self.BUTTON_PIN_1 = Button(26, pull_up=True,bounce_time=0.1)
+        self.BUTTON_PIN_2 = Button(19, pull_up=True,bounce_time=0.1)
+        self.BUTTON_PIN_3 = Button(13, pull_up=True,bounce_time=0.1)
 
         # Create instance of MODE_MANAGER
         from Controller import MODE_MANAGER
@@ -42,9 +41,9 @@ class LED_CONTROL:
         global GREEN_LED, RED_LED, BLUE_LED
 
         # Define LED pin numbers according to config file
-        GREEN_LED = LED(config.GREEN_LED_PIN)
-        RED_LED = LED(config.RED_LED_PIN)
-        BLUE_LED = LED(config.BLUE_LED_PIN)
+        GREEN_LED = LED(20)
+        RED_LED = LED(21)
+        BLUE_LED = LED(16)
 
     # Set LED funnction
     # Required input: Green LED State (1 or 0)
@@ -70,4 +69,4 @@ class LED_CONTROL:
             
 # leds = LED_CONTROL()
 # while True:
-#     leds.set_led(1,1,1)
+#     leds.set_led(0,1,1)

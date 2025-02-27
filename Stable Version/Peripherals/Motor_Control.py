@@ -169,7 +169,7 @@ class PCA9685:
         pwm.setServoPulse(1, 1915 + (i / 100.0) * 85) 
         time.sleep(0.00002)   
 
-hello = PCA9685()
-while True:
-  hello.run()
+# hello = PCA9685()
+# while True:
+#   hello.run()
   # hello.calibrate()
