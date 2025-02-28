@@ -15,4 +15,4 @@ class ARDUINO:
             print(f"Error: {e}")
         
 arduino = ARDUINO()
-arduino.write_to_arduino(3) 
+arduino.write_to_arduino(4) 
