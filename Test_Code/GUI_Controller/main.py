@@ -85,20 +85,8 @@ class App(QWidget):
         pixmapImage = QPixmap.fromImage(scaledImage)
         self.VideoLabel.setPixmap(pixmapImage)
 
-    def updateTimer(self):
-        currentTime = QDateTime.currentDateTime()
-        formatted_time = currentTime.toString('yyyy-MM-dd hh:mm:ss dddd')
-        self.TimerLabel.setText(formatted_time)
-
-    def startTimer(self):
-        self.timer.start(1000)
-        self.TimerStart.setEnabled(False)
-        self.TimerStop.setEnabled(True)
-
-    def stopTimer(self):
-        self.timer.stop()
-        self.TimerStart.setEnabled(True)
-        self.TimerStop.setEnabled(False)
+    def updateTimer(self, time):
+        pass
 
 processor = ImageProcessor()
 while True:
