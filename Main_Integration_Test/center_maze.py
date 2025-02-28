@@ -7,7 +7,7 @@ from Peripherals.Motor_Control import PCA9685
 motors = PCA9685()
 
 def get_flat_values():
-    defaultx = 1870
+    defaultx = 1850
     defaulty = 1920
 
 

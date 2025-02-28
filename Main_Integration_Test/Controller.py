@@ -208,6 +208,7 @@ class STOP_MODE(MODE):
         self.led.set_led(0,1,1)
         self.timer.stop_timer()
         self.joystick.stop_reading()
+        self.led_strip.write_to_arduino(2)
 
     # Function determines which mode the program goes into after a button press interupt    
     def handle_input(self, button):
