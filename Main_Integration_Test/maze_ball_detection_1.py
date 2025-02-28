@@ -10,10 +10,11 @@ from center_maze import get_flat_values
 import PyQt5
 from PyQt5.QtCore import pyqtSignal, QThread
 
-class ImageProcessor(QThread):
-    cameraVideo = pyqtSignal(np.ndarray)
+class ImageProcessor:#(QThread):
+    #cameraVideo = pyqtSignal(np.ndarray)
 
     def __init__(self):
+        #super().__init__()
         self.motors = PCA9685()
         self.cap = cv2.VideoCapture(0)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -155,6 +156,9 @@ class ImageProcessor(QThread):
             if ball_center:
                 cv2.circle(cropped_frame, ball_center, 10, (0, 255, 0), -1)
             cv2.circle(cropped_frame, (self.gx, self.gy), 5, (0, 0, 255), -1)
+            
+            #self.cameraVideo.emit(cropped_frame)
+            
             cv2.imshow("Tracking", cropped_frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
