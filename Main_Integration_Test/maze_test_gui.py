@@ -68,10 +68,10 @@ class App(QWidget):
         hBoxLayout.addWidget(self.TimerStart)
         hBoxLayout.addWidget(self.TimerStop)
         # Timer Stuff?
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.updateTimer)
-        self.TimerStart.clicked.connect(self.startTimer)
-        self.TimerStop.clicked.connect(self.stopTimer)
+        #self.timer = QTimer()
+        #self.timer.timeout.connect(self.updateTimer)
+        #self.TimerStart.clicked.connect(self.startTimer)
+        #self.TimerStop.clicked.connect(self.stopTimer)
 
     # PyQt Slot for updating image contents
     @pyqtSlot(np.ndarray)
@@ -85,8 +85,8 @@ class App(QWidget):
         pixmapImage = QPixmap.fromImage(scaledImage)
         self.VideoLabel.setPixmap(pixmapImage)
 
-    def updateTimer(self, time):
-        pass
+    #def updateTimer(self, time):
+    #    pass
 
 processor = ImageProcessor()
 while True:
