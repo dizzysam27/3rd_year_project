@@ -70,8 +70,8 @@ class App(QWidget):
         # Timer Stuff?
         self.timer = QTimer()
         self.timer.timeout.connect(self.updateTimer)
-        self.TimerStart.clicked.connect(self.startTimer)
-        self.TimerStop.clicked.connect(self.stopTimer)
+        #self.TimerStart.clicked.connect(self.startTimer)
+        #self.TimerStop.clicked.connect(self.stopTimer)
 
     # PyQt Slot for updating image contents
     @pyqtSlot(np.ndarray)

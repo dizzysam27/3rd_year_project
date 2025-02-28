@@ -88,6 +88,7 @@ class ImageProcessor(QThread):
 
             if ball_center:
                 cv2.circle(cropped_frame, ball_center, 10, (0, 255, 0), -1)
+            cv2.circle(cropped_frame, (100,100), 5, (0,0,255), -1)
 
             self.cameraVideo.emit(cropped_frame)
 
