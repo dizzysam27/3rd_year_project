@@ -51,9 +51,6 @@ class App(QWidget):
         gridLayout.addWidget(self.VideoLabel,
                              1, 0,
                              10, 1)
-        # Video Capture Thread
-        processor.cameraVideo.connect(self.updateImage) # Run updateImage when cameraVideo is modified in ImageProcessor()
-        processor.start()
         
         # Timer GUI
         self.TimerLabel = QLabel('Time: 00:00.000')
@@ -67,6 +64,11 @@ class App(QWidget):
         self.TimerStop = QPushButton('Stop')
         hBoxLayout.addWidget(self.TimerStart)
         hBoxLayout.addWidget(self.TimerStop)
+
+        # Video Capture Thread
+        processor.cameraVideo.connect(self.updateImage) # Run updateImage when cameraVideo is modified in ImageProcessor()
+        processor.start()
+
         # Timer Stuff?
         #self.timer = QTimer()
         #self.timer.timeout.connect(self.updateTimer)
