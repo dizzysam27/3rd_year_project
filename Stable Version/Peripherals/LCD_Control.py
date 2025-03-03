@@ -5,6 +5,15 @@ b = SMBus(1)
 
 # Device I2C Address
 LCD_ADDRESS = (0x7c >> 1)
+RGB_ADDRESS = (0xc0 >> 1)
+
+# Define Colour
+REG_RED = 0x04
+REG_GREEN = 0x04
+REG_BLUE = 0x04
+REG_MODE1 = 0x00
+REG_MODE2 = 0x01
+REG_OUTPUT = 0x08
 
 # LCD Command Set
 LCD_CLEARDISPLAY = 0x01
@@ -103,10 +112,17 @@ class LCD1602:
         self._showmode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT
         self.command(LCD_ENTRYMODESET | self._showmode)
 
+<<<<<<< HEAD:Main_Integration_Test/LCD_Display.py
+    def setRGB(self,r,g,b):
+        self.setReg(REG_RED,r)
+        self.setReg(REG_GREEN,g)
+        self.setReg(REG_BLUE,b)
+=======
 """
 This class controls what is written on the LCD. The useful function is update_messages which crazily updates the messages
 """
 
+>>>>>>> b901b996023dd785830e3708af05ce930a4c0f89:Stable Version/Peripherals/LCD_Control.py
 class LCD1602_WRITE(LCD1602): 
     def __init__(self):
         super().__init__(16, 2)
@@ -170,4 +186,5 @@ class LCD1602_WRITE(LCD1602):
 
     #         # Wait for 1 second
     #         time.sleep(1)
+
 

@@ -5,7 +5,16 @@ b = SMBus(1)
 
 #Device I2C Arress
 LCD_ADDRESS   =  (0x7c>>1)
+RGB_ADDRESS   =  (0xc0>>1)
 
+#color define
+
+REG_RED    =     0x04
+REG_GREEN  =     0x03
+REG_BLUE   =     0x02
+REG_MODE1  =     0x00
+REG_MODE2  =     0x01
+REG_OUTPUT =     0x08
 LCD_CLEARDISPLAY = 0x01
 LCD_RETURNHOME = 0x02
 LCD_ENTRYMODESET = 0x04
@@ -42,19 +51,30 @@ LCD_2LINE = 0x08
 LCD_1LINE = 0x00
 LCD_5x8DOTS = 0x00
 
+
 class LCD1602:
   def __init__(self, col, row):
     self._row = row
     self._col = col
     self._showfunction = LCD_4BITMODE | LCD_1LINE | LCD_5x8DOTS;
     self.begin(self._row,self._col)
-     
+
+        
   def command(self,cmd):
     b.write_byte_data(LCD_ADDRESS,0x80,cmd)
 
   def write(self,data):
     b.write_byte_data(LCD_ADDRESS,0x40,data)
     
+  def setReg(self,reg,data):
+    b.write_byte_data(RGB_ADDRESS,reg,data)
+
+
+  def setRGB(self,r,g,b):
+    self.setReg(REG_RED,r)
+    self.setReg(REG_GREEN,g)
+    self.setReg(REG_BLUE,b)
+
   def setCursor(self,col,row):
     if(row == 0):
       col|=0x80
@@ -65,7 +85,6 @@ class LCD1602:
   def clear(self):
     self.command(LCD_CLEARDISPLAY)
     time.sleep(0.002)
-
   def printout(self,arg):
     if(isinstance(arg,int)):
       arg=str(arg)
@@ -88,6 +107,7 @@ class LCD1602:
      
     time.sleep(0.05)
 
+    
     # Send function set command sequence
     self.command(LCD_FUNCTIONSET | self._showfunction)
     #delayMicroseconds(4500);  # wait more than 4.1ms
@@ -110,5 +130,45 @@ class LCD1602:
     # set the entry mode
     self.command(LCD_ENTRYMODESET | self._showmode);
 
-  
+    # backlight init
+    self.setReg(REG_MODE1, 0)
+    # set LEDs controllable by both PWM and GRPPWM registers
+    self.setReg(REG_OUTPUT, 0xFF)
+    # set MODE2 values
+    # 0010 0000 -> 0x20  (DMBLNK to 1, ie blinky mode)
+    self.setReg(REG_MODE2, 0x20)
+    
 
+    
+#     self.setColorWhite()
+
+#   def setColorWhite(self):
+#     self.setRGB(255, 255, 255)
+
+class LCD1602_WRITE(LCD1602): 
+    def __init__(self):
+        super().__init__(16, 2)
+        self.message_line1 = "Welcome"
+        self.message_line2 = "Group 12"
+        self.flag = 0
+        self.previous_hour = ""
+        self.previous_minute = ""
+        self.previous_second = ""
+
+    def update_messages(self, new_message_line1, new_message_line2):
+        self.flag = 1
+        self.message_line1 = new_message_line1
+        self.message_line2 = new_message_line2
+        print(self.message_line1 + "    \r", end="", flush=True)  # Clear the rest of the line with spaces
+
+
+        self.clear()
+        self.display_lines(self.message_line1, self.message_line2)
+
+    def display_lines(self, message_line1, message_line2):
+        self.flag = 0
+        self.setCursor(0, 0)
+        self.printout(message_line1)
+        self.setCursor(0, 1)
+        self.printout(message_line2)
+    

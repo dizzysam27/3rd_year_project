@@ -69,8 +69,8 @@ class App(QWidget):
         hBoxLayout.addWidget(self.TimerStop)
         # Timer Stuff?
         self.timer = QTimer()
-        self.timer.timeout.connect(self.updateTimer)
-        #self.TimerStart.clicked.connect(self.startTimer)
+        #self.timer.timeout.connect(self.updateTimer)
+        self.TimerStart.clicked.connect(self.updateTimer)
         #self.TimerStop.clicked.connect(self.stopTimer)
 
     # PyQt Slot for updating image contents
@@ -86,7 +86,7 @@ class App(QWidget):
         self.VideoLabel.setPixmap(pixmapImage)
 
     def updateTimer(self, time):
-        pass
+        self.TimerLabel.setText(":) kendama")
 
 processor = ImageProcessor()
 while True:
