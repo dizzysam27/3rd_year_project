@@ -1,4 +1,4 @@
-# from Peripherals.LCD_Control import LCD1602_WRITE
+from Peripherals.LCD_Control import LCD1602_WRITE
 from Timer import TIMER
 # from Peripherals.Gyro_Control import LSM6DS3
 from Peripherals.Motor_Control import PCA9685
@@ -20,8 +20,7 @@ class MODE_MANAGER:
     def __init__(self,gui,led):
 
         # Creates instances of the classes
-        # lcd = LCD1602_WRITE()
-        lcd = 1
+        lcd = LCD1602_WRITE()
         timer = TIMER(gui)
         # gyro = LSM6DS3()
         gyro = 1
@@ -81,7 +80,7 @@ class MENU_MODE(MODE):
 
     def display(self):
         # Update LCD
-        # self.lcd.update_messages("The Maze Game", "AI    Man    Cal")
+        self.lcd.update_messages("The Maze Game", "AI    Man    Cal")
         self.gui.update_label("Welcome to the Maze Game")
         # Update GUI
         self.gui.update_button_text(1,"AI Solve")
@@ -107,7 +106,7 @@ class MENU_MODE(MODE):
 class AI_MODE(MODE):
 
     def display(self):
-        # self.lcd.update_messages("AI Solver", "Start       Menu")
+        self.lcd.update_messages("AI Solver", "Start       Menu")
         self.gui.update_label("AI Solver")
         self.gui.update_button_text(1,"Start")
         self.gui.update_button_text(2,"")
@@ -130,7 +129,8 @@ class AI_MODE(MODE):
 class MANUAL_MODE(MODE):
 
     def display(self):
-        # self.lcd.update_messages("Manual Solver", "Start       Menu")
+        self.lcd.update_messages("Manual Solver", "Start       Menu")
+        self.lcd.setRGB(255,255,255)
         self.gui.update_label("Manual Solver")
         self.gui.update_button_text(1,"Start")
         self.gui.update_button_text(2,"")
@@ -153,7 +153,7 @@ class MANUAL_MODE(MODE):
 class CALIBRATE_MODE(MODE):
     
     def display(self):
-        # self.lcd.update_messages("Calibration Mode", "Start       Menu")
+        self.lcd.update_messages("Calibration Mode", "Start       Menu")
         self.gui.update_label("Calibration Mode")
         self.gui.update_button_text(1,"Start")
         self.gui.update_button_text(2,"")

@@ -103,5 +103,5 @@ def main():
         update_messages("Hello","Everyone")
       
 if __name__ == "__main__":
-    lcd.setRGB(0,0,0)
+    lcd.setRGB(255,255,255)
     main()
