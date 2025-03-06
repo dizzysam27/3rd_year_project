@@ -1,113 +1,62 @@
-import sys
+import smbus
 import time
 
-import RPi.GPIO as GPIO
-import smbus
+# LSM6DS3 I2C address
+LSM6DS3_ADDR = 0x6A  # Default address
 
-# Sensor I2C Address
-LSM6DS3_ADDR = 0x6a
+# Register addresses
+CTRL1_XL = 0x10  # Accelerometer control
+CTRL2_G = 0x11   # Gyroscope control
+OUTX_L_XL = 0x28  # Accelerometer data register
+OUTX_L_G = 0x22   # Gyroscope data register
 
-# Register-specific values to read
-ACCEL_LOW_X = 0x28
-ACCEL_HIGH_X = 0x29
-ACCEL_LOW_Y = 0x2A
-ACCEL_HIGH_Y = 0x2B
-ACCEL_LOW_Z = 0x2C
-ACCEL_HIGH_Z = 0x2D
+# Initialize I2C bus
+bus = smbus.SMBus(1)  # Use I2C bus 1
 
-GYRO_LOW_X = 0x22
-GYRO_HIGH_X = 0x23
-GYRO_LOW_Y = 0x24
-GYRO_HIGH_Y = 0x25
-GYRO_LOW_Z = 0x26
-GYRO_HIGH_Z = 0x27
+def initialize_sensor():
+    # Set accelerometer to 2g range, 104 Hz output data rate
+    bus.write_byte_data(LSM6DS3_ADDR, CTRL1_XL, 0x40)
+    # Set gyroscope to 250 dps range, 104 Hz output data rate
+    bus.write_byte_data(LSM6DS3_ADDR, CTRL2_G, 0x40)
 
-# Register-specific values to write
-CTRL1_XL = 0x10  # Accelerometer configuration
-CTRL2_G = 0x11  # Gyroscope configuration
+def read_raw_data(addr):
+    # Read two bytes of data from the specified address
+    low = bus.read_byte_data(LSM6DS3_ADDR, addr)
+    high = bus.read_byte_data(LSM6DS3_ADDR, addr + 1)
+    
+    # Combine high and low values
+    value = (high << 8) | low
+    
+    # Convert to signed value
+    if value > 32767:
+        value -= 65536
+    return value
 
-# use the bus that matches your raspi version
-rev = GPIO.RPI_REVISION
-if rev == 2 or rev == 3:
-    bus = smbus.SMBus(1)
-else:
-    bus = smbus.SMBus(0)
+def get_sensor_data():
+    accel_x = read_raw_data(OUTX_L_XL) / 16384.0  # Convert to g
+    accel_y = read_raw_data(OUTX_L_XL + 2) / 16384.0
+    accel_z = read_raw_data(OUTX_L_XL + 4) / 16384.0
+    
+    gyro_x = read_raw_data(OUTX_L_G) / 131.0  # Convert to degrees/sec
+    gyro_y = read_raw_data(OUTX_L_G + 2) / 131.0
+    gyro_z = read_raw_data(OUTX_L_G + 4) / 131.0
+    
+    return {
+        "accel_x": accel_x, "accel_y": accel_y, "accel_z": accel_z,
+        "gyro_x": gyro_x, "gyro_y": gyro_y, "gyro_z": gyro_z
+    }
 
+if __name__ == "__main__":
+    initialize_sensor()
+    print("LSM6DS3 Initialized")
+    
+    try:
+        while True:
+            data = get_sensor_data()
+            #print(f"Accel (g): X={data['accel_x']:.2f}, Y={data['accel_y']:.2f}, Z={data['accel_z']:.2f}")
+            print(f"Gyro (°/s): X={data['gyro_x']:.2f}, Y={data['gyro_y']:.2f}, Z={data['gyro_z']:.2f}")
+            #print("-----------------------")
+            time.sleep(0.01)
+    except KeyboardInterrupt:
+        print("Measurement stopped")
 
-def decimal_to_binary(int_value):
-    return "{0:08b}".format(int_value)
-
-
-def two_complement_two_bytes(val_str):
-    val = int(val_str, 2)
-    b = val.to_bytes(2, byteorder=sys.byteorder, signed=False)
-    return int.from_bytes(b, byteorder=sys.byteorder, signed=True)
-
-
-class LSM6DS3:
-    # Write ´data´ to a ´reg´ on the I2C device
-    @staticmethod
-    def __write_reg(data, reg):
-        bus.write_byte_data(LSM6DS3_ADDR, reg, data)
-        time.sleep(0.01)
-
-    # Read from the ´reg´ register
-    @staticmethod
-    def __read_reg(reg):
-        value = bus.read_byte_data(LSM6DS3_ADDR, reg)
-        time.sleep(0.01)
-        return value
-
-    def __init__(self):
-        data_to_write = 0
-        data_to_write |= 0b00010000  # ODR_XL Low power mode
-        data_to_write |= 0b00000000  # FX_XL Full-scale selection in +-2g
-        data_to_write |= 0b00000011  # BW_XL Anti-aliasing filter in 50 Hz
-        self.__write_reg(data_to_write, CTRL1_XL)
-
-        data_to_write = 0
-        data_to_write |= 0b00010000  # ODR_G Low power mode
-        data_to_write |= 0b00001000  # FS_G Full-scale selection in 1000 dps
-        data_to_write |= 0b00000000  # FS_125 Full-scale selection not in 125 dps
-        self.__write_reg(data_to_write, CTRL2_G)
-
-        time.sleep(0.05)
-
-    def read_acceleration_x(self):
-        return self.get_value_int_from_register_address(ACCEL_HIGH_X, ACCEL_LOW_X)
-
-    def read_acceleration_y(self):
-        return self.get_value_int_from_register_address(ACCEL_HIGH_Y, ACCEL_LOW_Y)
-
-    def read_acceleration_z(self):
-        return self.get_value_int_from_register_address(ACCEL_HIGH_Z, ACCEL_LOW_Z)
-
-    def read_gyroscope_x(self):
-        return self.get_value_int_from_register_address(GYRO_HIGH_X, GYRO_LOW_X)
-
-    def read_gyroscope_y(self):
-        return self.get_value_int_from_register_address(GYRO_HIGH_Y, GYRO_LOW_Y)
-
-    def read_gyroscope_z(self):
-        return self.get_value_int_from_register_address(GYRO_HIGH_Z, GYRO_LOW_Z)
-
-    def get_value_int_from_register_address(self, high_register, low_register):
-        high_value = self.__read_reg(high_register)
-        low_value = self.__read_reg(low_register)
-        output_high_bin = decimal_to_binary(high_value)
-        output_low_bin = decimal_to_binary(low_value)
-        output_int = two_complement_two_bytes(f"{output_high_bin}{output_low_bin}")
-        return output_int
-
-# lsm6ds3 = LSM6DS3()
-
-# while True:
-#     try:
-#         acc_x = lsm6ds3.read_gyroscope_x()
-#         acc_y = lsm6ds3.read_gyroscope_y()
-#         acc_z = lsm6ds3.read_gyroscope_z()
-#         print(acc_x,acc_y,acc_z)
-        
-#     except IOError as e:
-#         print("Unable to read from accelerometer, check the setup and try again. Error is: ")
-#         print(e)
