@@ -9,7 +9,7 @@ class PHYSICAL_BUTTONS:
 
         self.BUTTON_PIN_1 = 4
         self.BUTTON_PIN_2 = 17
-        self.BUTTON_PIN_3 = 20
+        self.BUTTON_PIN_3 = 27
 
         GPIO.setmode(GPIO.BCM)
 

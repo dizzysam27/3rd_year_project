@@ -7,6 +7,7 @@ lcd = LCD1602(16,2)
 # Define the Welcome Message
 message_line1 = "Welcome"
 message_line2 = "Group 12"
+
 flag=0
 
 # Function to update the messages
@@ -102,4 +103,5 @@ def main():
         update_messages("Hello","Everyone")
       
 if __name__ == "__main__":
+    lcd.setRGB(0,0,0)
     main()
