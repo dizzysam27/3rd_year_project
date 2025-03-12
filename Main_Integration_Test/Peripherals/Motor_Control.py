@@ -103,11 +103,11 @@ class PCA9685:
 
     self.setPWMFreq(50)
 
-    self.x_offset = -50
-    self.y_offset = 20
-    self.x_maxtilt = 50
-    self.y_maxtilt = 50
-    self.x_centre = 1915
+    self.x_offset = 0
+    self.y_offset = 0
+    self.x_maxtilt = 70
+    self.y_maxtilt = 70
+    self.x_centre = 1900
     self.y_centre = 1915
 
     self.motorAngle(0,0)

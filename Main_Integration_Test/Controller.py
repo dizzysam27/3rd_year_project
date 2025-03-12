@@ -90,6 +90,7 @@ class MENU_MODE(MODE):
         self.led.set_led(1,1,1)
         # Update LED strip
         self.led_strip.write_to_arduino(4)
+        self.lcd.setRGB(255,255,255)
         
     # current_mode specific handle_input function
     def handle_input(self, button):

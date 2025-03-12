@@ -20,8 +20,8 @@ class JOYSTICK_READ_DATA:
                 try:
                     yValue, xValue = map(int, dataRx.split(','))
                     print(f"x: {xValue}, y: {yValue}")
-                    self.motors.setServoPulse(1,1870+yValue/2) # Sends joystick data to the motors
-                    self.motors.setServoPulse(0,1925+xValue/2)
+                    self.motors.setServoPulse(1,1850+yValue/2) # Sends joystick data to the motors
+                    self.motors.setServoPulse(0,1915+xValue/2)
                 except ValueError:
                     print("Invalid data received")
 
