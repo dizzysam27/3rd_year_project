@@ -8,7 +8,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout
 import sys
 
-class ImageProcessor(QThread):
+class IMAGEPROCESSOR(QThread):
     cameraVideo = pyqtSignal(np.ndarray)
 
     def __init__(self):

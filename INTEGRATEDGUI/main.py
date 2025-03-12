@@ -2,7 +2,7 @@
 import sys
 import cv2
 import numpy as np
-from gpiozero import Button
+from gpiozero import Button # type: ignore
 
 # PyQt5 Imports
 from PyQt5 import QtGui, QtCore, QtWidgets
@@ -11,10 +11,10 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QPushButton, QHBoxLayout
 
 # Maze Game Module Imports
-from imageProcessing import ImageProcessor
-from peripherals.lcdControl import LCD1602_WRITE
-from peripherals.ledStripControl import ARDUINO
-from peripherals.ledButtonControl import LEDBUTTON
+from imageProcessing import IMAGEPROCESSOR
+from lcdControl import LCD1602_WRITE
+from peripherals import LEDSTRIPCONTROL
+from peripherals import LEDBUTTONCONTROL
 
 # Main GUI App Class
 class App(QWidget):
@@ -74,15 +74,19 @@ class App(QWidget):
         self.secCount = 0
         self.minCount = 0
         # Timer Buttons
-        self.button1 = QPushButton('Start')
-        self.button2 = QPushButton('Stop')
-        self.button3 = QPushButton('Reset')
+        self.button1 = QPushButton('AI')
+        self.button2 = QPushButton('Manual')
+        self.button3 = QPushButton('Cal.')
         hBoxLayout.addWidget(self.button1)
         hBoxLayout.addWidget(self.button2)
         hBoxLayout.addWidget(self.button3)
         self.button1.clicked.connect(lambda : kendama.currentMode.handleInput(1))
         self.button2.clicked.connect(lambda : kendama.currentMode.handleInput(2))
         self.button3.clicked.connect(lambda : kendama.currentMode.handleInput(3))
+
+        # Flags for Manual/AI Mode
+        self.joystickFlag = 0
+        self.aiFlag = 0
 
     # PyQt Slot for updating image contents
     @pyqtSlot(np.ndarray)
@@ -99,7 +103,7 @@ class App(QWidget):
     def showTime(self):
         if self.timerFlag == True:
             self.TimerLabel.setText('Time: {:02d}:{:02d}.{:01d}'.format(self.minCount, self.secCount, self.tenCount))
-            lcd.update_messages("", self.TimerLabel.text())
+            lcd.update_messages(self.TimerLabel.text(), "")
             self.tenCount += 1
         if self.tenCount == 10:
             self.tenCount = 0
@@ -115,8 +119,9 @@ class App(QWidget):
         self.tenCount = 0
         self.secCount = 0
         self.minCount = 0
+        self.TimerLabel.setText('Time: {:02d}:{:02d}.{:01d}'.format(self.minCount, self.secCount, self.tenCount))
 
-class PhysicalButtons():
+class PHYSICALBUTTONS():
     def __init__(self):
         self.pButton1 = Button(26, pull_up=True, bounce_time=0.1)
         self.pButton2 = Button(19, pull_up=True, bounce_time=0.1)
@@ -129,62 +134,165 @@ class PhysicalButtons():
 class KENDAMA():
     def __init__(self):
         self.modes = {
-            "Menu" : MenuMode(),
-            "Manual" : ManualMode()
+            'Menu' : MenuMode(),
+            'Manual' : ManualMode(),
+            'ManualRunning' : ManualRunningMode(),
+            'ManualStopped' : ManualStoppedMode(),
+            'AI' : AIMode(),
+            'Calibration' : CalibrationMode()
         }
 
-        self.currentMode = self.modes["Menu"]
+        self.currentMode = self.modes['Menu']
 
     def switchMode(self, nextMode):
         if nextMode in self.modes:
             self.currentMode = self.modes[nextMode]
             self.currentMode.update()
 
+    def update(self, b1=None, b2=None, b3=None, title=None, lcdTxt=None, lcdCol=None, ledStr=None, ledBtn=None):
+        if b1 == None: pass
+        else: mainWindow.button1.setText(b1)
+        if b2 == None: pass
+        else: mainWindow.button2.setText(b2)
+        if b3 == None: pass
+        else: mainWindow.button3.setText(b3)
+        if title == None: pass
+        else: mainWindow.TitleLabel.setText(title)
+        if lcdTxt == None: pass
+        else: lcd.update_messages(lcdTxt[0], lcdTxt[1])
+        if lcdCol == None: pass
+        else: lcd.setRGB(lcdCol[0], lcdCol[1], lcdCol[2])
+        if ledStr == None: pass
+        else: ledStrip.writeArduino(ledStr)
+        if ledBtn == None: pass
+        else: ledButtons.setLED(ledBtn[0], ledBtn[1], ledBtn[2])
+
 class MenuMode():
 
+    def update(self):
+        kendama.update(b1='AI',
+                       b2='Manual',
+                       b3='Cal.',
+                       title='Welcome to the Maze Game!',
+                       lcdTxt=['Main Menu',
+                               'AI   Manual  Cal'],
+                       lcdCol=[255,255,255],
+                       ledStr=4,
+                       ledBtn=[1,1,1]
+        )
+    
     def handleInput(self, button):
         if button == 1:
-            mainWindow.startTimer()
+            kendama.switchMode('AI')
         elif button == 2:
-            mainWindow.stopTimer()
+            kendama.switchMode('Manual')
         elif button == 3:
-            kendama.switchMode("Manual")
-
-    def update(self):
-        mainWindow.button3.setText("Manual")
-        mainWindow.TitleLabel.setText("MENU MODE")
-        lcd.update_messages("MENU MODE", "")
-        ledStrip.write_to_arduino(4)
-        lcd.setRGB(255, 255, 255)
-        ledButtons.setLED(0,1,1)
+            kendama.switchMode('Calibration')
+        else:
+            pass
 
 class ManualMode():
 
+    def update(self):
+        kendama.update(b1='Start',
+                       b2='',
+                       b3='Menu',
+                       title='Manual Solving Mode',
+                       lcdTxt=['{}'.format(mainWindow.TimerLabel.text()),
+                               'Start       Menu'],
+                       lcdCol=[255,0,0],
+                       ledStr=2,
+                       ledBtn=[1,0,1]
+        )
+
     def handleInput(self, button):
         if button == 1:
             mainWindow.startTimer()
-        elif button == 2:
-            mainWindow.stopTimer()
+            kendama.switchMode('ManualRunning')
         elif button == 3:
-            kendama.switchMode("Menu")
-    
+            kendama.switchMode('Menu')
+        else:
+            pass
+
+class ManualRunningMode():
+
     def update(self):
-        mainWindow.button3.setText("Menu")
-        mainWindow.TitleLabel.setText("MANUAL MODE")
-        lcd.update_messages("MANUAL MODE", "")
-        ledStrip.write_to_arduino(2)
-        lcd.setRGB(255, 0, 0)
-        ledButtons.setLED(1,0,0)
+        kendama.update(b1='',
+                       b2='Stop',
+                       b3='',
+                       title='Manual Solving Mode',
+                       lcdTxt=['',
+                               '      Stop      '],
+                       ledStr=5,
+                       ledBtn=[0,1,0]
+        )
+        mainWindow.joystickFlag = 1
+
+    def handleInput(self, button):
+        if button == 2:
+            mainWindow.stopTimer()
+            kendama.switchMode('ManualStopped')
+            mainWindow.joystickFlag = 0
+        else:
+            pass
+
+class ManualStoppedMode():
+
+    def update(self):
+        kendama.update(b1='Start',
+                       b2='',
+                       b3='Reset',
+                       lcdTxt=['',
+                               'Start      Reset'],
+                       ledStr=2
+        )
+
+    def handleInput(self, button):
+        if button == 1:
+            mainWindow.startTimer()
+            kendama.switchMode('ManualRunning')
+        elif button == 3:
+            mainWindow.resetTimer()
+            kendama.switchMode('Manual')
+        else:
+            pass
+
+class AIMode():
+
+    def update(self):
+        kendama.update(b1='Start',
+                       b2='',
+                       b3='Menu',
+                       title='AI Solving Mode',
+                       lcdTxt=['{}'.format(mainWindow.TimerLabel.text()),
+                               'Start       Menu'],
+                       lcdCol=[0,255,0],
+                       ledStr=1,
+                       ledBtn=[1,0,1]
+        )
+
+    def handleInput(self, button):
+        if button == 1:
+            kendama.switchMode('AIRunning')
+        elif button == 3:
+            kendama.switchMode('Menu')
+        else:
+            pass
+
+class CalibrationMode():
+
+    def handleInput(self, button):
+        pass
 
 # Mode Manager Call
 kendama = KENDAMA()
 
 # Other Peripheral Calls
-processor = ImageProcessor()
-pButtons = PhysicalButtons()
-ledButtons = LEDBUTTON()
+processor = IMAGEPROCESSOR()
+pButtons = PHYSICALBUTTONS()
+ledButtons = LEDBUTTONCONTROL()
 lcd = LCD1602_WRITE()
-ledStrip = ARDUINO()
+ledStrip = LEDSTRIPCONTROL()
 
 # Main PyQt Application Loop
 while True:
