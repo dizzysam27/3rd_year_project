@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QPushBut
 
 # Maze Game Module Imports
 from imageProcessing import ImageProcessor
+from LCD_Control import LCD1602_WRITE
 
 # Main GUI App Class
 class App(QWidget):
@@ -55,7 +56,7 @@ class App(QWidget):
         processor.start()
         
         # Timer GUI
-        self.TimerLabel = QLabel('Time: 00:00.000')
+        self.TimerLabel = QLabel('Time: 00:00.0')
         self.TimerLabel.setStyleSheet('border: 5px solid black; padding: 15px; font-size: 50px; background-color: rgb(200,200,200);')
         self.TimerLabel.setAlignment(QtCore.Qt.AlignCenter)
         gridLayout.addWidget(self.TimerLabel,
@@ -66,11 +67,19 @@ class App(QWidget):
         timer.timeout.connect(self.showTime)
         timer.start(100)
         self.timerFlag = False
-        self.timerCount = 0
+        self.tenCount = 0
+        self.secCount = 0
+        self.minCount = 0
         # Timer Buttons
-        self.button1 = ButtonCreation("1")
-        self.button2 = ButtonCreation("2")
-        self.button3 = ButtonCreation("3")
+        self.button1 = QPushButton('Start')
+        self.button2 = QPushButton('Stop')
+        self.button3 = QPushButton('Reset')
+        hBoxLayout.addWidget(self.button1)
+        hBoxLayout.addWidget(self.button2)
+        hBoxLayout.addWidget(self.button3)
+        self.button1.clicked.connect(lambda : kendama.currentMode.handleInput(1))
+        self.button2.clicked.connect(lambda : kendama.currentMode.handleInput(2))
+        self.button3.clicked.connect(lambda : kendama.currentMode.handleInput(3))
 
     # PyQt Slot for updating image contents
     @pyqtSlot(np.ndarray)
@@ -86,46 +95,75 @@ class App(QWidget):
 
     def showTime(self):
         if self.timerFlag == True:
-            self.timerCount += 1
-        self.TimerLabel.setText(str(self.timerCount))
+            self.tenCount += 1
+        if self.tenCount == 10:
+            self.tenCount = 0
+            self.secCount += 1
+        if self.secCount == 60:
+            self.secCount = 0
+            self.minCount += 1
+        self.TimerLabel.setText('Time: {:02d}:{:02d}.{:01d}'.format(self.minCount, self.secCount, self.tenCount))
     def startTimer(self):
         self.timerFlag = True
     def stopTimer(self):
         self.timerFlag = False
     def resetTimer(self):
-        self.timerCount = 0
+        self.tenCount = 0
+        self.secCount = 0
+        self.minCount = 0
 
-class ButtonCreation(QtWidgets.QPushButton):
-    def __init__(self, name):
-        super().__init__()
-        self.setText(name)
-        self.clicked.connect(modeManager.inputHandling(name))
 
 class KENDAMA():
     def __init__(self):
         self.modes = {
-            "Menu": MenuMode(),
-            "AI Solve": AiMode(),
-            "Manual": ManualMode(),
-            "Calibration": CalibrateMode()
+            "Menu" : MenuMode(),
+            "Manual" : ManualMode()
         }
 
-        self.switchMode("Menu")
+        self.currentMode = self.modes["Menu"]
+        self.currentMode.update()
+
+    def switchMode(self, nextMode):
+        if nextMode in self.modes:
+            self.currentMode = self.modes[nextMode]
+            self.currentMode.update()
+
+class MenuMode():
+
+    def handleInput(self, button):
+        if button == 1:
+            mainWindow.startTimer()
+        elif button == 2:
+            mainWindow.stopTimer()
+        elif button == 3:
+            kendama.switchMode("Manual")
+
+    def update(self):
+        mainWindow.button3.setText("Manual")
+        mainWindow.TitleLabel.setText("MANUAL MODE")
+        lcd.update_messages("MANUAL MODE", "MANUAL MODE")
+
+class ManualMode():
+
+    def handleInput(self, button):
+        if button == 1:
+            mainWindow.startTimer()
+        elif button == 2:
+            mainWindow.stopTimer()
+        elif button == 3:
+            kendama.switchMode("Menu")
     
-    def switchMode(self, modeName):
-        self.currentMode = self.modes[modeName]
-        self.currentMode.display()
-
-    def inputHandling(self, button):
-        nextModeName = self.currentMode.handleInput(button)
-        if nextModeName in self.modes:
-            self.switchMode(nextModeName)
-
-# Mode Manager Call
-modeManager = KENDAMA()
+    def update(self):
+        mainWindow.button3.setText("Menu")
+        mainWindow.TitleLabel.setText("MENU MODE")
+        lcd.update_messages("MENU MODE", "MENU MODE")
 
 # Image Processor Call
 processor = ImageProcessor()
+# LCD Call
+lcd = LCD1602_WRITE()
+# Mode Manager Call
+kendama = KENDAMA()
 
 # Main PyQt Application Loop
 while True:
