@@ -4,8 +4,7 @@ import cv2
 import numpy as np
 
 # PyQt5 Imports
-from PyQt5 import QtGui
-from PyQt5 import QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread, QTimer, QDateTime
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QPushButton, QHBoxLayout
@@ -62,16 +61,16 @@ class App(QWidget):
         gridLayout.addWidget(self.TimerLabel,
                              1, 1,
                              1, 1)
-        # Start/Stop Timer Test Buttons
-        self.TimerStart = QPushButton('Start')
-        self.TimerStop = QPushButton('Stop')
-        hBoxLayout.addWidget(self.TimerStart)
-        hBoxLayout.addWidget(self.TimerStop)
-        # Timer Stuff?
-        self.timer = QTimer()
-        #self.timer.timeout.connect(self.updateTimer)
-        self.TimerStart.clicked.connect(self.updateTimer)
-        #self.TimerStop.clicked.connect(self.stopTimer)
+        # Timer Item
+        timer = QTimer(self)
+        timer.timeout.connect(self.showTime)
+        timer.start(100)
+        self.timerFlag = False
+        self.timerCount = 0
+        # Timer Buttons
+        self.button1 = ButtonCreation("1")
+        self.button2 = ButtonCreation("2")
+        self.button3 = ButtonCreation("3")
 
     # PyQt Slot for updating image contents
     @pyqtSlot(np.ndarray)
@@ -85,10 +84,50 @@ class App(QWidget):
         pixmapImage = QPixmap.fromImage(scaledImage)
         self.VideoLabel.setPixmap(pixmapImage)
 
-    def updateTimer(self, time):
-        self.TimerLabel.setText(":) kendama")
+    def showTime(self):
+        if self.timerFlag == True:
+            self.timerCount += 1
+        self.TimerLabel.setText(str(self.timerCount))
+    def startTimer(self):
+        self.timerFlag = True
+    def stopTimer(self):
+        self.timerFlag = False
+    def resetTimer(self):
+        self.timerCount = 0
 
+class ButtonCreation(QtWidgets.QPushButton):
+    def __init__(self, name):
+        super().__init__()
+        self.setText(name)
+        self.clicked.connect(modeManager.inputHandling(name))
+
+class KENDAMA():
+    def __init__(self):
+        self.modes = {
+            "Menu": MenuMode(),
+            "AI Solve": AiMode(),
+            "Manual": ManualMode(),
+            "Calibration": CalibrateMode()
+        }
+
+        self.switchMode("Menu")
+    
+    def switchMode(self, modeName):
+        self.currentMode = self.modes[modeName]
+        self.currentMode.display()
+
+    def inputHandling(self, button):
+        nextModeName = self.currentMode.handleInput(button)
+        if nextModeName in self.modes:
+            self.switchMode(nextModeName)
+
+# Mode Manager Call
+modeManager = KENDAMA()
+
+# Image Processor Call
 processor = ImageProcessor()
+
+# Main PyQt Application Loop
 while True:
     app = QApplication(sys.argv)
     mainWindow = App()
