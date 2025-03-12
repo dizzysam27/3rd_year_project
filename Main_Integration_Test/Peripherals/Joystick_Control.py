@@ -41,19 +41,19 @@ class JOYSTICK_READ_DATA:
             self.thread.join()
             print("Joystick reading stopped.")
 
-# # Usage example
-# joystick = JOYSTICK_READ_DATA()
+# Usage example
+joystick = JOYSTICK_READ_DATA()
 
-# # Start the thread
-# joystick.start_reading()
+# Start the thread
+joystick.start_reading()
 
-# # Simulating other tasks
-# import time
-# time.sleep(5)
+# Simulating other tasks
+import time
+time.sleep(5)
 
-# # Stop the thread
-# joystick.stop_reading()
+# Stop the thread
+joystick.stop_reading()
 
-# # Restart the thread
-# time.sleep(2)
-# joystick.start_reading()
+# Restart the thread
+time.sleep(2)
+joystick.start_reading()

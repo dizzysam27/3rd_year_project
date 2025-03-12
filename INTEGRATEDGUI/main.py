@@ -2,6 +2,7 @@
 import sys
 import cv2
 import numpy as np
+from gpiozero import Button
 
 # PyQt5 Imports
 from PyQt5 import QtGui, QtCore, QtWidgets
@@ -11,7 +12,9 @@ from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QPushBut
 
 # Maze Game Module Imports
 from imageProcessing import ImageProcessor
-from LCD_Control import LCD1602_WRITE
+from peripherals.lcdControl import LCD1602_WRITE
+from peripherals.ledStripControl import ARDUINO
+from peripherals.ledButtonControl import LEDBUTTON
 
 # Main GUI App Class
 class App(QWidget):
@@ -95,6 +98,8 @@ class App(QWidget):
 
     def showTime(self):
         if self.timerFlag == True:
+            self.TimerLabel.setText('Time: {:02d}:{:02d}.{:01d}'.format(self.minCount, self.secCount, self.tenCount))
+            lcd.update_messages("", self.TimerLabel.text())
             self.tenCount += 1
         if self.tenCount == 10:
             self.tenCount = 0
@@ -102,7 +107,6 @@ class App(QWidget):
         if self.secCount == 60:
             self.secCount = 0
             self.minCount += 1
-        self.TimerLabel.setText('Time: {:02d}:{:02d}.{:01d}'.format(self.minCount, self.secCount, self.tenCount))
     def startTimer(self):
         self.timerFlag = True
     def stopTimer(self):
@@ -112,6 +116,15 @@ class App(QWidget):
         self.secCount = 0
         self.minCount = 0
 
+class PhysicalButtons():
+    def __init__(self):
+        self.pButton1 = Button(26, pull_up=True, bounce_time=0.1)
+        self.pButton2 = Button(19, pull_up=True, bounce_time=0.1)
+        self.pButton3 = Button(13, pull_up=True, bounce_time=0.1)
+
+        self.pButton1.when_pressed = lambda : kendama.currentMode.handleInput(1)
+        self.pButton2.when_pressed = lambda : kendama.currentMode.handleInput(2)
+        self.pButton3.when_pressed = lambda : kendama.currentMode.handleInput(3)
 
 class KENDAMA():
     def __init__(self):
@@ -121,7 +134,6 @@ class KENDAMA():
         }
 
         self.currentMode = self.modes["Menu"]
-        self.currentMode.update()
 
     def switchMode(self, nextMode):
         if nextMode in self.modes:
@@ -140,8 +152,11 @@ class MenuMode():
 
     def update(self):
         mainWindow.button3.setText("Manual")
-        mainWindow.TitleLabel.setText("MANUAL MODE")
-        lcd.update_messages("MANUAL MODE", "MANUAL MODE")
+        mainWindow.TitleLabel.setText("MENU MODE")
+        lcd.update_messages("MENU MODE", "")
+        ledStrip.write_to_arduino(4)
+        lcd.setRGB(255, 255, 255)
+        ledButtons.setLED(0,1,1)
 
 class ManualMode():
 
@@ -155,15 +170,21 @@ class ManualMode():
     
     def update(self):
         mainWindow.button3.setText("Menu")
-        mainWindow.TitleLabel.setText("MENU MODE")
-        lcd.update_messages("MENU MODE", "MENU MODE")
+        mainWindow.TitleLabel.setText("MANUAL MODE")
+        lcd.update_messages("MANUAL MODE", "")
+        ledStrip.write_to_arduino(2)
+        lcd.setRGB(255, 0, 0)
+        ledButtons.setLED(1,0,0)
 
-# Image Processor Call
-processor = ImageProcessor()
-# LCD Call
-lcd = LCD1602_WRITE()
 # Mode Manager Call
 kendama = KENDAMA()
+
+# Other Peripheral Calls
+processor = ImageProcessor()
+pButtons = PhysicalButtons()
+ledButtons = LEDBUTTON()
+lcd = LCD1602_WRITE()
+ledStrip = ARDUINO()
 
 # Main PyQt Application Loop
 while True:

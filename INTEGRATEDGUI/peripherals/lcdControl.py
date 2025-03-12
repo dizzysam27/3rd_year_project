@@ -150,8 +150,14 @@ class LCD1602_WRITE(LCD1602):
 
     def update_messages(self, new_message_line1, new_message_line2):
         self.flag = 1
-        self.message_line1 = new_message_line1
-        self.message_line2 = new_message_line2
+        if new_message_line1 == "":
+          pass
+        else:
+          self.message_line1 = new_message_line1
+        if new_message_line2 == "":
+          pass
+        else:
+          self.message_line2 = new_message_line2
         print(self.message_line1 + "    \r", end="", flush=True)  # Clear the rest of the line with spaces
 
 
@@ -164,4 +170,3 @@ class LCD1602_WRITE(LCD1602):
         self.printout(message_line1)
         self.setCursor(0, 1)
         self.printout(message_line2)
-    
