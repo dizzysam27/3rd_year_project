@@ -244,7 +244,8 @@ class ManualStoppedMode():
                        b3='Reset',
                        lcdTxt=['',
                                'Start      Reset'],
-                       ledStr=2
+                       ledStr=2,
+                       ledBtn=[1,0,1]
         )
 
     def handleInput(self, button):
@@ -299,4 +300,5 @@ while True:
     app = QApplication(sys.argv)
     mainWindow = App()
     mainWindow.show()
+    kendama.currentMode.update()
     sys.exit(app.exec_())

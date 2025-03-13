@@ -18,9 +18,9 @@ class LEDBUTTONCONTROL():
         self.greenLED = LED(20)
         self.blueLED = LED(16)
 
-    def setLED(self, r, g, b):
-        ledArray = [self.redLED, self.greenLED, self.blueLED]
-        stateArray = [r, g, b]
+    def setLED(self, g, r, b):
+        ledArray = [self.greenLED, self.redLED, self.blueLED]
+        stateArray = [g, r, b]
         for i in range(3):
             if stateArray[i] == 0:
                 ledArray[i].off()

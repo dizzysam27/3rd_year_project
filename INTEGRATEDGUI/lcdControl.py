@@ -138,7 +138,7 @@ class LCD1602:
     # 0010 0000 -> 0x20  (DMBLNK to 1, ie blinky mode)
     self.setReg(REG_MODE2, 0x20)
 
-class LCD1602_WRITE():#LCD1602):
+class LCD1602_WRITE(LCD1602):
     def update_messages(self, new_message_line1, new_message_line2):
         pass
     def setRGB(self, r, g, b):
