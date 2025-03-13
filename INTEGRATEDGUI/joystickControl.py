@@ -2,6 +2,10 @@ import serial
 import threading
 from motorControl import PCA9685
 
+global xRate, yRate
+xRate = 0
+yRate = 0
+
 class JOYSTICK_READ_DATA:
     def __init__(self):
         self.uart0 = serial.Serial("/dev/ttyAMA0",
@@ -21,8 +25,10 @@ class JOYSTICK_READ_DATA:
                 try:
                     yValue, xValue = map(int, dataRx.split(','))
                     print(f"x: {xValue}, y: {yValue}")
-                    self.motors.setServoPulse(1,1850+yValue/2) # Sends joystick data to the motors
-                    self.motors.setServoPulse(0,1915+xValue/2)
+                    xRate = xValue
+                    yRate = yValue
+                    #self.motors.setServoPulse(1,1850+yValue/2) # Sends joystick data to the motors
+                    #self.motors.setServoPulse(0,1915+xValue/2)
                 except ValueError:
                     print("Invalid data received")
 

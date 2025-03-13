@@ -5,8 +5,8 @@ import numpy as np
 from gpiozero import Button # type: ignore
 
 # PyQt5 Imports
-from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread, QTimer, QDateTime
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread, QTimer
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QPushButton, QHBoxLayout
 
@@ -15,7 +15,9 @@ from imageProcessing import IMAGEPROCESSOR
 from lcdControl import LCD1602_WRITE
 from peripherals import LEDSTRIPCONTROL
 from peripherals import LEDBUTTONCONTROL
-from joystickControl import JOYSTICK_READ_DATA
+import joystickControl
+#from joystickControl import JOYSTICK_READ_DATA
+from motorControl import PCA9685
 
 # Main GUI App Class
 class App(QWidget):
@@ -84,10 +86,6 @@ class App(QWidget):
         self.button1.clicked.connect(lambda : kendama.currentMode.handleInput(1))
         self.button2.clicked.connect(lambda : kendama.currentMode.handleInput(2))
         self.button3.clicked.connect(lambda : kendama.currentMode.handleInput(3))
-
-        # Flags for Manual/AI Mode
-        self.joystickFlag = 0
-        self.aiFlag = 0
 
     # PyQt Slot for updating image contents
     @pyqtSlot(np.ndarray)
@@ -296,12 +294,15 @@ pButtons = PHYSICALBUTTONS()
 ledButtons = LEDBUTTONCONTROL()
 lcd = LCD1602_WRITE()
 ledStrip = LEDSTRIPCONTROL()
-joystick = JOYSTICK_READ_DATA()
+joystick = joystickControl.JOYSTICK_READ_DATA()
+motors = PCA9685()
 
 # Main PyQt Application Loop
 while True:
     app = QApplication(sys.argv)
     mainWindow = App()
     mainWindow.show()
+    motors.setServoPulse(1,1850+joystickControl.xRate/2) # Sends joystick data to the motors
+    motors.setServoPulse(0,1915+joystickControl.yRate/2)
     kendama.currentMode.update()
     sys.exit(app.exec_())

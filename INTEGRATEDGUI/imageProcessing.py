@@ -8,6 +8,10 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout
 import sys
 
+global xRate, yRate
+xRate = 0
+yRate = 0
+
 class IMAGEPROCESSOR(QThread):
     cameraVideo = pyqtSignal(np.ndarray)
 
@@ -90,7 +94,7 @@ class IMAGEPROCESSOR(QThread):
                 cv2.circle(cropped_frame, ball_center, 10, (0, 255, 0), -1)
             cv2.circle(cropped_frame, (100,100), 5, (0,0,255), -1)
 
-            self.cameraVideo.emit(cropped_frame)
+            self.cameraVideo.emit(frame)
 
         self.cleanup()
 
