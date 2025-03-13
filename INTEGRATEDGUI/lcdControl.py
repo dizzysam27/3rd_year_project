@@ -1,7 +1,7 @@
 import time
-from smbus import SMBus # type: ignore
+import smbus # type: ignore
 
-b = SMBus(1)
+bus = smbus.SMBus(1)
 
 #Device I2C Arress
 LCD_ADDRESS   =  (0x7c>>1)
@@ -61,13 +61,13 @@ class LCD1602:
 
         
   def command(self,cmd):
-    b.write_byte_data(LCD_ADDRESS,0x80,cmd)
+    bus.write_byte_data(LCD_ADDRESS,0x80,cmd)
 
   def write(self,data):
-    b.write_byte_data(LCD_ADDRESS,0x40,data)
+    bus.write_byte_data(LCD_ADDRESS,0x40,data)
     
   def setReg(self,reg,data):
-    b.write_byte_data(RGB_ADDRESS,reg,data)
+    bus.write_byte_data(RGB_ADDRESS,reg,data)
 
 
   def setRGB(self,r,g,b):
@@ -139,10 +139,6 @@ class LCD1602:
     self.setReg(REG_MODE2, 0x20)
 
 class LCD1602_WRITE(LCD1602):
-    def update_messages(self, new_message_line1, new_message_line2):
-        pass
-    def setRGB(self, r, g, b):
-        pass
     def __init__(self):
         super().__init__(16, 2)
         self.message_line1 = "Welcome"

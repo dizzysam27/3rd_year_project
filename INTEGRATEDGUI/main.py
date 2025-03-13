@@ -15,6 +15,7 @@ from imageProcessing import IMAGEPROCESSOR
 from lcdControl import LCD1602_WRITE
 from peripherals import LEDSTRIPCONTROL
 from peripherals import LEDBUTTONCONTROL
+from joystickControl import JOYSTICK_READ_DATA
 
 # Main GUI App Class
 class App(QWidget):
@@ -226,7 +227,7 @@ class ManualRunningMode():
                        ledStr=5,
                        ledBtn=[0,1,0]
         )
-        mainWindow.joystickFlag = 1
+        joystick.start_reading()
 
     def handleInput(self, button):
         if button == 2:
@@ -247,6 +248,7 @@ class ManualStoppedMode():
                        ledStr=2,
                        ledBtn=[1,0,1]
         )
+        joystick.stop_reading()
 
     def handleInput(self, button):
         if button == 1:
@@ -294,6 +296,7 @@ pButtons = PHYSICALBUTTONS()
 ledButtons = LEDBUTTONCONTROL()
 lcd = LCD1602_WRITE()
 ledStrip = LEDSTRIPCONTROL()
+joystick = JOYSTICK_READ_DATA()
 
 # Main PyQt Application Loop
 while True:

@@ -2,7 +2,6 @@ from gpiozero import LED # type: ignore
 import smbus # type: ignore
 
 # i2c Bus Setup
-global bus
 bus = smbus.SMBus(1)
 
 # LED Button Control Class
