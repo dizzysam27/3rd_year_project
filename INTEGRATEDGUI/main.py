@@ -36,12 +36,13 @@ class App(QWidget):
         print(screenHeight)
         
         # Set camera feed dimensions
-        self.imageWidth = int(screenWidth * (2/3))
+        self.imageWidth = int(screenWidth * (2/3) + 20)
         self.imageHeight = int(self.imageWidth * (3/4))
         
         # Create main grid with camera feed size
         mainGrid = QGridLayout()
         self.setLayout(mainGrid)
+        self.setStyleSheet('background-color: #A0A0A0')
         mainGrid.setHorizontalSpacing(5)
         mainGrid.setVerticalSpacing(5)
         mainGrid.setColumnMinimumWidth(0, self.imageWidth)
@@ -74,7 +75,7 @@ class App(QWidget):
         self.timerLabel = QLabel('00:00.0')
         self.timerLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.timerLabel.setMinimumHeight(150)
-        self.timerLabel.setStyleSheet('border: 5px solid black; font: bold 100px')
+        self.timerLabel.setStyleSheet('background-color: #C0C0C0; font: bold 100px')
         contentVBox.addWidget(self.timerLabel)
         # Timer Item
         timer = QTimer(self)
@@ -258,7 +259,9 @@ class KENDAMA():
         if lcdTxt == None: pass
         else: lcd.update_messages(lcdTxt[0], lcdTxt[1])
         if lcdCol == None: pass
-        else: lcd.setRGB(lcdCol[0], lcdCol[1], lcdCol[2])
+        else:
+            lcd.setRGB(lcdCol[0], lcdCol[1], lcdCol[2])
+            mainWindow.setStyleSheet('background-color: #{:02x}{:02x}{:02x};'.format(int(lcdCol[0]//1.59), int(lcdCol[1]//1.59), int(lcdCol[2]//1.59)))
         if ledStr == None: pass
         else: ledStrip.writeArduino(ledStr)
         if ledBtn == None: pass
