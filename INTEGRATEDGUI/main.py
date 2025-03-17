@@ -6,9 +6,9 @@ from gpiozero import Button # type: ignore
 
 # PyQt5 Imports
 from PyQt5 import QtGui, QtCore
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread, QTimer
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread, QTimer, QDateTime
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QPushButton, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QPushButton, QHBoxLayout, QVBoxLayout, QPlainTextEdit
 
 # Maze Game Module Imports
 from imageProcessing import IMAGEPROCESSOR
@@ -19,55 +19,63 @@ import joystickControl
 #from joystickControl import JOYSTICK_READ_DATA
 from motorControl import PCA9685
 
+global screenWidth, screenHeight
+
 # Main GUI App Class
 class App(QWidget):
     def __init__(self):
-        # Inherit QWidget features
+        # Initialise Class and QApplication
         super().__init__()
+        self.setWindowTitle('Group 15 - Maze Project')
 
-        # Image Size Definition
-        self.imageWidth = 1374
-        self.imageHeight = 1219
-
-        # Overall GUI appearance
-        self.setWindowTitle("Group 15 - Maze Game")
+        # Set and find fullscreen size
         self.showFullScreen()
+        self.setFixedSize(QtCore.QSize(screenWidth, screenHeight))
 
-        # Layout Boxes
-        gridLayout = QGridLayout()
-        self.setLayout(gridLayout)
-        hBoxLayout = QHBoxLayout()
-        gridLayout.addLayout(hBoxLayout,
-                             2, 1,
-                             1, 1)
+        print(screenWidth)
+        print(screenHeight)
+        
+        # Set camera feed dimensions
+        self.imageWidth = int(screenWidth * (2/3))
+        self.imageHeight = int(self.imageWidth * (3/4))
+        
+        # Create main grid with camera feed size
+        mainGrid = QGridLayout()
+        self.setLayout(mainGrid)
+        mainGrid.setHorizontalSpacing(5)
+        mainGrid.setVerticalSpacing(5)
+        mainGrid.setColumnMinimumWidth(0, self.imageWidth)
+        mainGrid.setRowMinimumHeight(1, self.imageHeight)
 
-        # Title GUI
-        self.TitleLabel = QLabel('Welcome to the Maze Game! Sponsored by Kendama Playtime')
-        self.TitleLabel.setStyleSheet('border: 5px solid black; padding: 15px; font-size: 50px; background-color: rgb(200,200,200);')
-        self.TitleLabel.setAlignment(QtCore.Qt.AlignCenter)
-        gridLayout.addWidget(self.TitleLabel,
-                             0, 0,
-                             1, 2)
+        # Content vertical layout
+        contentVBox = QVBoxLayout()
+        mainGrid.addLayout(contentVBox, 1, 1, 1, 1)
 
-        # Video GUI
-        self.VideoLabel = QLabel('Video Output')
-        self.VideoLabel.resize(self.imageWidth, self.imageHeight)
-        self.VideoLabel.setStyleSheet('border: 5px solid black')
-        self.VideoLabel.setAlignment(QtCore.Qt.AlignCenter)
-        gridLayout.addWidget(self.VideoLabel,
-                             1, 0,
-                             10, 1)
+        # Header
+        headerHBox = QHBoxLayout()
+        mainGrid.addLayout(headerHBox, 0, 0, 1, 2)
+        self.titleLabel = QLabel('Group 15 Maze Game')
+        self.titleLabel.setStyleSheet('border: 5px solid black; font: bold 50px')
+        headerHBox.addWidget(self.titleLabel)
+        self.modeLabel = QLabel('Menu')
+        self.modeLabel.setStyleSheet('border: 5px solid black; font: bold 50px')
+        self.modeLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignCenter)
+        headerHBox.addWidget(self.modeLabel)
+
+        # Camera Feed
+        self.imageLabel = QLabel('Image')
+        self.imageLabel.setStyleSheet('border: 2px solid black')
+        mainGrid.addWidget(self.imageLabel, 1, 0, 1, 1)
         # Video Capture Thread
         processor.cameraVideo.connect(self.updateImage) # Run updateImage when cameraVideo is modified in ImageProcessor()
         processor.start()
         
-        # Timer GUI
-        self.TimerLabel = QLabel('Time: 00:00.0')
-        self.TimerLabel.setStyleSheet('border: 5px solid black; padding: 15px; font-size: 50px; background-color: rgb(200,200,200);')
-        self.TimerLabel.setAlignment(QtCore.Qt.AlignCenter)
-        gridLayout.addWidget(self.TimerLabel,
-                             1, 1,
-                             1, 1)
+        # Timer
+        self.timerLabel = QLabel('00:00.0')
+        self.timerLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.timerLabel.setMinimumHeight(150)
+        self.timerLabel.setStyleSheet('border: 5px solid black; font: bold 100px')
+        contentVBox.addWidget(self.timerLabel)
         # Timer Item
         timer = QTimer(self)
         timer.timeout.connect(self.showTime)
@@ -76,16 +84,93 @@ class App(QWidget):
         self.tenCount = 0
         self.secCount = 0
         self.minCount = 0
-        # Timer Buttons
-        self.button1 = QPushButton('AI')
-        self.button2 = QPushButton('Manual')
-        self.button3 = QPushButton('Cal.')
-        hBoxLayout.addWidget(self.button1)
-        hBoxLayout.addWidget(self.button2)
-        hBoxLayout.addWidget(self.button3)
+        # Button Labels
+        buttonLabelHBox = QHBoxLayout()
+        contentVBox.addLayout(buttonLabelHBox)
+        button1Box = QVBoxLayout()
+        button2Box = QVBoxLayout()
+        button3Box = QVBoxLayout()
+        buttonPH = QLabel('')
+        buttonPH.setMinimumHeight(200)
+        buttonPH.setMaximumWidth(1)
+        buttonLabelHBox.addWidget(buttonPH)
+        buttonLabelHBox.addLayout(button1Box)
+        buttonLabelHBox.addLayout(button2Box)
+        buttonLabelHBox.addLayout(button3Box)
+        buttonPH2 = QLabel('')
+        buttonPH2.setMinimumHeight(200)
+        buttonPH2.setMaximumWidth(1)
+        buttonLabelHBox.addWidget(buttonPH2)
+        self.buttonLabel1 = QLabel('AI\nSolve')
+        self.buttonLabel1.setAlignment(QtCore.Qt.AlignCenter)
+        self.buttonLabel1.setMaximumSize(500, 80)
+        self.buttonLabel1.setStyleSheet('font: bold 25px')
+        button1Box.addWidget(self.buttonLabel1)
+        self.button1 = QPushButton()
+        self.button1.setMaximumSize(100, 100)
+        self.button1.setStyleSheet('border-radius: 50px; border: 8px solid green; background-color: #C0C0C0')
+        button1Box.addWidget(self.button1)
+        self.buttonLabel2 = QLabel('Manual\nSolve')
+        self.buttonLabel2.setAlignment(QtCore.Qt.AlignCenter)
+        self.buttonLabel2.setMaximumSize(500, 80)
+        self.buttonLabel2.setStyleSheet('font: bold 25px')
+        button2Box.addWidget(self.buttonLabel2)
+        self.button2 = QPushButton()
+        self.button2.setMaximumSize(100, 100)
+        self.button2.setStyleSheet('border-radius: 50px; border: 8px solid red; background-color: #C0C0C0')
+        button2Box.addWidget(self.button2)
+        self.buttonLabel3 = QLabel('Calibrate')
+        self.buttonLabel3.setAlignment(QtCore.Qt.AlignCenter)
+        self.buttonLabel3.setMaximumSize(500, 80)
+        self.buttonLabel3.setStyleSheet('font: bold 25px')
+        button3Box.addWidget(self.buttonLabel3)
+        self.button3 = QPushButton()
+        self.button3.setMaximumSize(100, 100)
+        self.button3.setStyleSheet('border-radius: 50px; border: 8px solid blue; background-color: #C0C0C0')
+        button3Box.addWidget(self.button3)
         self.button1.clicked.connect(lambda : kendama.currentMode.handleInput(1))
         self.button2.clicked.connect(lambda : kendama.currentMode.handleInput(2))
         self.button3.clicked.connect(lambda : kendama.currentMode.handleInput(3))
+
+        # PWM Brightness Slider
+        self.brightnessLabel = QLabel('Brightness')
+        self.brightnessLabel.setStyleSheet('border: 5px solid black')
+        self.brightnessLabel.setMinimumHeight(100)
+        contentVBox.addWidget(self.brightnessLabel)
+        
+        # Motor Rate Commands
+        rateHBox = QHBoxLayout()
+        contentVBox.addLayout(rateHBox)
+
+        rateTitle = QLabel('Current Motor Positions:')
+        rateTitle.setMinimumHeight(100)
+        rateTitle.setStyleSheet('font: 30px')
+        rateHBox.addWidget(rateTitle)
+
+        self.xRateLabel = QLabel('X: 0')
+        self.xRateLabel.setMinimumHeight(100)
+        self.xRateLabel.setStyleSheet('font: 30px')
+        self.xRateLabel.setAlignment(QtCore.Qt.AlignCenter)
+        rateHBox.addWidget(self.xRateLabel)
+
+        self.yRateLabel = QLabel('Y: 0')
+        self.yRateLabel.setMinimumHeight(100)
+        self.yRateLabel.setStyleSheet('font: 30px')
+        self.yRateLabel.setAlignment(QtCore.Qt.AlignCenter)
+        rateHBox.addWidget(self.yRateLabel)
+
+        joystick.xRate.connect(self.updateX)
+        joystick.yRate.connect(self.updateY)
+
+        # Command Box
+        self.commandBox = QPlainTextEdit('Initialising System...')
+        self.commandBox.setStyleSheet('border: 2px solid black; font: 10px; background-color: #C0C0C0')
+        self.commandBox.appendPlainText('Done!')
+        contentVBox.addWidget(self.commandBox)
+
+        joystick.printBuffer.connect(self.updateConsole)
+
+        # Begin Event Loop
 
     # PyQt Slot for updating image contents
     @pyqtSlot(np.ndarray)
@@ -97,12 +182,21 @@ class App(QWidget):
         qtImage = QtGui.QImage(rgbImage.data, w, h, lineSize, QtGui.QImage.Format_RGB888)
         scaledImage = qtImage.scaled(self.imageWidth, self.imageHeight, Qt.KeepAspectRatio)
         pixmapImage = QPixmap.fromImage(scaledImage)
-        self.VideoLabel.setPixmap(pixmapImage)
+        self.imageLabel.setPixmap(pixmapImage)
+
+    # PyQt Slot for updating motor rates
+    @pyqtSlot(int)
+    def updateX(self, xRate):
+        motors.setServoPulse(0,1915+xRate/2)
+        self.xRateLabel.setText('X: {}'.format(xRate))
+    def updateY(self, yRate):
+        motors.setServoPulse(1,1850+yRate/2)
+        self.yRateLabel.setText('Y: {}'.format(yRate))
 
     def showTime(self):
         if self.timerFlag == True:
-            self.TimerLabel.setText('Time: {:02d}:{:02d}.{:01d}'.format(self.minCount, self.secCount, self.tenCount))
-            lcd.update_messages(self.TimerLabel.text(), "")
+            self.timerLabel.setText('{:02d}:{:02d}.{:01d}'.format(self.minCount, self.secCount, self.tenCount))
+            lcd.update_messages(self.timerLabel.text(), "")
             self.tenCount += 1
         if self.tenCount == 10:
             self.tenCount = 0
@@ -118,7 +212,11 @@ class App(QWidget):
         self.tenCount = 0
         self.secCount = 0
         self.minCount = 0
-        self.TimerLabel.setText('Time: {:02d}:{:02d}.{:01d}'.format(self.minCount, self.secCount, self.tenCount))
+        self.timerLabel.setText('{:02d}:{:02d}.{:01d}'.format(self.minCount, self.secCount, self.tenCount))
+
+    @pyqtSlot(str)
+    def updateConsole(self, printBuffer):
+        self.commandBox.appendPlainText('[{}]: {}'.format(QDateTime.currentDateTime(), printBuffer))
 
 class PHYSICALBUTTONS():
     def __init__(self):
@@ -150,13 +248,13 @@ class KENDAMA():
 
     def update(self, b1=None, b2=None, b3=None, title=None, lcdTxt=None, lcdCol=None, ledStr=None, ledBtn=None):
         if b1 == None: pass
-        else: mainWindow.button1.setText(b1)
+        else: mainWindow.buttonLabel1.setText(b1)
         if b2 == None: pass
-        else: mainWindow.button2.setText(b2)
+        else: mainWindow.buttonLabel2.setText(b2)
         if b3 == None: pass
-        else: mainWindow.button3.setText(b3)
+        else: mainWindow.buttonLabel3.setText(b3)
         if title == None: pass
-        else: mainWindow.TitleLabel.setText(title)
+        else: mainWindow.modeLabel.setText(title)
         if lcdTxt == None: pass
         else: lcd.update_messages(lcdTxt[0], lcdTxt[1])
         if lcdCol == None: pass
@@ -164,7 +262,13 @@ class KENDAMA():
         if ledStr == None: pass
         else: ledStrip.writeArduino(ledStr)
         if ledBtn == None: pass
-        else: ledButtons.setLED(ledBtn[0], ledBtn[1], ledBtn[2])
+        else:
+            colourArray = ['#C0C0C0', 'green', 'red', 'blue']
+            ledButtons.setLED(ledBtn[0], ledBtn[1], ledBtn[2])
+            mainWindow.button1.setStyleSheet('border-radius: 50px; border: 8px solid {}; background-color: #C0C0C0'.format(colourArray[ledBtn[0]]))
+            mainWindow.button2.setStyleSheet('border-radius: 50px; border: 8px solid {}; background-color: #C0C0C0'.format(colourArray[ledBtn[1]*2]))
+            mainWindow.button3.setStyleSheet('border-radius: 50px; border: 8px solid {}; background-color: #C0C0C0'.format(colourArray[ledBtn[2]*3]))
+            
 
 class MenuMode():
 
@@ -197,7 +301,7 @@ class ManualMode():
                        b2='',
                        b3='Menu',
                        title='Manual Solving Mode',
-                       lcdTxt=['{}'.format(mainWindow.TimerLabel.text()),
+                       lcdTxt=['{}'.format(mainWindow.timerLabel.text()),
                                'Start       Menu'],
                        lcdCol=[255,0,0],
                        ledStr=2,
@@ -265,7 +369,7 @@ class AIMode():
                        b2='',
                        b3='Menu',
                        title='AI Solving Mode',
-                       lcdTxt=['{}'.format(mainWindow.TimerLabel.text()),
+                       lcdTxt=['{}'.format(mainWindow.timerLabel.text()),
                                'Start       Menu'],
                        lcdCol=[0,255,0],
                        ledStr=1,
@@ -298,11 +402,10 @@ joystick = joystickControl.JOYSTICK_READ_DATA()
 motors = PCA9685()
 
 # Main PyQt Application Loop
-while True:
-    app = QApplication(sys.argv)
-    mainWindow = App()
-    mainWindow.show()
-    motors.setServoPulse(1,1850+joystickControl.xRate/2) # Sends joystick data to the motors
-    motors.setServoPulse(0,1915+joystickControl.yRate/2)
-    kendama.currentMode.update()
-    sys.exit(app.exec_())
+app = QApplication(sys.argv)
+screenWidth = app.primaryScreen().size().width()
+screenHeight = app.primaryScreen().size().height()
+mainWindow = App()
+mainWindow.show()
+kendama.currentMode.update()
+sys.exit(app.exec_())

@@ -18,9 +18,13 @@ class App(QWidget):
         self.setWindowTitle('Group 15 - Maze Project')
 
         # Set and find fullscreen size
-        self.showFullScreen()
         screenWidth = app.primaryScreen().size().width()
         screenHeight = app.primaryScreen().size().height()
+        self.showFullScreen()
+        self.setFixedSize(QtCore.QSize(screenWidth, screenHeight))
+
+        print(screenWidth)
+        print(screenHeight)
         
         # Set camera feed dimensions
         self.imageWidth = int(screenWidth * (2/3))
