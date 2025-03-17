@@ -6,7 +6,7 @@ from gpiozero import Button # type: ignore
 
 # PyQt5 Imports
 from PyQt5 import QtGui, QtCore
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread, QTimer, QDateTime
+from PyQt5.QtCore import pyqtSlot, Qt, QTimer, QDateTime
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QPushButton, QHBoxLayout, QVBoxLayout, QPlainTextEdit
 
@@ -16,10 +16,10 @@ from lcdControl import LCD1602_WRITE
 from peripherals import LEDSTRIPCONTROL
 from peripherals import LEDBUTTONCONTROL
 import joystickControl
-#from joystickControl import JOYSTICK_READ_DATA
 from motorControl import PCA9685
 
-global screenWidth, screenHeight
+global screenWidth, screenHeight, aiControlFlag
+aiControlFlag = False
 
 # Main GUI App Class
 class App(QWidget):
@@ -163,6 +163,9 @@ class App(QWidget):
         joystick.xRate.connect(self.updateX)
         joystick.yRate.connect(self.updateY)
 
+        processor.xRate.connect(self.AIupdateX)
+        processor.yRate.connect(self.AIupdateY)
+
         # Command Box
         self.commandBox = QPlainTextEdit('Initialising System...')
         self.commandBox.setStyleSheet('border: 2px solid black; font: 10px; background-color: #C0C0C0')
@@ -170,6 +173,9 @@ class App(QWidget):
         contentVBox.addWidget(self.commandBox)
 
         joystick.printBuffer.connect(self.updateConsole)
+        ledStrip.printBuffer.connect(self.updateConsole)
+        processor.printBuffer.connect(self.updateConsole)
+        motors.printBuffer.connect(self.updateConsole)
 
         # Begin Event Loop
 
@@ -193,6 +199,12 @@ class App(QWidget):
     def updateY(self, yRate):
         motors.setServoPulse(1,1850+yRate/2)
         self.yRateLabel.setText('Y: {}'.format(yRate))
+    def AIupdateX(self, xRate):
+        if aiControlFlag == True: motors.setServoPulse(0,1915+xRate/2)
+        else: pass
+    def AIupdateY(self, yRate):
+        if aiControlFlag == True: motors.setServoPulse(0,1850+yRate/2)
+        else: pass
 
     def showTime(self):
         if self.timerFlag == True:
@@ -234,149 +246,153 @@ class KENDAMA():
         self.modes = {
             'Menu' : MenuMode(),
             'Manual' : ManualMode(),
-            'ManualRunning' : ManualRunningMode(),
-            'ManualStopped' : ManualStoppedMode(),
+            'ManualRunning' : ManualModeRunning(),
+            'ManualStopped' : ManualModeStopped(),
             'AI' : AIMode(),
-            'Calibration' : CalibrationMode()
+            'AIRunning' : AIModeRunning(),
+            'Solved' : SolvedMaze()
         }
 
         self.currentMode = self.modes['Menu']
 
+    # Switch Mode function called by each currenMode.handleInput()
     def switchMode(self, nextMode):
         if nextMode in self.modes:
             self.currentMode = self.modes[nextMode]
             self.currentMode.update()
+        else: pass
 
-    def update(self, b1=None, b2=None, b3=None, title=None, lcdTxt=None, lcdCol=None, ledStr=None, ledBtn=None):
-        if b1 == None: pass
-        else: mainWindow.buttonLabel1.setText(b1)
-        if b2 == None: pass
-        else: mainWindow.buttonLabel2.setText(b2)
-        if b3 == None: pass
-        else: mainWindow.buttonLabel3.setText(b3)
+    # Update Function called each currentMode.update(), changing all features on GUI and peripherals
+    def update(self, title=None, b1=None, b2=None, b3=None, colour=None, lcdTxt=None):
         if title == None: pass
         else: mainWindow.modeLabel.setText(title)
+
+        if b1 == None:
+            mainWindow.buttonLabel1.setText('')
+            mainWindow.button1('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
+            ledButtons.setLED(g=0)
+        else:
+            mainWindow.buttonLabel1.setText(b1)
+            mainWindow.button1.setStyleSheet('border-radius: 50px; border: 8px solid green; background-color: #C0C0C0')
+            ledButtons.setLED(g=1)
+
+        if b2 == None:
+            mainWindow.buttonLabel2.setText('')
+            mainWindow.button2('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
+            ledButtons.setLED(r=0)
+        else:
+            mainWindow.buttonLabel2.setText(b2)
+            mainWindow.button2.setStyleSheet('border-radius: 50px; border: 8px solid red; background-color: #C0C0C0')
+            ledButtons.setLED(r=2)
+
+        if b3 == None:
+            mainWindow.buttonLabel3.setText('')
+            mainWindow.button3('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
+            ledButtons.setLED(b=0)
+        else:
+            mainWindow.buttonLabel1.setText(b3)
+            mainWindow.button1.setStyleSheet('border-radius: 50px; border: 8px solid blue; background-color: #C0C0C0')
+            ledButtons.setLED(b=1)
+
+        if colour == 'green':
+            lcd.setRGB(0,255,0)
+            ledStrip.writeArduino(1)
+        elif colour == 'red':
+            lcd.setRGB(255,0,0)
+            ledStrip.writeArduino(2)
+        elif colour == 'green':
+            lcd.setRGB(0,0,255)
+            ledStrip.writeArduino(3)
+        elif colour == 'chase':
+            lcd.setRGB(255,0,0)
+            ledStrip.writeArduino(5)
+        else:
+            lcd.setRGB(255,255,255)
+            ledStrip.writeArduino(4)
+
         if lcdTxt == None: pass
         else: lcd.update_messages(lcdTxt[0], lcdTxt[1])
-        if lcdCol == None: pass
-        else:
-            lcd.setRGB(lcdCol[0], lcdCol[1], lcdCol[2])
-            mainWindow.setStyleSheet('background-color: #{:02x}{:02x}{:02x};'.format(int(lcdCol[0]//1.59), int(lcdCol[1]//1.59), int(lcdCol[2]//1.59)))
-        if ledStr == None: pass
-        else: ledStrip.writeArduino(ledStr)
-        if ledBtn == None: pass
-        else:
-            colourArray = ['#C0C0C0', 'green', 'red', 'blue']
-            ledButtons.setLED(ledBtn[0], ledBtn[1], ledBtn[2])
-            mainWindow.button1.setStyleSheet('border-radius: 50px; border: 8px solid {}; background-color: #C0C0C0'.format(colourArray[ledBtn[0]]))
-            mainWindow.button2.setStyleSheet('border-radius: 50px; border: 8px solid {}; background-color: #C0C0C0'.format(colourArray[ledBtn[1]*2]))
-            mainWindow.button3.setStyleSheet('border-radius: 50px; border: 8px solid {}; background-color: #C0C0C0'.format(colourArray[ledBtn[2]*3]))
-            
+
+# Each class is created with handleInput() and update() functions to update the UI and other peripherals
 
 class MenuMode():
-
     def update(self):
-        kendama.update(b1='AI',
-                       b2='Manual',
-                       b3='Cal.',
-                       title='Welcome to the Maze Game!',
-                       lcdTxt=['Main Menu',
-                               'AI   Manual  Cal'],
-                       lcdCol=[255,255,255],
-                       ledStr=4,
-                       ledBtn=[1,1,1]
+        mainWindow.resetTimer()
+        kendama.update(title = 'Welcome to the Maze Game!',
+                       b1 = 'AI',
+                       b2 = 'Manual',
+                       b3 = 'Calibrate',
+                       lcdTxt = ['Main Menu',
+                                 'AI   Manual  Cal']
         )
-    
+
     def handleInput(self, button):
         if button == 1:
             kendama.switchMode('AI')
         elif button == 2:
             kendama.switchMode('Manual')
         elif button == 3:
-            kendama.switchMode('Calibration')
-        else:
-            pass
+            kendama.switchMode('Calibrate')
+        else: pass
 
 class ManualMode():
-
     def update(self):
-        kendama.update(b1='Start',
-                       b2='',
-                       b3='Menu',
-                       title='Manual Solving Mode',
-                       lcdTxt=['{}'.format(mainWindow.timerLabel.text()),
-                               'Start       Menu'],
-                       lcdCol=[255,0,0],
-                       ledStr=2,
-                       ledBtn=[1,0,1]
+        mainWindow.resetTimer()
+        kendama.update(b1 = 'Start',
+                       b3 = 'Menu',
+                       lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
+                                 'Start       Menu']
         )
 
     def handleInput(self, button):
         if button == 1:
-            mainWindow.startTimer()
             kendama.switchMode('ManualRunning')
         elif button == 3:
             kendama.switchMode('Menu')
-        else:
-            pass
+        else: pass
 
-class ManualRunningMode():
-
+class ManualModeRunning():
     def update(self):
-        kendama.update(b1='',
-                       b2='Stop',
-                       b3='',
-                       title='Manual Solving Mode',
-                       lcdTxt=['',
-                               '      Stop      '],
-                       ledStr=5,
-                       ledBtn=[0,1,0]
-        )
+        mainWindow.startTimer()
         joystick.start_reading()
+        kendama.update(title = 'Manual Solving Mode',
+                       b2 = 'Stop',
+                       lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
+                                 '      Stop      ']
+        )
 
     def handleInput(self, button):
         if button == 2:
-            mainWindow.stopTimer()
             kendama.switchMode('ManualStopped')
-            mainWindow.joystickFlag = 0
-        else:
-            pass
+        else: pass
 
-class ManualStoppedMode():
-
+class ManualModeStopped():
     def update(self):
-        kendama.update(b1='Start',
-                       b2='',
-                       b3='Reset',
-                       lcdTxt=['',
-                               'Start      Reset'],
-                       ledStr=2,
-                       ledBtn=[1,0,1]
-        )
+        mainWindow.stopTimer()
         joystick.stop_reading()
+        kendama.update(title = 'Manual Solving Mode',
+                       b1 = 'Start',
+                       b3 = 'Reset',
+                       lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
+                                 'Start      Reset']
+        )
 
     def handleInput(self, button):
         if button == 1:
-            mainWindow.startTimer()
             kendama.switchMode('ManualRunning')
         elif button == 3:
-            mainWindow.resetTimer()
             kendama.switchMode('Manual')
-        else:
-            pass
+        else: pass
 
 class AIMode():
-
     def update(self):
-        kendama.update(b1='Start',
-                       b2='',
-                       b3='Menu',
-                       title='AI Solving Mode',
-                       lcdTxt=['{}'.format(mainWindow.timerLabel.text()),
-                               'Start       Menu'],
-                       lcdCol=[0,255,0],
-                       ledStr=1,
-                       ledBtn=[1,0,1]
+        mainWindow.resetTimer()
+        aiControlFlag = False
+        kendama.update(title = 'AI Solving Mode',
+                       b1 = 'Start',
+                       b3 = 'Menu',
+                       lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
+                                 'Start       Menu']
         )
 
     def handleInput(self, button):
@@ -384,13 +400,37 @@ class AIMode():
             kendama.switchMode('AIRunning')
         elif button == 3:
             kendama.switchMode('Menu')
-        else:
-            pass
+        else: pass
 
-class CalibrationMode():
+class AIModeRunning():
+    def update(self):
+        mainWindow.startTimer()
+        aiControlFlag = True
+        kendama.update(title = 'AI Solving Mode',
+                       b2 = 'Stop',
+                       lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
+                                 '      Stop      ']
+        )
 
     def handleInput(self, button):
-        pass
+        if button == 2:
+            kendama.switchMode('AI')
+        else: pass
+
+class SolvedMaze():
+    def update(self):
+        mainWindow.stopTimer()
+        aiControlFlag = False
+        kendama.update(title = 'Maze Solved!',
+                       b3 = 'Menu',
+                       lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
+                                 '            Menu']
+        )
+
+    def handleInput(self, button):
+        if button == 3:
+            kendama.switchMode('Menu')
+        else: pass
 
 # Mode Manager Call
 kendama = KENDAMA()

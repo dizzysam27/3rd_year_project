@@ -14,6 +14,7 @@ yRate = 0
 
 class IMAGEPROCESSOR(QThread):
     cameraVideo = pyqtSignal(np.ndarray)
+    printBuffer = pyqtSignal(str)
 
     def __init__(self):
         # Inherit QThread features
@@ -24,7 +25,7 @@ class IMAGEPROCESSOR(QThread):
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
         if not self.cap.isOpened():
-            print("Error: Could not open webcam.")
+            self.printBuffer.emit("Error: Could not open webcam.")
             exit()
 
     def crop_frame(self, frame):
@@ -87,6 +88,8 @@ class IMAGEPROCESSOR(QThread):
             if not ret:
                 break
 
+            self.cameraVideo.emit(frame)
+
             cropped_frame = self.crop_frame(frame)
             ball_center = self.detect_light_blue(cropped_frame)
 
@@ -94,11 +97,9 @@ class IMAGEPROCESSOR(QThread):
                 cv2.circle(cropped_frame, ball_center, 10, (0, 255, 0), -1)
             cv2.circle(cropped_frame, (100,100), 5, (0,0,255), -1)
 
-            self.cameraVideo.emit(frame)
-
         self.cleanup()
 
     def cleanup(self):
         self.cap.release()
         cv2.destroyAllWindows()
-        print("Cleaning up and exiting.")
+        self.printBuffer.emit("Cleaning up and exiting.")

@@ -3,12 +3,14 @@
 import time
 import math
 import smbus
+from PyQt5.QtCore import pyqtSignal, QThread
 
 # ============================================================================
 # Raspi PCA9685 16-Channel PWM Servo Driver
 # ============================================================================
 
-class PCA9685:
+class PCA9685(QThread):
+  printBuffer = pyqtSignal(str)
 
   # Registers/etc.
   __SUBADR1            = 0x02
@@ -46,13 +48,13 @@ class PCA9685:
     "Writes an 8-bit value to the specified register/address"
     self.bus.write_byte_data(self.address, reg, value)
     if (self.debug):
-      print("I2C: Write 0x%02X to register 0x%02X" % (value, reg))
+      self.printBuffer.emit("I2C: Write 0x%02X to register 0x%02X" % (value, reg))
 	  
   def read(self, reg):
     "Read an unsigned byte from the I2C device"
     result = self.bus.read_byte_data(self.address, reg)
     if (self.debug):
-      print("I2C: Device 0x%02X returned 0x%02X from reg 0x%02X" % (self.address, result & 0xFF, reg))
+      self.printBuffer.emit("I2C: Device 0x%02X returned 0x%02X from reg 0x%02X" % (self.address, result & 0xFF, reg))
     return result
 	
   def setPWMFreq(self, freq):
@@ -62,11 +64,11 @@ class PCA9685:
     prescaleval /= float(freq)
     prescaleval -= 1.0
     if (self.debug):
-      print("Setting PWM frequency to %d Hz" % freq)
-      print("Estimated pre-scale: %d" % prescaleval)
+      self.printBuffer.emit("Setting PWM frequency to %d Hz" % freq)
+      self.printBuffer.emit("Estimated pre-scale: %d" % prescaleval)
     prescale = math.floor(prescaleval + 0.5)
     if (self.debug):
-      print("Final pre-scale: %d" % prescale)
+      self.printBuffer.emit("Final pre-scale: %d" % prescale)
 
     oldmode = self.read(self.__MODE1);
     newmode = (oldmode & 0x7F) | 0x10        # sleep
@@ -84,7 +86,7 @@ class PCA9685:
     self.write(self.__LED0_OFF_L+4*channel, off & 0xFF)
     self.write(self.__LED0_OFF_H+4*channel, off >> 8)
     if (self.debug):
-      print("channel: %d  LED_ON: %d LED_OFF: %d" % (channel,on,off))
+      self.printBuffer.emit("channel: %d  LED_ON: %d LED_OFF: %d" % (channel,on,off))
 	  
   def setServoPulse(self, channel, pulse):
     "Sets the Servo Pulse,The PWM frequency must be 50HZ"
@@ -143,7 +145,7 @@ class PCA9685:
     pulse_width = off_count - on_count
 
     if self.debug:
-        print(f"Channel {channel}: ON={on_count}, OFF={off_count}, Pulse Width={pulse_width}")
+        self.printBuffer.emit(f"Channel {channel}: ON={on_count}, OFF={off_count}, Pulse Width={pulse_width}")
 
     return pulse_width
 

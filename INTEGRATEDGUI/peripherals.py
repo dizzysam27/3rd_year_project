@@ -1,5 +1,6 @@
 from gpiozero import LED # type: ignore
 import smbus # type: ignore
+from PyQt5.QtCore import pyqtSignal, QThread
 
 # i2c Bus Setup
 bus = smbus.SMBus(1)
@@ -17,7 +18,7 @@ class LEDBUTTONCONTROL():
         self.greenLED = LED(20)
         self.blueLED = LED(16)
 
-    def setLED(self, g, r, b):
+    def setLED(self, g=None, r=None, b=None):
         ledArray = [self.greenLED, self.redLED, self.blueLED]
         stateArray = [g, r, b]
         for i in range(3):
@@ -34,10 +35,12 @@ class LEDBUTTONCONTROL():
 #              V
 # writeArduino(value)
 ARDUINO_ADDRESS = 0x47 # Arduino Address
-class LEDSTRIPCONTROL():
+class LEDSTRIPCONTROL(QThread):
+    printBuffer = pyqtSignal(str)
+
     def writeArduino(self,value):
         try:
             bus.write_byte(ARDUINO_ADDRESS, value)
-            print(f"Sent {value} to Arduino")
+            self.printBuffer.emit(f"Sent {value} to Arduino")
         except Exception as e:
-            print(f"Error: {e}")
+            self.printBuffer.emit(f"Error: {e}")

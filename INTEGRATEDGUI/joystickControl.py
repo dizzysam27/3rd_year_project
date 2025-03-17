@@ -30,8 +30,6 @@ class JOYSTICK_READ_DATA(QThread):
                     self.printBuffer.emit(f"x: {xValue}, y: {yValue}")
                     self.xRate.emit(int(xValue))
                     self.yRate.emit(int(yValue))
-                    #self.motors.setServoPulse(1,1850+yValue/2) # Sends joystick data to the motors
-                    #self.motors.setServoPulse(0,1915+xValue/2)
                 except ValueError:
                     self.printBuffer.emit("Invalid data received")
 
