@@ -105,7 +105,9 @@ class App(QWidget):
         self.button3.setMaximumSize(100, 100)
         self.button3.setStyleSheet('border-radius: 50px; border: 8px solid blue; background-color: #C0C0C0')
         button3Box.addWidget(self.button3)
-        self.button3.clicked.connect(self.testFunc)
+        self.button1.clicked.connect(lambda : self.testFunc(1))
+        self.button2.clicked.connect(lambda : self.testFunc(2))
+        self.button3.clicked.connect(lambda : self.testFunc(3))
 
         # PWM Brightness Slider
         self.brightnessLabel = QLabel('Brightness')
@@ -143,8 +145,15 @@ class App(QWidget):
 
         sys.exit(app.exec_())
 
-    def testFunc(self):
-        self.button3.setStyleSheet('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
+    def testFunc(self, button):
+        if button == 1:
+            self.button1.setStyleSheet('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
+        elif button == 2:
+            self.button2.setStyleSheet('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
+        elif button == 3:
+            self.button3.setStyleSheet('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
+        else:
+            pass
 
 while True:
     mainWindow = App()
