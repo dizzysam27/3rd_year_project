@@ -26,11 +26,11 @@ class ImageProcessor:
         self.sampled_points = self.load_last_coordinates()
         self.current_target_index = 0
         self.goal_reached = True
-        self.PID_output_limits = 30
+        self.PID_output_limits =  40
 
         # PID controllers for X and Y axes
-        self.pid_x = PID(0.9, 0.05, 0.5)
-        self.pid_y = PID(0.9, 0.05, 0.5)
+        self.pid_x = PID(0.3, 0.05, 0.5)
+        self.pid_y = PID(0.7, 0.05, 0.3)
         self.pid_x.output_limits = (-self.PID_output_limits, self.PID_output_limits)
         self.pid_y.output_limits = (-self.PID_output_limits, self.PID_output_limits)
 
@@ -50,7 +50,7 @@ class ImageProcessor:
 
     def crop_frame(self, frame):
         frame_height, frame_width = frame.shape[:2]
-        crop_width, crop_height = 320, 240
+        crop_width, crop_height = 310, 230
         x_offset, y_offset = 10, -15
 
         start_x = (frame_width - crop_width) // 2
@@ -63,7 +63,7 @@ class ImageProcessor:
     def detect_light_blue(self, frame):
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         hsv = cv2.GaussianBlur(hsv, (5, 5), 0)
-        lower_blue, upper_blue = np.array([100, 100, 100]), np.array([130, 255, 255])
+        lower_blue, upper_blue = np.array([140,80, 80]), np.array([175, 175, 255])
         mask = cv2.inRange(hsv, lower_blue, upper_blue)
 
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -86,9 +86,18 @@ class ImageProcessor:
             control_x = self.pid_x(bx)
             control_y = self.pid_y(by)
             print("x %s y %s" % (control_x, control_y))
+            
+            
+            if abs(bx - self.gx) < 10:
+                 self.motors.setServoPulse(1, int(self.defaultx))
+            else:
+                self.motors.setServoPulse(1, int(self.defaultx + control_x))
+    
+            if abs(by - self.gy) < 10:
+                 self.motors.setServoPulse(0, int(self.defaulty))
+            else:
+                self.motors.setServoPulse(0, int(self.defaulty + control_y))
 
-            self.motors.setServoPulse(1, int(self.defaultx + control_x))
-            self.motors.setServoPulse(0, int(self.defaulty + control_y))
         else:
             self.motors.setServoPulse(1, self.defaultx)
             self.motors.setServoPulse(0, self.defaulty)
@@ -154,12 +163,16 @@ class ImageProcessor:
             self.move_motors(ball_center)
 
             if ball_center:
-                cv2.circle(cropped_frame, ball_center, 10, (0, 255, 0), -1)
+                cv2.circle(cropped_frame, ball_center, 3, (0, 0, 255), -1)
             cv2.circle(cropped_frame, (self.gx, self.gy), 5, (0, 0, 255), -1)
 
             
             cv2.imshow("Tracking", cropped_frame)
-
+            if cv2.waitKey(1) & 0xFF == ord('r'):
+                self.current_target_index = 0
+                self.goal_reached = True
+                print("reset")
+               
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.motors.setServoPulse(1, self.defaultx)
                 self.motors.setServoPulse(0, self.defaulty)
