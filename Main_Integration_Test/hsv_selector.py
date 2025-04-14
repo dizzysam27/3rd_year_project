@@ -5,8 +5,9 @@ cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 ret, frame = cap.read()
+cv2.normalize(frame, frame, 0, 255, cv2.NORM_MINMAX)
 frame_height, frame_width = frame.shape[:2]
-crop_width, crop_height = 305, 220
+crop_width, crop_height = 290, 210
 x_offset, y_offset = 10, -10
 
 start_x = (frame_width - crop_width) // 2
@@ -23,15 +24,15 @@ def nothing(x):
 cv2.namedWindow('image')
 
 # create trackbars for color change
-cv2.createTrackbar('HMin','image',0,179,nothing) # Hue is from 0-179 for Opencv
+cv2.createTrackbar('HMin','image',0,255,nothing) # Hue is from 0-179 for Opencv
 cv2.createTrackbar('SMin','image',0,255,nothing)
 cv2.createTrackbar('VMin','image',0,255,nothing)
-cv2.createTrackbar('HMax','image',0,179,nothing)
+cv2.createTrackbar('HMax','image',0,255,nothing)
 cv2.createTrackbar('SMax','image',0,255,nothing)
 cv2.createTrackbar('VMax','image',0,255,nothing)
 
 # Set default value for MAX HSV trackbars.
-cv2.setTrackbarPos('HMax', 'image', 179)
+cv2.setTrackbarPos('HMax', 'image', 255)
 cv2.setTrackbarPos('SMax', 'image', 255)
 cv2.setTrackbarPos('VMax', 'image', 255)
 
@@ -59,9 +60,12 @@ while(1):
     upper = np.array([hMax, sMax, vMax])
 
     # Create HSV Image and threshold into a range.
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, lower, upper)
-    output = cv2.bitwise_and(img,img, mask= mask)
+    # hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    hsv = cv2.medianBlur(img, 5)
+    mask = cv2.inRange(img, lower, upper)
+    output = img.copy()
+    output[mask == 0] = [0, 255, 255]  # Set non-matching areas to yellow (BGR)
+
     # Print if there is a change in HSV value
     if( (phMin != hMin) | (psMin != sMin) | (pvMin != vMin) | (phMax != hMax) | (psMax != sMax) | (pvMax != vMax) ):
         print("(hMin = %d , sMin = %d, vMin = %d), (hMax = %d , sMax = %d, vMax = %d)" % (hMin , sMin , vMin, hMax, sMax , vMax))

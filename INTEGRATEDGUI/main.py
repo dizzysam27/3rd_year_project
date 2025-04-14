@@ -434,8 +434,8 @@ class SolvedMaze():
         else: pass
 
 def get_flat_values():
-    defaultx = 1860
-    defaulty = 1920
+    defaultx = 380
+    defaulty = 380
 
 
     motors.setServoPulse(0, int(defaulty))

@@ -7,9 +7,8 @@ from Peripherals.Motor_Control import PCA9685
 motors = PCA9685()
 
 def get_flat_values():
-    defaultx = 1850
-    defaulty = 1930
-
+    defaultx = 1851
+    defaulty = 1941
     motors.setServoPulse(0, int(defaulty))
     motors.setServoPulse(1, int(defaultx))
 

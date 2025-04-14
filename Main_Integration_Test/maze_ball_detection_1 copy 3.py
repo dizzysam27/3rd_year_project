@@ -12,6 +12,27 @@ from PyQt5.QtCore import pyqtSignal, QThread
 from collections import deque
 import argparse
 
+import cv2
+import numpy as np
+
+def skeletonize(mask):
+    skeleton = np.zeros_like(mask)
+    element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3))
+    done = False
+
+    while not done:
+        eroded = cv2.erode(mask, element)
+        temp = cv2.dilate(eroded, element)
+        temp = cv2.subtract(mask, temp)
+        skeleton = cv2.bitwise_or(skeleton, temp)
+        mask = eroded.copy()
+
+        if cv2.countNonZero(mask) == 0:
+            done = True
+
+    return skeleton
+
+
 class ImageProcessor:
 
 
@@ -28,14 +49,25 @@ class ImageProcessor:
         self.sampled_points = self.load_last_coordinates()
         self.current_target_index = 0
         self.goal_reached = True
-        self.output_limits =  23
-        self.output_limitsy =  23
-        self.last_location = [120, 213]
+
+        self.default_limits_x = 30
+        self.default_limits_y = 30
+        self.output_limits =  self.default_limits_x
+        self.output_limitsy =  self.default_limits_y
+        self.last_location = [133, 249]
         self.last_motor_control = [self.defaultx,self.defaulty]
         self.new_motor_control = [0,0]
 
-        self.reached_distance = 14
-    
+        self.reached_distance = 18
+        self.motorcounter = 0
+        self.lastinput = [0,0]
+
+        self.balltracker = [0,0]
+        self.balltrackercounter = 0
+        self.boosted = 0
+
+        
+        
 
         ap = argparse.ArgumentParser()
         ap.add_argument("-v", "--video",
@@ -45,9 +77,9 @@ class ImageProcessor:
         self.args = vars(ap.parse_args())
         self.ballpts = deque(maxlen=self.args["buffer"])
 
-        # PID controllers for X and Y axe
-        self.PID_VALUES = [5,1,1.5]
-        self.PID_VALUESy = [5,1,1.5]
+        # PID controllers for X and Y axes
+        self.PID_VALUES = [8,1,2.3]
+        self.PID_VALUESy = [7,1,2.5]
         self.pid_x = PID(self.PID_VALUES[0],self.PID_VALUES[1],self.PID_VALUES[2])
         self.pid_y = PID(self.PID_VALUESy[0],self.PID_VALUESy[1],self.PID_VALUESy[2])
         # self.pid_x.proportional_on_measurement = True
@@ -99,6 +131,69 @@ class ImageProcessor:
         # return transformed_img
         return image
 
+    def detect_line(self, frame):
+     
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        hsv = cv2.GaussianBlur(hsv, (5, 5), 0)
+        lower_blue, upper_blue = np.array([0,0, 0]), np.array([179,255, 135])
+        mask = cv2.inRange(hsv, lower_blue, upper_blue)
+
+        skeleton = skeletonize(mask)
+
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+
+        if contours:
+            # Select the largest contour (assuming it's the line)
+            contour = max(contours, key=cv2.contourArea)
+
+            # Approximate the contour to a simpler shape
+            poly = cv2.approxPolyDP(contour, epsilon=0.01*cv2.arcLength(contour, True), closed=False)
+
+            # Extract the points and sort by x-coordinate
+            points = poly.reshape(-1, 2)
+            points = sorted(points, key=lambda p: p[0])  # Sorting left to right
+
+            # Sample 20 evenly spaced points along the line
+            num_points = 100
+            if len(points) < num_points:
+                # Interpolate between points if there are fewer points than desired
+                interpolated_points = []
+                for i in range(len(points) - 1):
+                    p1 = points[i]
+                    p2 = points[i + 1]
+                    
+                    # Linear interpolation between p1 and p2
+                    for j in range(num_points // len(points)):
+                        x = int(p1[0] + (p2[0] - p1[0]) * j / (num_points // len(points)))
+                        y = int(p1[1] + (p2[1] - p1[1]) * j / (num_points // len(points)))
+                        interpolated_points.append([x, y])
+                sampled_points = np.array(interpolated_points)
+            else:
+                # If enough points, just sample evenly
+                step = len(points) // num_points
+                sampled_points = points[::step][:num_points]
+            # Convert to an array of (x, y) coordinates
+            self.line_coordinates = np.array(sampled_points)
+
+            # Draw the detected line
+            cv2.drawContours(frame, [contour], -1, (0, 255, 0), 2)
+
+            # Draw the sampled points
+            for (x, y) in self.line_coordinates:
+                cv2.circle(frame, (x, y), 5, (0, 0, 255), -1)  # Red points
+
+            # Print coordinates (optional)
+            print("Detected points:", self.line_coordinates)
+
+        # Show the output
+        cv2.imshow('Black Line Detection', frame)
+
+      
+
+ 
+
+
     def detect_light_blue(self, frame):
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         hsv = cv2.GaussianBlur(hsv, (5, 5), 0)
@@ -111,10 +206,44 @@ class ImageProcessor:
             if cv2.contourArea(largest_contour) > 10:
                 M = cv2.moments(largest_contour)
                 if M["m00"] != 0:
+                    
                     cx = int(M["m10"] / M["m00"])
                     cy = int(M["m01"] / M["m00"])
                     self.last_location[0] = int(M["m10"] / M["m00"])
                     self.last_location[1] = int(M["m01"] / M["m00"])
+
+                    if self.balltrackercounter == 0:
+                        self.balltracker[0] = int(M["m10"] / M["m00"])
+                        self.balltracker[1] = int(M["m01"] / M["m00"])
+
+                    if self.balltrackercounter == 10:
+                        if self.balltracker[0] == cx and self.balltracker[1] == cy:
+                            self.output_limits = 25
+                            self.output_limitsy = 25
+                            print('boosted')
+                            self.boosted = 1
+                            cx = 100
+                            cy = 100
+                            if self.current_target_index < 4:
+                                self.current_target_index = 0
+                            else:
+                                self.current_target_index = self.current_target_index - 3
+                                self.goal_reached = True
+
+                    if self.balltrackercounter == 15:
+                        if self.boosted == 1:
+                            self.output_limitsy = self.default_limits_y
+                            self.output_limits = self.default_limits_x
+                            print('normal')
+                        self.balltrackercounter = -1
+                        self.balltracker = [0,0]
+                        self.boosted = 0
+                        cx = int(M["m10"] / M["m00"])
+                        cy = int(M["m01"] / M["m00"])
+
+                    self.balltrackercounter += 1
+                    self.pid_x.output_limits = (-self.output_limits, self.output_limits)
+                    self.pid_y.output_limits = (-self.output_limitsy, self.output_limitsy)
                     return (cx, cy)
                 
         else:
@@ -126,14 +255,27 @@ class ImageProcessor:
 
     def move_motors(self, ball_center):
         if ball_center:
+            self.motorcounter += 1
             bx, by = ball_center
             if abs(bx - self.gx) < self.reached_distance and abs(by - self.gy) < self.reached_distance:
                 self.goal_reached = True
 
-          
+            
             control_x = self.pid_x(bx)
             control_y = self.pid_y(by)
             print("x %s y %s" % (control_x, control_y))
+            if self.motorcounter == 1:
+                self.lastinput = [control_x, control_y]
+            elif self.motorcounter > 30:
+                if [control_x,control_y] == self.lastinput:
+                    print('ballstuck')
+                    # self.motors.setServoPulse(0, self.defaulty)
+                    # self.motors.setServoPulse(1, self.defaultx)
+
+                self.motorcounter = 1
+                self.lastinput = [control_x, control_y]
+
+                    
             
             
             # if abs(bx - self.gx) < 10:
@@ -166,7 +308,11 @@ class ImageProcessor:
         else:
             self.motors.setServoPulse(0, self.new_motor_control[1])
             self.last_motor_control[1] = self.new_motor_control[1]
-
+       
+        # if self.motorcounter > 60:   
+        #     self.motors.setServoPulse(0, self.defaulty)
+        #     self.motors.setServoPulse(1, self.defaultx)
+        #     self.motorcounter = 0
 
     def update_goal_position(self):
         if self.goal_reached and self.current_target_index < len(self.sampled_points):
@@ -187,7 +333,9 @@ class ImageProcessor:
     def run(self):
         self.motors.setServoPulse(1, self.defaultx)
         self.motors.setServoPulse(0, self.defaulty)
-        
+        ret, frame = self.cap.read()
+        cropped_frame = self.crop_frame(frame)
+        self.detect_line(cropped_frame)
         if self.sampled_points:
             choice = input("Use last saved coordinates? (y/n): ")
             if choice.lower() == 'y':
@@ -220,8 +368,23 @@ class ImageProcessor:
 
                 print(f"Selected path points: {self.sampled_points}")
                 self.save_last_coordinates()
-        
+        self.sampled_points = self.line_coordinates
+        self.motors.setServoPulse(1, self.defaultx)
+        self.motors.setServoPulse(0, self.defaulty)
         self.current_target_index = 0  
+        
+
+        # print('5')
+        # time.sleep(1)
+        # print('4')
+        # time.sleep(1)
+        # print('3')
+        # time.sleep(1)
+        # print('2')
+        # time.sleep(1)
+        # print('1')
+        # time.sleep(1)
+        # print('READY')
 
         while True:
             
@@ -233,10 +396,11 @@ class ImageProcessor:
             cropped_frame = self.crop_frame(frame)
             cropped_frame = self.rotate_frame(cropped_frame)
             ball_center = self.detect_light_blue(cropped_frame)
+            
             self.update_goal_position()
             print(f"Ball: {ball_center}, Goal: ({self.gx}, {self.gy})")
 
-            self.move_motors(ball_center)
+            # self.move_motors(ball_center)
 
             if ball_center:
                 cv2.circle(cropped_frame, ball_center, 3, (0, 0, 255), -1)
@@ -254,8 +418,9 @@ class ImageProcessor:
 
             cv2.circle(cropped_frame, (self.gx, self.gy), 5, (0, 0, 255), -1)
 
-            
+
             cv2.imshow("Tracking", cropped_frame)
+            
             if cv2.waitKey(1) & 0xFF == ord('r'):
                 self.current_target_index = 0
                 self.goal_reached = True

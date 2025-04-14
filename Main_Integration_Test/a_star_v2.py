@@ -5,7 +5,7 @@ from heapq import heappop, heappush
 class MazeSolver:
     def __init__(self):
         self.cap = cv2.VideoCapture(0)
-        self.kernel = np.ones((15, 15), np.uint8)  # Morphological kernel for cleaning up small gaps
+        self.kernel = np.ones((11, 11), np.uint8)  # Smaller kernel for morphological operations
         if not self.cap.isOpened():
             print("Error: Could not open webcam.")
             exit()
@@ -35,7 +35,7 @@ class MazeSolver:
         lower_green = np.array([40, 50, 50])   # Lower bound of green
         upper_green = np.array([80, 255, 255]) # Upper bound of green
 
-        # Threshold the image to get the green areas
+        # Threshold the image to get the green areas (walls)
         green_mask = cv2.inRange(hsv, lower_green, upper_green)
 
         # Use morphological operations to clean up small gaps and noise
@@ -54,48 +54,11 @@ class MazeSolver:
         # The mask of areas considered as holes is the region that is not green (not walls) and not black (no line)
         hole_mask = cv2.bitwise_and(inverted_black_line_mask, cv2.bitwise_not(green_mask_cleaned))
 
-        # Use morphological operations to clean the holes mask
+        # Use additional morphological operations to clean the holes mask and reduce noise
         hole_mask_cleaned = cv2.morphologyEx(hole_mask, cv2.MORPH_CLOSE, self.kernel)
+        hole_mask_cleaned = cv2.morphologyEx(hole_mask_cleaned, cv2.MORPH_OPEN, self.kernel)  # Erosion step to remove small noise
 
         return green_mask_cleaned, hole_mask_cleaned
-
-    def find_holes_using_contours(self, frame):
-        # Convert the frame to grayscale
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        # Apply a Gaussian blur to reduce noise
-        blurred = cv2.GaussianBlur(gray, (15, 15), 0)
-
-        # Use binary thresholding to focus on the distinct features (holes)
-        _, thresholded = cv2.threshold(blurred, 100, 255, cv2.THRESH_BINARY)
-
-        # Find contours in the thresholded image
-        contours, _ = cv2.findContours(thresholded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        valid_circles = []
-
-        for contour in contours:
-            # Approximate the contour to a polygon and calculate its area
-            contour_area = cv2.contourArea(contour)
-            if contour_area < 100:  # Ignore small contours
-                continue
-
-            # Fit a circle to the contour
-            (x, y), radius = cv2.minEnclosingCircle(contour)
-            circle_area = np.pi * (radius ** 2)
-
-            # Check if the contour is circular based on circularity (area / perimeter^2)
-            perimeter = cv2.arcLength(contour, True)
-            circularity = 4 * np.pi * contour_area / (perimeter ** 2) if perimeter else 0
-
-            # Filter contours by size and circularity
-            if 100 < contour_area < 1000 and circularity > 0.8:  # adjust the threshold values as necessary
-                valid_circles.append((x, y, radius))
-                # Draw the circle and center
-                cv2.circle(frame, (int(x), int(y)), int(radius), (0, 0, 255), 4)  # Red circle
-                cv2.circle(frame, (int(x), int(y)), 2, (0, 128, 255), 3)  # Yellow center
-
-        return frame, valid_circles
 
 
 # A* algorithm to find the optimal path
@@ -113,6 +76,9 @@ def astar(start, end, grid):
 
     while open_set:
         _, current_g, current = heappop(open_set)
+
+        # Debug: Track progress
+        print(f"Processing {current}, f_score={f_score[current]}")
 
         if current == end:
             # Reconstruct the path
@@ -142,8 +108,8 @@ def astar(start, end, grid):
 solver = MazeSolver()
 
 # Define start and end points
-start_point = (272, 668)  # (x, y)
-end_point = (77, 367)  # (x, y)
+start_point = (360, 605)  # (x, y)
+end_point = (91, 400)  # (x, y)
 
 while True:
     ret, frame = solver.cap.read()
@@ -156,38 +122,51 @@ while True:
     # Find the green walls and holes (masks for green and holes)
     green_mask_cleaned, hole_mask_cleaned = solver.find_green_walls_and_holes(maze)
 
-    # Debug: Check the output of green_mask_cleaned and hole_mask_cleaned
-    print("Green Mask Cleaned:", green_mask_cleaned)
-    print("Hole Mask Cleaned:", hole_mask_cleaned)
+    # Create grid based on the hole mask (1 = obstacle, 0 = free space)
+    grid = np.zeros_like(hole_mask_cleaned)
+    grid[hole_mask_cleaned == 255] = 1  # Mark walls as 1 (blocked space)
 
-    # Create grid based on the green walls and holes map (1 = wall, 0 = free space)
-    grid = np.zeros_like(green_mask_cleaned)
-    grid[green_mask_cleaned == 255] = 1  # Set walls as 1
-    grid[hole_mask_cleaned == 255] = 1   # Set holes as 1 (avoid these areas)
+    # Debug: Visualize the grid (pathfinding)
+    grid_visual = np.repeat(grid[:, :, np.newaxis], 3, axis=2) * 255
+    cv2.imshow("Pathfinding Grid", grid_visual)
 
-    # Debug: Ensure start and end points are within bounds and valid
-    print("Grid size:", grid.shape)
-    print("Start point:", start_point)
-    print("End point:", end_point)
+    # Ensure start and end points are free (0) in the grid
+    if grid[start_point[0], start_point[1]] == 1:
+        print(f"Start point {start_point} is blocked. Trying a nearby free space.")
+        # Try adjusting the start point if it's blocked
+        start_point = (min(start_point[0] + 1, hole_mask_cleaned.shape[0] - 1), start_point[1])
+    if grid[end_point[0], end_point[1]] == 1:
+        print(f"End point {end_point} is blocked. Trying a nearby free space.")
+        # Try adjusting the end point if it's blocked
+        end_point = (min(end_point[0] + 1, hole_mask_cleaned.shape[0] - 1), end_point[1])
+
+    # Debug: Print grid and start/end points to validate
+    print("Grid:")
+    print(grid)
+    print(f"Start: {start_point}, End: {end_point}")
+
+    # Define the start and end points in terms of grid coordinates
+    # Ensure the start and end points are inside the bounds of the hole mask
+    start_point = (min(max(start_point[0], 0), hole_mask_cleaned.shape[0] - 1),
+                  min(max(start_point[1], 0), hole_mask_cleaned.shape[1] - 1))
+
+    end_point = (min(max(end_point[0], 0), hole_mask_cleaned.shape[0] - 1),
+                min(max(end_point[1], 0), hole_mask_cleaned.shape[1] - 1))
 
     # Run A* to find the path
     path = astar(start_point, end_point, grid)
-
-    # Debug: Print the found path
-    if path:
-        print("Path found:", path)
-    else:
-        print("No path found.")
 
     # Draw the path (if any) in blue
     if path:
         for point in path:
             cv2.circle(maze, (point[1], point[0]), 3, (255, 0, 0), -1)  # Blue dots for the path
+        cv2.imshow("Maze with Path", maze)
+    else:
+        print("No path found!")
 
     # Show the maze with detected green walls and holes
     cv2.imshow("Maze Solver - Green Walls", green_mask_cleaned)
     cv2.imshow("Maze Solver - Holes Detection", hole_mask_cleaned)
-    cv2.imshow("Maze Solver - Path (A*)", maze)
 
     # Exit the program when the 'q' key is pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):

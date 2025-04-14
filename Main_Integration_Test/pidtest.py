@@ -46,8 +46,8 @@ class ImageProcessor:
         self.ballpts = deque(maxlen=self.args["buffer"])
 
         # PID controllers for X and Y axe
-        self.PID_VALUES = [5,1,1.5]
-        self.PID_VALUESy = [5,1,1.5]
+        self.PID_VALUES = [7,1,1.8]
+        self.PID_VALUESy = [7,1,1.8]
         self.pid_x = PID(self.PID_VALUES[0],self.PID_VALUES[1],self.PID_VALUES[2])
         self.pid_y = PID(self.PID_VALUESy[0],self.PID_VALUESy[1],self.PID_VALUESy[2])
         # self.pid_x.proportional_on_measurement = True
