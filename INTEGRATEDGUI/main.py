@@ -11,7 +11,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QPushButton, QHBoxLayout, QVBoxLayout, QPlainTextEdit
 
 # Maze Game Module Imports
-from imageProcessing import IMAGEPROCESSOR
+from maze_ball_detection_1_copy import ImageProcessor
 from lcdControl import LCD1602_WRITE
 from peripherals import LEDSTRIPCONTROL
 from peripherals import LEDBUTTONCONTROL
@@ -75,7 +75,7 @@ class App(QWidget):
         self.timerLabel = QLabel('00:00.0')
         self.timerLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.timerLabel.setMinimumHeight(150)
-        self.timerLabel.setStyleSheet('background-color: #C0C0C0; font: bold 100px')
+        self.timerLabel.setStyleSheet('background-color: #A0A0A0; font: bold 100px')
         contentVBox.addWidget(self.timerLabel)
         # Timer Item
         timer = QTimer(self)
@@ -194,16 +194,16 @@ class App(QWidget):
     # PyQt Slot for updating motor rates
     @pyqtSlot(int)
     def updateX(self, xRate):
-        motors.setServoPulse(0,1915+xRate/2)
+        motors.setServoPulse(0,x1+xRate/2)
         self.xRateLabel.setText('X: {}'.format(xRate))
     def updateY(self, yRate):
-        motors.setServoPulse(1,1850+yRate/2)
+        motors.setServoPulse(1,y1+yRate/2)
         self.yRateLabel.setText('Y: {}'.format(yRate))
     def AIupdateX(self, xRate):
-        if aiControlFlag == True: motors.setServoPulse(0,1915+xRate/2)
+        if aiControlFlag == True: motors.setServoPulse(0,x1+xRate)
         else: pass
     def AIupdateY(self, yRate):
-        if aiControlFlag == True: motors.setServoPulse(0,1850+yRate/2)
+        if aiControlFlag == True: motors.setServoPulse(0,y1+yRate)
         else: pass
 
     def showTime(self):
@@ -269,7 +269,7 @@ class KENDAMA():
 
         if b1 == None:
             mainWindow.buttonLabel1.setText('')
-            mainWindow.button1('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
+            mainWindow.button1.setStyleSheet('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
             ledButtons.setLED(g=0)
         else:
             mainWindow.buttonLabel1.setText(b1)
@@ -278,20 +278,20 @@ class KENDAMA():
 
         if b2 == None:
             mainWindow.buttonLabel2.setText('')
-            mainWindow.button2('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
+            mainWindow.button2.setStyleSheet('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
             ledButtons.setLED(r=0)
         else:
             mainWindow.buttonLabel2.setText(b2)
             mainWindow.button2.setStyleSheet('border-radius: 50px; border: 8px solid red; background-color: #C0C0C0')
-            ledButtons.setLED(r=2)
+            ledButtons.setLED(r=1)
 
         if b3 == None:
             mainWindow.buttonLabel3.setText('')
-            mainWindow.button3('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
+            mainWindow.button3.setStyleSheet('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
             ledButtons.setLED(b=0)
         else:
-            mainWindow.buttonLabel1.setText(b3)
-            mainWindow.button1.setStyleSheet('border-radius: 50px; border: 8px solid blue; background-color: #C0C0C0')
+            mainWindow.buttonLabel3.setText(b3)
+            mainWindow.button3.setStyleSheet('border-radius: 50px; border: 8px solid blue; background-color: #C0C0C0')
             ledButtons.setLED(b=1)
 
         if colour == 'green':
@@ -386,6 +386,7 @@ class ManualModeStopped():
 
 class AIMode():
     def update(self):
+        mainWindow.stopTimer()
         mainWindow.resetTimer()
         aiControlFlag = False
         kendama.update(title = 'AI Solving Mode',
@@ -432,17 +433,29 @@ class SolvedMaze():
             kendama.switchMode('Menu')
         else: pass
 
+def get_flat_values():
+    defaultx = 1860
+    defaulty = 1920
+
+
+    motors.setServoPulse(0, int(defaulty))
+    motors.setServoPulse(1, int(defaultx))
+
+    return defaultx, defaulty
+
 # Mode Manager Call
 kendama = KENDAMA()
 
 # Other Peripheral Calls
-processor = IMAGEPROCESSOR()
+processor = ImageProcessor()
 pButtons = PHYSICALBUTTONS()
 ledButtons = LEDBUTTONCONTROL()
 lcd = LCD1602_WRITE()
 ledStrip = LEDSTRIPCONTROL()
 joystick = joystickControl.JOYSTICK_READ_DATA()
 motors = PCA9685()
+
+x1,y1 = get_flat_values()
 
 # Main PyQt Application Loop
 app = QApplication(sys.argv)
