@@ -129,9 +129,9 @@ class App(QWidget):
         self.button3.setMaximumSize(100, 100)
         self.button3.setStyleSheet('border-radius: 50px; border: 8px solid blue; background-color: #C0C0C0')
         button3Box.addWidget(self.button3)
-        self.button1.clicked.connect(lambda : kendama.currentMode.handleInput(1))
-        self.button2.clicked.connect(lambda : kendama.currentMode.handleInput(2))
-        self.button3.clicked.connect(lambda : kendama.currentMode.handleInput(3))
+        self.button1.clicked.connect(lambda : mode.currentMode.handleInput(1))
+        self.button2.clicked.connect(lambda : mode.currentMode.handleInput(2))
+        self.button3.clicked.connect(lambda : mode.currentMode.handleInput(3))
 
         # PWM Brightness Slider
         self.brightnessLabel = QLabel('Brightness')
@@ -237,11 +237,11 @@ class PHYSICALBUTTONS():
         self.pButton2 = Button(19, pull_up=True, bounce_time=0.1)
         self.pButton3 = Button(13, pull_up=True, bounce_time=0.1)
 
-        self.pButton1.when_pressed = lambda : kendama.currentMode.handleInput(1)
-        self.pButton2.when_pressed = lambda : kendama.currentMode.handleInput(2)
-        self.pButton3.when_pressed = lambda : kendama.currentMode.handleInput(3)
+        self.pButton1.when_pressed = lambda : mode.currentMode.handleInput(1)
+        self.pButton2.when_pressed = lambda : mode.currentMode.handleInput(2)
+        self.pButton3.when_pressed = lambda : mode.currentMode.handleInput(3)
 
-class KENDAMA():
+class MODE():
     def __init__(self):
         self.modes = {
             'Menu' : MenuMode(),
@@ -318,7 +318,7 @@ class KENDAMA():
 class MenuMode():
     def update(self):
         mainWindow.resetTimer()
-        kendama.update(title = 'Welcome to the Maze Game!',
+        mode.update(title = 'Welcome to the Maze Game!',
                        b1 = 'AI',
                        b2 = 'Manual',
                        b3 = 'Calibrate',
@@ -328,17 +328,17 @@ class MenuMode():
 
     def handleInput(self, button):
         if button == 1:
-            kendama.switchMode('AI')
+            mode.switchMode('AI')
         elif button == 2:
-            kendama.switchMode('Manual')
+            mode.switchMode('Manual')
         elif button == 3:
-            kendama.switchMode('Calibrate')
+            mode.switchMode('Calibrate')
         else: pass
 
 class ManualMode():
     def update(self):
         mainWindow.resetTimer()
-        kendama.update(b1 = 'Start',
+        mode.update(b1 = 'Start',
                        b3 = 'Menu',
                        lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
                                  'Start       Menu']
@@ -346,16 +346,16 @@ class ManualMode():
 
     def handleInput(self, button):
         if button == 1:
-            kendama.switchMode('ManualRunning')
+            mode.switchMode('ManualRunning')
         elif button == 3:
-            kendama.switchMode('Menu')
+            mode.switchMode('Menu')
         else: pass
 
 class ManualModeRunning():
     def update(self):
         mainWindow.startTimer()
         joystick.start_reading()
-        kendama.update(title = 'Manual Solving Mode',
+        mode.update(title = 'Manual Solving Mode',
                        b2 = 'Stop',
                        lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
                                  '      Stop      ']
@@ -363,14 +363,14 @@ class ManualModeRunning():
 
     def handleInput(self, button):
         if button == 2:
-            kendama.switchMode('ManualStopped')
+            mode.switchMode('ManualStopped')
         else: pass
 
 class ManualModeStopped():
     def update(self):
         mainWindow.stopTimer()
         joystick.stop_reading()
-        kendama.update(title = 'Manual Solving Mode',
+        mode.update(title = 'Manual Solving Mode',
                        b1 = 'Start',
                        b3 = 'Reset',
                        lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
@@ -379,9 +379,9 @@ class ManualModeStopped():
 
     def handleInput(self, button):
         if button == 1:
-            kendama.switchMode('ManualRunning')
+            mode.switchMode('ManualRunning')
         elif button == 3:
-            kendama.switchMode('Manual')
+            mode.switchMode('Manual')
         else: pass
 
 class AIMode():
@@ -389,7 +389,7 @@ class AIMode():
         mainWindow.stopTimer()
         mainWindow.resetTimer()
         aiControlFlag = False
-        kendama.update(title = 'AI Solving Mode',
+        mode.update(title = 'AI Solving Mode',
                        b1 = 'Start',
                        b3 = 'Menu',
                        lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
@@ -398,16 +398,16 @@ class AIMode():
 
     def handleInput(self, button):
         if button == 1:
-            kendama.switchMode('AIRunning')
+            mode.switchMode('AIRunning')
         elif button == 3:
-            kendama.switchMode('Menu')
+            mode.switchMode('Menu')
         else: pass
 
 class AIModeRunning():
     def update(self):
         mainWindow.startTimer()
         aiControlFlag = True
-        kendama.update(title = 'AI Solving Mode',
+        mode.update(title = 'AI Solving Mode',
                        b2 = 'Stop',
                        lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
                                  '      Stop      ']
@@ -415,14 +415,14 @@ class AIModeRunning():
 
     def handleInput(self, button):
         if button == 2:
-            kendama.switchMode('AI')
+            mode.switchMode('AI')
         else: pass
 
 class SolvedMaze():
     def update(self):
         mainWindow.stopTimer()
         aiControlFlag = False
-        kendama.update(title = 'Maze Solved!',
+        mode.update(title = 'Maze Solved!',
                        b3 = 'Menu',
                        lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
                                  '            Menu']
@@ -430,7 +430,7 @@ class SolvedMaze():
 
     def handleInput(self, button):
         if button == 3:
-            kendama.switchMode('Menu')
+            mode.switchMode('Menu')
         else: pass
 
 def get_flat_values():
@@ -444,7 +444,7 @@ def get_flat_values():
     return defaultx, defaulty
 
 # Mode Manager Call
-kendama = KENDAMA()
+mode = MODE()
 
 # Other Peripheral Calls
 processor = ImageProcessor()
@@ -463,5 +463,5 @@ screenWidth = app.primaryScreen().size().width()
 screenHeight = app.primaryScreen().size().height()
 mainWindow = App()
 mainWindow.show()
-kendama.currentMode.update()
+mode.currentMode.update()
 sys.exit(app.exec_())
