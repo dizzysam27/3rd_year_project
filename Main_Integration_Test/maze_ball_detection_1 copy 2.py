@@ -28,14 +28,25 @@ class ImageProcessor:
         self.sampled_points = self.load_last_coordinates()
         self.current_target_index = 0
         self.goal_reached = True
-        self.output_limits =  23
-        self.output_limitsy =  23
-        self.last_location = [120, 213]
+
+        self.default_limits_x = 18
+        self.default_limits_y = 15
+        self.output_limits =  self.default_limits_x
+        self.output_limitsy =  self.default_limits_y
+        self.last_location = [133, 249]
         self.last_motor_control = [self.defaultx,self.defaulty]
         self.new_motor_control = [0,0]
 
-        self.reached_distance = 14
-    
+        self.reached_distance = 18
+        self.motorcounter = 0
+        self.lastinput = [0,0]
+
+        self.balltracker = [0,0]
+        self.balltrackercounter = 0
+        self.boosted = 0
+
+        
+        
 
         ap = argparse.ArgumentParser()
         ap.add_argument("-v", "--video",
@@ -45,9 +56,9 @@ class ImageProcessor:
         self.args = vars(ap.parse_args())
         self.ballpts = deque(maxlen=self.args["buffer"])
 
-        # PID controllers for X and Y axe
-        self.PID_VALUES = [5,1,1.5]
-        self.PID_VALUESy = [5,1,1.5]
+        # PID controllers for X and Y axes
+        self.PID_VALUES = [8,0,2]
+        self.PID_VALUESy = [6,0.1,2.3]
         self.pid_x = PID(self.PID_VALUES[0],self.PID_VALUES[1],self.PID_VALUES[2])
         self.pid_y = PID(self.PID_VALUESy[0],self.PID_VALUESy[1],self.PID_VALUESy[2])
         # self.pid_x.proportional_on_measurement = True
@@ -111,10 +122,44 @@ class ImageProcessor:
             if cv2.contourArea(largest_contour) > 10:
                 M = cv2.moments(largest_contour)
                 if M["m00"] != 0:
+                    
                     cx = int(M["m10"] / M["m00"])
                     cy = int(M["m01"] / M["m00"])
                     self.last_location[0] = int(M["m10"] / M["m00"])
                     self.last_location[1] = int(M["m01"] / M["m00"])
+
+                    if self.balltrackercounter == 0:
+                        self.balltracker[0] = int(M["m10"] / M["m00"])
+                        self.balltracker[1] = int(M["m01"] / M["m00"])
+
+                    if self.balltrackercounter == 10:
+                        if self.balltracker[0] == cx and self.balltracker[1] == cy:
+                            self.output_limits = 25
+                            self.output_limitsy = 25
+                            print('boosted')
+                            self.boosted = 1
+                            cx = 100
+                            cy = 100
+                            if self.current_target_index < 4:
+                                self.current_target_index = 0
+                            else:
+                                self.current_target_index = self.current_target_index - 3
+                                self.goal_reached = True
+
+                    if self.balltrackercounter == 13:
+                        if self.boosted == 1:
+                            self.output_limitsy = self.default_limits_y
+                            self.output_limits = self.default_limits_x
+                            print('normal')
+                        self.balltrackercounter = -1
+                        self.balltracker = [0,0]
+                        self.boosted = 0
+                        cx = int(M["m10"] / M["m00"])
+                        cy = int(M["m01"] / M["m00"])
+
+                    self.balltrackercounter += 1
+                    self.pid_x.output_limits = (-self.output_limits, self.output_limits)
+                    self.pid_y.output_limits = (-self.output_limitsy, self.output_limitsy)
                     return (cx, cy)
                 
         else:
@@ -126,14 +171,27 @@ class ImageProcessor:
 
     def move_motors(self, ball_center):
         if ball_center:
+            self.motorcounter += 1
             bx, by = ball_center
             if abs(bx - self.gx) < self.reached_distance and abs(by - self.gy) < self.reached_distance:
                 self.goal_reached = True
 
-          
+            
             control_x = self.pid_x(bx)
             control_y = self.pid_y(by)
             print("x %s y %s" % (control_x, control_y))
+            if self.motorcounter == 1:
+                self.lastinput = [control_x, control_y]
+            elif self.motorcounter > 30:
+                if [control_x,control_y] == self.lastinput:
+                    print('ballstuck')
+                    # self.motors.setServoPulse(0, self.defaulty)
+                    # self.motors.setServoPulse(1, self.defaultx)
+
+                self.motorcounter = 1
+                self.lastinput = [control_x, control_y]
+
+                    
             
             
             # if abs(bx - self.gx) < 10:
@@ -166,7 +224,11 @@ class ImageProcessor:
         else:
             self.motors.setServoPulse(0, self.new_motor_control[1])
             self.last_motor_control[1] = self.new_motor_control[1]
-
+       
+        # if self.motorcounter > 60:   
+        #     self.motors.setServoPulse(0, self.defaulty)
+        #     self.motors.setServoPulse(1, self.defaultx)
+        #     self.motorcounter = 0
 
     def update_goal_position(self):
         if self.goal_reached and self.current_target_index < len(self.sampled_points):
@@ -221,7 +283,22 @@ class ImageProcessor:
                 print(f"Selected path points: {self.sampled_points}")
                 self.save_last_coordinates()
         
+        self.motors.setServoPulse(1, self.defaultx)
+        self.motors.setServoPulse(0, self.defaulty)
         self.current_target_index = 0  
+        
+
+        # print('5')
+        # time.sleep(1)
+        # print('4')
+        # time.sleep(1)
+        # print('3')
+        # time.sleep(1)
+        # print('2')
+        # time.sleep(1)
+        # print('1')
+        # time.sleep(1)
+        # print('READY')
 
         while True:
             
@@ -254,8 +331,9 @@ class ImageProcessor:
 
             cv2.circle(cropped_frame, (self.gx, self.gy), 5, (0, 0, 255), -1)
 
-            
+
             cv2.imshow("Tracking", cropped_frame)
+            
             if cv2.waitKey(1) & 0xFF == ord('r'):
                 self.current_target_index = 0
                 self.goal_reached = True

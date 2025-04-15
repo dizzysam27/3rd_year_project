@@ -33,7 +33,7 @@ class PCA9685:
       print("Reseting PCA9685")
     self.write(self.__MODE1, 0x00)
     self.calibrate()
-    self.motorAngle(0,0)
+    # self.motorAngle(0,0)
 
     #self.motorAngle(0,0)
     #time.sleep(2)
@@ -110,7 +110,7 @@ class PCA9685:
     self.x_centre = 1900
     self.y_centre = 1915
 
-    self.motorAngle(0,0)
+    # self.motorAngle(0,0)
     
     self.previous_motor1_angle = 0
     self.previous_motor2_angle = 0

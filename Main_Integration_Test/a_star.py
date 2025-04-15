@@ -10,21 +10,18 @@ class MazeSolver:
             exit()
 
     def crop_frame(self, frame):
-        # Zoom into the region where the line is likely to be
         frame_height, frame_width = frame.shape[:2]
-        
-        # Adjusted crop area for zooming in on the center
-        crop_width = 800   # Smaller width to zoom in
-        crop_height = 600  # Smaller height to zoom in
-        x_offset = 90      # Offset to adjust where to crop from the left
-        y_offset = 100     # Offset to adjust where to crop from the top
+        crop_width, crop_height = 1000, 750  # Fixed crop size
+        x_offset, y_offset = 10, -10  # Offsets for fine-tuning the crop
 
+        # Calculate the start and end points to center the crop
         start_x = (frame_width - crop_width) // 2
         end_x = start_x + crop_width
         start_y = (frame_height - crop_height) // 2
         end_y = start_y + crop_height
 
-        return frame[start_y + y_offset : end_y + y_offset, start_x + x_offset : end_x + x_offset]
+        # Return the cropped frame with applied offsets
+        return frame[start_y + y_offset:end_y + y_offset, start_x + x_offset:end_x + x_offset]
 
     def process_frame(self, frame):
         return self.crop_frame(frame)
@@ -81,7 +78,7 @@ while True:
     if not ret:
         break
 
-    # Process the frame
+    # Process the frame (apply crop)
     maze = solver.process_frame(frame)
     
     # Find the start and end points of the black line

@@ -19,8 +19,8 @@ class ImageProcessor:
 
         self.motors = PCA9685()
         self.cap = cv2.VideoCapture(0)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         flat_x, flat_y = get_flat_values()
         self.defaultx = flat_x
         self.defaulty = flat_y
@@ -28,13 +28,10 @@ class ImageProcessor:
         self.sampled_points = self.load_last_coordinates()
         self.current_target_index = 0
         self.goal_reached = True
-        self.output_limits =  23
-        self.output_limitsy =  23
+        self.output_limits =  40
         self.last_location = [120, 213]
         self.last_motor_control = [self.defaultx,self.defaulty]
         self.new_motor_control = [0,0]
-
-        self.reached_distance = 14
     
 
         ap = argparse.ArgumentParser()
@@ -46,15 +43,14 @@ class ImageProcessor:
         self.ballpts = deque(maxlen=self.args["buffer"])
 
         # PID controllers for X and Y axe
-        self.PID_VALUES = [5,1,1.5]
-        self.PID_VALUESy = [5,1,1.5]
+        self.PID_VALUES = [14,1,3]
         self.pid_x = PID(self.PID_VALUES[0],self.PID_VALUES[1],self.PID_VALUES[2])
-        self.pid_y = PID(self.PID_VALUESy[0],self.PID_VALUESy[1],self.PID_VALUESy[2])
+        self.pid_y = PID(self.PID_VALUES[0],self.PID_VALUES[1],self.PID_VALUES[2])
         # self.pid_x.proportional_on_measurement = True
-        # self.pid_y.proortional_on_measurement = True
+        # self.pid_y.proportional_on_measurement = True
 
         self.pid_x.output_limits = (-self.output_limits, self.output_limits)
-        self.pid_y.output_limits = (-self.output_limitsy, self.output_limitsy)
+        self.pid_y.output_limits = (-self.output_limits, self.output_limits)
 
         if not self.cap.isOpened():
             print("Error: Could not open webcam.")
@@ -72,7 +68,7 @@ class ImageProcessor:
 
     def crop_frame(self, frame):
         frame_height, frame_width = frame.shape[:2]
-        crop_width, crop_height = 370, 280
+        crop_width, crop_height = 280, 210
         x_offset, y_offset = 10, -10
 
         start_x = (frame_width - crop_width) // 2
@@ -81,42 +77,46 @@ class ImageProcessor:
         end_y = start_y + crop_height
 
         return frame[start_y + y_offset:end_y + y_offset, start_x + x_offset:end_x + x_offset]
-    
-    def rotate_frame(self, image):
-        # Define three source points (e.g., corners of a triangle in the original image)
-        src_pts = np.float32([[10, 10], [305, 13], [15, 235]])
-
-        # Define three corresponding destination points (where you want those points to map)
-        dst_pts = np.float32([[0, 0], [310, 0], [0, 250]])
-
-        # Get the affine transformation matrix
-        M = cv2.getAffineTransform(src_pts, dst_pts)
-
-        # Apply the affine transformation
-        rows, cols, _ = image.shape
-        transformed_img = cv2.warpAffine(image, M, (cols, rows))
-        
-        # return transformed_img
-        return image
 
     def detect_light_blue(self, frame):
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        hsv = cv2.GaussianBlur(hsv, (5, 5), 0)
-        lower_blue, upper_blue = np.array([120,50, 80]), np.array([179,255, 255])
-        mask = cv2.inRange(hsv, lower_blue, upper_blue)
+        # Define the color range for the ball (e.g., red ball)
+        # Define the color range for the ball (e.g., red ball)
+        lower_rgb = np.array([50, 100, 20])
+        upper_rgb = np.array([150, 255, 100])
 
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        if contours:
-            largest_contour = max(contours, key=cv2.contourArea)
-            if cv2.contourArea(largest_contour) > 10:
-                M = cv2.moments(largest_contour)
-                if M["m00"] != 0:
-                    cx = int(M["m10"] / M["m00"])
-                    cy = int(M["m01"] / M["m00"])
-                    self.last_location[0] = int(M["m10"] / M["m00"])
-                    self.last_location[1] = int(M["m01"] / M["m00"])
-                    return (cx, cy)
-                
+        # Create a mask to isolate the ball's color in RGB
+        rgb_mask = cv2.inRange(frame, lower_rgb, upper_rgb)
+
+        # Find contours from the mask
+        contours, _ = cv2.findContours(rgb_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        largest_circle = None
+        largest_radius = 0
+
+        # Loop through the contours to detect the largest valid circle
+        for contour in contours:
+            if 5 < cv2.contourArea(contour) < 20:  # Filter small contours
+                (x, y), radius = cv2.minEnclosingCircle(contour)
+                radius = int(radius)
+
+                if 1 < radius < 10 and radius > largest_radius:  # Track the largest valid circle
+                    largest_circle = (int(x), int(y))
+                    largest_radius = radius
+
+        # Draw the largest circle if found
+        if largest_circle is not None:
+            cv2.circle(frame, largest_circle, largest_radius, (0, 255, 0), 2)
+            cv2.putText(frame, "Largest Ball", (largest_circle[0] - largest_radius, largest_circle[1] - largest_radius - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+
+            M = cv2.moments(largest_circle)
+            if M["m00"] != 0:
+                cx = int(M["m10"] / M["m00"])
+                cy = int(M["m01"] / M["m00"])
+                self.last_location[0] = int(M["m10"] / M["m00"])
+                self.last_location[1] = int(M["m01"] / M["m00"])
+                return (cx, cy)       
         else:
             cx = self.last_location[0]
             cy = self.last_location[1]
@@ -127,7 +127,7 @@ class ImageProcessor:
     def move_motors(self, ball_center):
         if ball_center:
             bx, by = ball_center
-            if abs(bx - self.gx) < self.reached_distance and abs(by - self.gy) < self.reached_distance:
+            if abs(bx - self.gx) < 15 and abs(by - self.gy) < 12:
                 self.goal_reached = True
 
           
@@ -199,15 +199,11 @@ class ImageProcessor:
 
                 while True:
                     ret, frame = self.cap.read()
-                
                     if not ret:
                         print("Error: Failed to capture frame.")
                         break
 
-             
                     cropped_frame = self.crop_frame(frame)
-                    cropped_frame = self.rotate_frame(cropped_frame)
-             
                     for (x, y) in self.sampled_points:
                         cv2.circle(cropped_frame, (x, y), 5, (0, 0, 255), -1)
         
@@ -231,7 +227,6 @@ class ImageProcessor:
                 break
 
             cropped_frame = self.crop_frame(frame)
-            cropped_frame = self.rotate_frame(cropped_frame)
             ball_center = self.detect_light_blue(cropped_frame)
             self.update_goal_position()
             print(f"Ball: {ball_center}, Goal: ({self.gx}, {self.gy})")
