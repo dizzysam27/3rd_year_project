@@ -62,7 +62,7 @@ while(1):
     # Create HSV Image and threshold into a range.
     # hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     hsv = cv2.medianBlur(img, 5)
-    mask = cv2.inRange(img, lower, upper)
+    mask = cv2.inRange(hsv, lower, upper)
     output = img.copy()
     output[mask == 0] = [0, 255, 255]  # Set non-matching areas to yellow (BGR)
 

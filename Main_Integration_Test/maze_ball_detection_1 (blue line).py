@@ -29,7 +29,7 @@ class ImageProcessor:
         self.current_target_index = 0
         self.goal_reached = True
 
-        self.default_limits_x = 15
+        self.default_limits_x = 18
         self.default_limits_y = 15
         self.output_limits =  self.default_limits_x
         self.output_limitsy =  self.default_limits_y
@@ -37,13 +37,15 @@ class ImageProcessor:
         self.last_motor_control = [self.defaultx,self.defaulty]
         self.new_motor_control = [0,0]
 
-        self.reached_distance = 18
+        self.reached_distance = 23
         self.motorcounter = 0
         self.lastinput = [0,0]
 
         self.balltracker = [0,0]
         self.balltrackercounter = 0
         self.boosted = 0
+
+        self.line_points = np.zeros(shape=(400,2))
 
         
         
@@ -58,7 +60,7 @@ class ImageProcessor:
 
         # PID controllers for X and Y axes
         self.PID_VALUES = [8,0,2]
-        self.PID_VALUESy = [8,0,2.3]
+        self.PID_VALUESy = [10,0,2.5]
         self.pid_x = PID(self.PID_VALUES[0],self.PID_VALUES[1],self.PID_VALUES[2])
         self.pid_y = PID(self.PID_VALUESy[0],self.PID_VALUESy[1],self.PID_VALUESy[2])
         # self.pid_x.proportional_on_measurement = True
@@ -110,11 +112,11 @@ class ImageProcessor:
         # return transformed_img
         return image
 
-    def detect_light_blue(self, frame):
+    def detect_ball(self, frame):
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         hsv = cv2.GaussianBlur(hsv, (5, 5), 0)
-        lower_blue, upper_blue = np.array([120,50, 80]), np.array([179,255, 255])
-        mask = cv2.inRange(hsv, lower_blue, upper_blue)
+        lower_red, upper_red = np.array([120,50, 80]), np.array([179,255, 255])
+        mask = cv2.inRange(hsv, lower_red, upper_red)
 
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if contours:
@@ -134,8 +136,8 @@ class ImageProcessor:
 
                     if self.balltrackercounter == 10:
                         if self.balltracker[0] == cx and self.balltracker[1] == cy:
-                            self.output_limits = 25
-                            self.output_limitsy = 25
+                            self.output_limits = 30
+                            self.output_limitsy = 30
                             print('boosted')
                             self.boosted = 1
                             cx = 100
@@ -146,7 +148,7 @@ class ImageProcessor:
                                 self.current_target_index = self.current_target_index - 3
                                 self.goal_reached = True
 
-                    if self.balltrackercounter == 12:
+                    if self.balltrackercounter == 13:
                         if self.boosted == 1:
                             self.output_limitsy = self.default_limits_y
                             self.output_limits = self.default_limits_x
@@ -167,7 +169,81 @@ class ImageProcessor:
             cy = self.last_location[1]
         return None
     
-    
+    def find_and_fill_contours(self, mask, frame):
+        contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        filled_frame = frame.copy()
+        for contour in contours:
+            area = cv2.contourArea(contour)
+            largest_contour = max(contours, key=cv2.contourArea)
+        
+
+            x, y, w, h = cv2.boundingRect(largest_contour)
+            cx, cy = x + w // 2, y + h // 2
+            cv2.drawContours(filled_frame, [largest_contour], -1, (0, 255, 0), thickness=cv2.FILLED)
+        return filled_frame, contours
+    import numpy as np
+
+    def reorder_line_to_start(self, line_points, start):
+        # line_points: np.array of shape (N, 2)
+        distances = np.linalg.norm(line_points - start, axis=1)
+        start_idx = np.argmin(distances)
+
+        # Rotate using np.concatenate instead of +
+        return np.concatenate((line_points[start_idx:], line_points[:start_idx]), axis=0)
+
+    def detect_line(self, frame):
+        cv2.normalize(frame, frame, 0, 255, cv2.NORM_MINMAX)
+
+        lower_blue, upper_blue = np.array([166,122,63]), np.array([255,198,166])
+        bmask = cv2.inRange(frame, lower_blue, upper_blue)
+
+        gfilled_frame, gcontours = self.find_and_fill_contours(bmask, frame)
+
+        if gcontours:
+            # Get the largest contour
+            contour = max(gcontours, key=cv2.contourArea)
+
+            # Approximate the contour for simplicity
+            epsilon = 0.001 * cv2.arcLength(contour, False)
+            approx = cv2.approxPolyDP(contour, epsilon, False)
+            points = approx.reshape(-1, 2)
+
+            # Compute distances between points to get total curve length
+            distances = np.cumsum(
+                [0] + [np.linalg.norm(points[i] - points[i - 1]) for i in range(1, len(points))]
+            )
+            total_length = distances[-1]
+
+            # Normalize distances to [0, 1]
+            distances /= total_length
+
+            # Interpolate 100 evenly spaced points
+            num_points = 400
+            evenly_spaced_alphas = np.linspace(0, 1, num_points)
+            interpolated_points = []
+
+            for alpha in evenly_spaced_alphas:
+                idx = np.searchsorted(distances, alpha)
+                if idx == 0:
+                    interpolated_points.append(points[0])
+                elif idx >= len(points):
+                    interpolated_points.append(points[-1])
+                else:
+                    t = (alpha - distances[idx - 1]) / (distances[idx] - distances[idx - 1])
+                    interp_point = (1 - t) * points[idx - 1] + t * points[idx]
+                    interpolated_points.append(interp_point)
+
+            interpolated_points = np.array(interpolated_points, dtype=int)
+
+            # Draw points on the frame
+            for (x, y) in interpolated_points:
+                cv2.circle(frame, (x, y), 3, (0, 0, 255), -1)
+
+            # Optional: print coordinates
+            print("Sampled 100 points:", interpolated_points)
+
+        return interpolated_points
+
 
     def move_motors(self, ball_center):
         if ball_center:
@@ -299,6 +375,18 @@ class ImageProcessor:
         # print('1')
         # time.sleep(1)
         # print('READY')
+        ret, frame = self.cap.read()
+    
+        frame = self.crop_frame(frame)
+        cv2.normalize(frame, frame, 0, 255, cv2.NORM_MINMAX)
+
+        self.sampled_points = self.detect_line(frame)
+        start = (130, 250)
+        self.sampled_points = self.reorder_line_to_start(self.sampled_points, start)
+       
+
+        print(self.line_points)
+        print(self.line_points[0][0])
 
         while True:
             
@@ -309,7 +397,7 @@ class ImageProcessor:
 
             cropped_frame = self.crop_frame(frame)
             cropped_frame = self.rotate_frame(cropped_frame)
-            ball_center = self.detect_light_blue(cropped_frame)
+            ball_center = self.detect_ball(cropped_frame)
             self.update_goal_position()
             print(f"Ball: {ball_center}, Goal: ({self.gx}, {self.gy})")
 
