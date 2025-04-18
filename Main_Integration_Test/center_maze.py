@@ -1,7 +1,5 @@
-import cv2
 import numpy as np
 import time
-from simple_pid import PID
 from Peripherals.Motor_Control import PCA9685
 from Peripherals.Gyro_Control import LSM6DS3
 
@@ -17,6 +15,8 @@ def get_flat_values():
 x1,y1 = get_flat_values()
 
 def gyro_flat_values():
+    # Pan between servo pulses at 1800 and 2000 to find the flattest values.
+    # This will give the servo pulses for the optimal flatness
     servo_levels = np.arange(1800,2000,10).tolist()
     gyro_results = []
     servo_start_x = 1800
@@ -35,7 +35,7 @@ def gyro_flat_values():
             gyro_data = gyro.get_sensor_data()
             print(f"Gyro (°/s): X={gyro_data['gyro_x']}, Y={gyro_data['gyro_y']}, Z={gyro_data['gyro_z']}")
             gyro_yx = [(gyro_data['gyro_y']),(gyro_data['gyro_x'])]
-            gyro_results[(servo_levels.index(pos))] = gyro_xy(servo)
+            gyro_results[(servo_levels.index(pos))] = gyro_yx(servo)
         gyro_results = np.array(gyro_results)
         pos_y_x(servo)= gyro_results.argmax()
     motors.setServoPulse(0,int(pos_y_x(0)))
@@ -43,8 +43,7 @@ def gyro_flat_values():
     return pos_y_x
     #data = gyro.get_sensor_data()
     #x_data, y_data, z_data = (data['gyro_x']),(data['gyro_y']),(data['gyro_z'])
-    
-    print(f"Gyro (°/s): X={x_data}, Y={y_data}, Z={z_data}")
+    #print(f"Gyro (°/s): X={x_data}, Y={y_data}, Z={z_data}")
     
     
 #def motor_pan()
