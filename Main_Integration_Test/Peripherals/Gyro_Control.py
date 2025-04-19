@@ -52,66 +52,16 @@ class LSM6DS3:
             "gyro_x": gyro_x, "gyro_y": gyro_y, "gyro_z": gyro_z
         }
 
-    def update(self,frame):
-        current_time = time.time() - start_time
-        data = self.get_sensor_data()
-    
-        time_data.append(current_time)
-        x_data.append(data['accel_x'])
-        y_data.append(data['accel_y'])
-        z_data.append(data['accel_z'])
-    
-        # Keep the plot within a fixed time window
-        if current_time > 10:
-            time_data.pop(0)
-            x_data.pop(0)
-            y_data.pop(0)
-            z_data.pop(0)
-    
-        ax.set_xlim(max(0, current_time - 10), current_time)
-    
-        line_x.set_data(time_data, x_data)
-        line_y.set_data(time_data, y_data)
-        line_z.set_data(time_data, z_data)
-    
-        return line_x, line_y, line_z
 
-gyro_1 = LSM6DS3()
-
-x_data, y_data, z_data, time_data = [], [], [], []
-start_time = time.time()
-
-fig, ax = plt.subplots()
-ax.set_ylim(-2.5,2.5)  # Adjust based on your sensor range
-ax.set_xlim(0, 10)  # Time range (adjust as needed)
-ax.set_xlabel("Time (s)")
-ax.set_ylabel("Gyro (°/s)")
-ax.set_title("Real-Time Gyroscope Data")
-
-line_x, = ax.plot([], [], label='Gyro X', color='r')
-line_y, = ax.plot([], [], label='Gyro Y', color='g')
-line_z, = ax.plot([], [], label='Gyro Z', color='b')
-ax.legend()
 
 
 
-ani = animation.FuncAnimation(fig, gyro_1.update, interval=50, blit=True)
-plt.show()
+gyro_1 = LSM6DS3()
+while True:
+    data = gyro_1.get_sensor_data()
+    print(f"Gyro (°/s): X={data['gyro_x']:.2f}, Y={data['gyro_y']:.2f}, Z={data['gyro_z']:.2f}")
+    time.sleep(1)
 
-if __name__ == "__main__":
-    gyro_1.initialize_sensor()
-    print("LSM6DS3 Initialized")
-    
-    try:
-        while True:
-            data = gyro_1.get_sensor_data()
-            #print(f"Accel (g): X={data['accel_x']:.2f}, Y={data['accel_y']:.2f}, Z={data['accel_z']:.2f}")
-            print(f"Gyro (°/s): X={data['gyro_x']:.2f}, Y={data['gyro_y']:.2f}, Z={data['gyro_z']:.2f}")
-            #print("-----------------------")
-            time.sleep(0.01)
-    except KeyboardInterrupt:
-        print("Measurement stopped")
-        
 # test code END
 
 # Original code
