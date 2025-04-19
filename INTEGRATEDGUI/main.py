@@ -194,14 +194,18 @@ class App(QWidget):
     # PyQt Slot for updating motor rates
     @pyqtSlot(int)
     def updateX(self, xRate):
-        motors.setServoPulse(0,x1+xRate/2)
+        self.commandBox.appendPlainText('run updateX')
+        motors.setServoPulse(1,x1+xRate/2)
         self.xRateLabel.setText('X: {}'.format(xRate))
+    @pyqtSlot(int)
     def updateY(self, yRate):
-        motors.setServoPulse(1,y1+yRate/2)
+        motors.setServoPulse(0,y1+yRate/2)
         self.yRateLabel.setText('Y: {}'.format(yRate))
+    @pyqtSlot(int)
     def AIupdateX(self, xRate):
-        if aiControlFlag == True: motors.setServoPulse(0,x1+xRate)
+        if aiControlFlag == True: motors.setServoPulse(1,x1+xRate)
         else: pass
+    @pyqtSlot(int)
     def AIupdateY(self, yRate):
         if aiControlFlag == True: motors.setServoPulse(0,y1+yRate)
         else: pass
@@ -340,6 +344,7 @@ class ManualMode():
         mainWindow.resetTimer()
         mode.update(b1 = 'Start',
                        b3 = 'Menu',
+                       colour = 'red',
                        lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
                                  'Start       Menu']
         )
@@ -357,6 +362,7 @@ class ManualModeRunning():
         joystick.start_reading()
         mode.update(title = 'Manual Solving Mode',
                        b2 = 'Stop',
+                       colour = 'red',
                        lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
                                  '      Stop      ']
         )
@@ -373,6 +379,7 @@ class ManualModeStopped():
         mode.update(title = 'Manual Solving Mode',
                        b1 = 'Start',
                        b3 = 'Reset',
+                       colour = 'red',
                        lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
                                  'Start      Reset']
         )
@@ -392,6 +399,7 @@ class AIMode():
         mode.update(title = 'AI Solving Mode',
                        b1 = 'Start',
                        b3 = 'Menu',
+                       colour = 'green',
                        lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
                                  'Start       Menu']
         )
@@ -409,6 +417,7 @@ class AIModeRunning():
         aiControlFlag = True
         mode.update(title = 'AI Solving Mode',
                        b2 = 'Stop',
+                       colour = 'green',
                        lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
                                  '      Stop      ']
         )
@@ -424,6 +433,7 @@ class SolvedMaze():
         aiControlFlag = False
         mode.update(title = 'Maze Solved!',
                        b3 = 'Menu',
+                       colour = 'chase',
                        lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
                                  '            Menu']
         )
@@ -434,8 +444,8 @@ class SolvedMaze():
         else: pass
 
 def get_flat_values():
-    defaultx = 380
-    defaulty = 380
+    defaultx = 1847
+    defaulty = 1933
 
 
     motors.setServoPulse(0, int(defaulty))

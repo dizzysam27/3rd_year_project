@@ -172,5 +172,3 @@ class PCA9685(QThread):
       for i in range(100, -101, -1):  
         pwm.setServoPulse(1, 1915 + (i / 100.0) * 85) 
         time.sleep(0.02)   
-
-hello = PCA9685()

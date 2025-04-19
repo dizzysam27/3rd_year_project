@@ -37,7 +37,7 @@ class ImageProcessor:
         self.last_motor_control = [self.defaultx,self.defaulty]
         self.new_motor_control = [0,0]
 
-        self.reached_distance = 23
+        self.reached_distance = 22
         self.motorcounter = 0
         self.lastinput = [0,0]
 
@@ -59,8 +59,8 @@ class ImageProcessor:
         self.ballpts = deque(maxlen=self.args["buffer"])
 
         # PID controllers for X and Y axes
-        self.PID_VALUES = [8,0,2]
-        self.PID_VALUESy = [10,0,2.5]
+        self.PID_VALUES = [9,0,3]
+        self.PID_VALUESy = [9,0,3]
         self.pid_x = PID(self.PID_VALUES[0],self.PID_VALUES[1],self.PID_VALUES[2])
         self.pid_y = PID(self.PID_VALUESy[0],self.PID_VALUESy[1],self.PID_VALUESy[2])
         # self.pid_x.proportional_on_measurement = True
@@ -115,7 +115,7 @@ class ImageProcessor:
     def detect_ball(self, frame):
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         hsv = cv2.GaussianBlur(hsv, (5, 5), 0)
-        lower_red, upper_red = np.array([120,50, 80]), np.array([179,255, 255])
+        lower_red, upper_red = np.array([120,50, 80]), np.array([255,255, 159])
         mask = cv2.inRange(hsv, lower_red, upper_red)
 
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -134,21 +134,27 @@ class ImageProcessor:
                         self.balltracker[0] = int(M["m10"] / M["m00"])
                         self.balltracker[1] = int(M["m01"] / M["m00"])
 
+                    if cx > 130 and cx < 135 and cy > 210 and cy < 225:
+                        self.output_limits = 30
+                        self.motors.setServoPulse(1, 1880)
+                    else:
+                        self.output_limits = self.default_limits_x
+
                     if self.balltrackercounter == 10:
                         if self.balltracker[0] == cx and self.balltracker[1] == cy:
                             self.output_limits = 30
                             self.output_limitsy = 30
                             print('boosted')
                             self.boosted = 1
-                            cx = 100
-                            cy = 100
+                            cx = 0
+                            cy = 0
                             if self.current_target_index < 4:
                                 self.current_target_index = 0
                             else:
-                                self.current_target_index = self.current_target_index - 3
+                                self.current_target_index = self.current_target_index - 4
                                 self.goal_reached = True
 
-                    if self.balltrackercounter == 13:
+                    if self.balltrackercounter == 14:
                         if self.boosted == 1:
                             self.output_limitsy = self.default_limits_y
                             self.output_limits = self.default_limits_x
@@ -194,7 +200,7 @@ class ImageProcessor:
     def detect_line(self, frame):
         cv2.normalize(frame, frame, 0, 255, cv2.NORM_MINMAX)
 
-        lower_blue, upper_blue = np.array([166,122,63]), np.array([255,198,166])
+        lower_blue, upper_blue = np.array([157,121,58]), np.array([255,198,166])
         bmask = cv2.inRange(frame, lower_blue, upper_blue)
 
         gfilled_frame, gcontours = self.find_and_fill_contours(bmask, frame)
@@ -381,7 +387,7 @@ class ImageProcessor:
         cv2.normalize(frame, frame, 0, 255, cv2.NORM_MINMAX)
 
         self.sampled_points = self.detect_line(frame)
-        start = (130, 250)
+        start = (130, 268)
         self.sampled_points = self.reorder_line_to_start(self.sampled_points, start)
        
 
