@@ -29,7 +29,7 @@ class LSM6DS3:
         # Read two bytes of data from the specified address
         low = self.bus.read_byte_data(self.LSM6DS3_ADDR, addr)
         high = self.bus.read_byte_data(self.LSM6DS3_ADDR, addr + 1)
-    
+        
         # Combine high and low values
         value = (high << 8) | low
     
@@ -56,11 +56,13 @@ class LSM6DS3:
 
 
 
-gyro_1 = LSM6DS3()
-while True:
-    data = gyro_1.get_sensor_data()
-    print(f"Gyro (°/s): X={data['gyro_x']:.2f}, Y={data['gyro_y']:.2f}, Z={data['gyro_z']:.2f}")
-    time.sleep(1)
+# gyro_1 = LSM6DS3()
+# gyro_1.initialize_sensor()
+# while True:
+#     data = gyro_1.get_sensor_data()
+#     print(f"Gyro (°/s): X={data['gyro_x']:.2f}, Y={data['gyro_y']:.2f}, Z={data['gyro_z']:.2f}")
+#     print(f"Gyro accel: X={data['accel_x']:.2f}, Y={data['accel_y']:.2f}, Z={data['accel_z']:.2f}")
+#     time.sleep(0.1)
 
 # test code END
 

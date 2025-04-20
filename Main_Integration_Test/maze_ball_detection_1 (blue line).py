@@ -134,11 +134,7 @@ class ImageProcessor:
                         self.balltracker[0] = int(M["m10"] / M["m00"])
                         self.balltracker[1] = int(M["m01"] / M["m00"])
 
-                    if cx > 130 and cx < 135 and cy > 210 and cy < 225:
-                        self.output_limits = 30
-                        self.motors.setServoPulse(1, 1880)
-                    else:
-                        self.output_limits = self.default_limits_x
+
 
                     if self.balltrackercounter == 10:
                         if self.balltracker[0] == cx and self.balltracker[1] == cy:
@@ -245,7 +241,7 @@ class ImageProcessor:
             for (x, y) in interpolated_points:
                 cv2.circle(frame, (x, y), 3, (0, 0, 255), -1)
 
-            # Optional: print coordinates
+            # print coordinates
             print("Sampled 100 points:", interpolated_points)
 
         return interpolated_points
