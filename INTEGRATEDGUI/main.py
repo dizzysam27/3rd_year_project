@@ -134,10 +134,34 @@ class App(QWidget):
         self.button3.clicked.connect(lambda : mode.currentMode.handleInput(3))
 
         # PWM Brightness Slider
-        self.brightnessLabel = QLabel('Brightness')
-        self.brightnessLabel.setStyleSheet('border: 5px solid black')
-        self.brightnessLabel.setMinimumHeight(100)
+        self.brightnessLabel = QLabel('Brightness Slider')
+        self.brightnessLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.brightnessLabel.setStyleSheet('font: bold 25px')
         contentVBox.addWidget(self.brightnessLabel)
+
+        brightnessHBox = QHBoxLayout()
+        contentVBox.addLayout(brightnessHBox)
+
+        brightnessZero = QLabel('0  ')
+        brightnessZero.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        brightnessZero.setStyleSheet('font: bold 25px')
+        brightnessMax = QLabel('  100')
+        brightnessMax.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        brightnessMax.setStyleSheet('font: bold 25px')
+
+        self.brightnessSlider = QSlider(Qt.Horizontal)
+        self.brightnessSlider.setMinimum(0)
+        self.brightnessSlider.setMaximum(100)
+        self.brightnessSlider.setTickInterval(10)
+        self.brightnessSlider.setTickPosition(QSlider.TicksBothSides)
+        self.brightnessSlider.setSingleStep(10)
+        self.brightnessSlider.setMinimumSize(300, 100)
+
+        self.brightnessSlider.valueChanged.connect(self.brightnessChanged)
+
+        brightnessHBox.addWidget(brightnessZero)
+        brightnessHBox.addWidget(self.brightnessSlider, alignment=QtCore.Qt.AlignCenter)
+        brightnessHBox.addWidget(brightnessMax)
         
         # Motor Rate Commands
         rateHBox = QHBoxLayout()
@@ -194,7 +218,6 @@ class App(QWidget):
     # PyQt Slot for updating motor rates
     @pyqtSlot(int)
     def updateX(self, xRate):
-        self.commandBox.appendPlainText('run updateX')
         motors.setServoPulse(1,x1+xRate/2)
         self.xRateLabel.setText('X: {}'.format(xRate))
     @pyqtSlot(int)
@@ -234,6 +257,11 @@ class App(QWidget):
     @pyqtSlot(str)
     def updateConsole(self, printBuffer):
         self.commandBox.appendPlainText('[{}]: {}'.format(QDateTime.currentDateTime(), printBuffer))
+    
+    def brightnessChanged(self, value):
+        self.updateConsole('New Brightness Value: {}'.format(value))
+        arduinoValue = value + 100
+        self.ledStrip.writeArduino(arduinoValue)
 
 class PHYSICALBUTTONS():
     def __init__(self):
