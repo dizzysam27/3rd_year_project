@@ -8,18 +8,15 @@ from gpiozero import Button # type: ignore
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import pyqtSlot, Qt, QTimer, QDateTime
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QPushButton, QHBoxLayout, QVBoxLayout, QPlainTextEdit
+from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QPushButton, QHBoxLayout, QVBoxLayout, QPlainTextEdit, QSlider
 
 # Maze Game Module Imports
-from maze_ball_detection_1_copy import ImageProcessor
+from imageProcessing import ImageProcessor
 from lcdControl import LCD1602_WRITE
 from peripherals import LEDSTRIPCONTROL
 from peripherals import LEDBUTTONCONTROL
-import joystickControl
+from joystickControl import JOYSTICK_READ_DATA
 from motorControl import PCA9685
-
-global screenWidth, screenHeight, aiControlFlag
-aiControlFlag = False
 
 # Main GUI App Class
 class App(QWidget):
@@ -27,6 +24,8 @@ class App(QWidget):
         # Initialise Class and QApplication
         super().__init__()
         self.setWindowTitle('Group 15 - Maze Project')
+
+        self.aiControlFlag = False
 
         # Set and find fullscreen size
         self.showFullScreen()
@@ -189,6 +188,7 @@ class App(QWidget):
 
         processor.xRate.connect(self.AIupdateX)
         processor.yRate.connect(self.AIupdateY)
+        processor.finish_flag.connect(self.AIsolved)
 
         # Command Box
         self.commandBox = QPlainTextEdit('Initialising System...')
@@ -198,7 +198,6 @@ class App(QWidget):
 
         joystick.printBuffer.connect(self.updateConsole)
         ledStrip.printBuffer.connect(self.updateConsole)
-        processor.printBuffer.connect(self.updateConsole)
         motors.printBuffer.connect(self.updateConsole)
 
         # Begin Event Loop
@@ -226,13 +225,16 @@ class App(QWidget):
         self.yRateLabel.setText('Y: {}'.format(yRate))
     @pyqtSlot(int)
     def AIupdateX(self, xRate):
-        if aiControlFlag == True: motors.setServoPulse(1,x1+xRate)
+        if self.aiControlFlag == True: motors.setServoPulse(1,xRate)
         else: pass
     @pyqtSlot(int)
     def AIupdateY(self, yRate):
-        if aiControlFlag == True: motors.setServoPulse(0,y1+yRate)
+        if self.aiControlFlag == True: motors.setServoPulse(0,yRate)
         else: pass
-
+    @pyqtSlot(int)
+    def AIsolved(self, finish_flag):
+        if self.aiControlFlag == True and finish_flag == 1: mode.currentMode.handleInput(4)
+        else: pass
     def showTime(self):
         if self.timerFlag == True:
             self.timerLabel.setText('{:02d}:{:02d}.{:01d}'.format(self.minCount, self.secCount, self.tenCount))
@@ -261,7 +263,7 @@ class App(QWidget):
     def brightnessChanged(self, value):
         self.updateConsole('New Brightness Value: {}'.format(value))
         arduinoValue = value + 100
-        self.ledStrip.writeArduino(arduinoValue)
+        ledStrip.writeArduino(arduinoValue)
 
 class PHYSICALBUTTONS():
     def __init__(self):
@@ -404,6 +406,7 @@ class ManualModeStopped():
     def update(self):
         mainWindow.stopTimer()
         joystick.stop_reading()
+        get_flat_values()
         mode.update(title = 'Manual Solving Mode',
                        b1 = 'Start',
                        b3 = 'Reset',
@@ -423,7 +426,8 @@ class AIMode():
     def update(self):
         mainWindow.stopTimer()
         mainWindow.resetTimer()
-        aiControlFlag = False
+        get_flat_values()
+        mainWindow.aiControlFlag = False
         mode.update(title = 'AI Solving Mode',
                        b1 = 'Start',
                        b3 = 'Menu',
@@ -442,7 +446,7 @@ class AIMode():
 class AIModeRunning():
     def update(self):
         mainWindow.startTimer()
-        aiControlFlag = True
+        mainWindow.aiControlFlag = True
         mode.update(title = 'AI Solving Mode',
                        b2 = 'Stop',
                        colour = 'green',
@@ -451,14 +455,18 @@ class AIModeRunning():
         )
 
     def handleInput(self, button):
-        if button == 2:
+        if button == 2:       
             mode.switchMode('AI')
+            processor.resetline()
+        elif button == 4:
+            processor.resetline()
+            mode.switchMode('Solved')     
         else: pass
 
 class SolvedMaze():
     def update(self):
         mainWindow.stopTimer()
-        aiControlFlag = False
+        mainWindow.aiControlFlag = False
         mode.update(title = 'Maze Solved!',
                        b3 = 'Menu',
                        colour = 'chase',
@@ -472,8 +480,8 @@ class SolvedMaze():
         else: pass
 
 def get_flat_values():
-    defaultx = 1847
-    defaulty = 1933
+    defaultx = 1849
+    defaulty = 1939
 
 
     motors.setServoPulse(0, int(defaulty))
@@ -490,16 +498,22 @@ pButtons = PHYSICALBUTTONS()
 ledButtons = LEDBUTTONCONTROL()
 lcd = LCD1602_WRITE()
 ledStrip = LEDSTRIPCONTROL()
-joystick = joystickControl.JOYSTICK_READ_DATA()
+joystick = JOYSTICK_READ_DATA()
 motors = PCA9685()
+
+print("everything inited")
 
 x1,y1 = get_flat_values()
 
 # Main PyQt Application Loop
 app = QApplication(sys.argv)
+print("app line 1")
 screenWidth = app.primaryScreen().size().width()
 screenHeight = app.primaryScreen().size().height()
 mainWindow = App()
+print("main window created")
 mainWindow.show()
+print("main window shown")
 mode.currentMode.update()
+print("mode update")
 sys.exit(app.exec_())
