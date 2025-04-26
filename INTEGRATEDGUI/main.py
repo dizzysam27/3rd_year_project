@@ -8,15 +8,18 @@ from gpiozero import Button # type: ignore
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import pyqtSlot, Qt, QTimer, QDateTime
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QPushButton, QHBoxLayout, QVBoxLayout, QPlainTextEdit, QSlider
+from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QPushButton, QHBoxLayout, QVBoxLayout, QPlainTextEdit
 
 # Maze Game Module Imports
-from imageProcessing import ImageProcessor
+from maze_ball_detection_1_copy import ImageProcessor
 from lcdControl import LCD1602_WRITE
 from peripherals import LEDSTRIPCONTROL
 from peripherals import LEDBUTTONCONTROL
-from joystickControl import JOYSTICK_READ_DATA
+import joystickControl
 from motorControl import PCA9685
+
+global screenWidth, screenHeight, aiControlFlag
+aiControlFlag = False
 
 # Main GUI App Class
 class App(QWidget):
@@ -24,8 +27,6 @@ class App(QWidget):
         # Initialise Class and QApplication
         super().__init__()
         self.setWindowTitle('Group 15 - Maze Project')
-
-        self.aiControlFlag = False
 
         # Set and find fullscreen size
         self.showFullScreen()
@@ -133,34 +134,10 @@ class App(QWidget):
         self.button3.clicked.connect(lambda : mode.currentMode.handleInput(3))
 
         # PWM Brightness Slider
-        self.brightnessLabel = QLabel('Brightness Slider')
-        self.brightnessLabel.setAlignment(QtCore.Qt.AlignCenter)
-        self.brightnessLabel.setStyleSheet('font: bold 25px')
+        self.brightnessLabel = QLabel('Brightness')
+        self.brightnessLabel.setStyleSheet('border: 5px solid black')
+        self.brightnessLabel.setMinimumHeight(100)
         contentVBox.addWidget(self.brightnessLabel)
-
-        brightnessHBox = QHBoxLayout()
-        contentVBox.addLayout(brightnessHBox)
-
-        brightnessZero = QLabel('0  ')
-        brightnessZero.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        brightnessZero.setStyleSheet('font: bold 25px')
-        brightnessMax = QLabel('  100')
-        brightnessMax.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        brightnessMax.setStyleSheet('font: bold 25px')
-
-        self.brightnessSlider = QSlider(Qt.Horizontal)
-        self.brightnessSlider.setMinimum(0)
-        self.brightnessSlider.setMaximum(100)
-        self.brightnessSlider.setTickInterval(10)
-        self.brightnessSlider.setTickPosition(QSlider.TicksBothSides)
-        self.brightnessSlider.setSingleStep(10)
-        self.brightnessSlider.setMinimumSize(300, 100)
-
-        self.brightnessSlider.valueChanged.connect(self.brightnessChanged)
-
-        brightnessHBox.addWidget(brightnessZero)
-        brightnessHBox.addWidget(self.brightnessSlider, alignment=QtCore.Qt.AlignCenter)
-        brightnessHBox.addWidget(brightnessMax)
         
         # Motor Rate Commands
         rateHBox = QHBoxLayout()
@@ -188,7 +165,6 @@ class App(QWidget):
 
         processor.xRate.connect(self.AIupdateX)
         processor.yRate.connect(self.AIupdateY)
-        processor.finish_flag.connect(self.AIsolved)
 
         # Command Box
         self.commandBox = QPlainTextEdit('Initialising System...')
@@ -198,6 +174,7 @@ class App(QWidget):
 
         joystick.printBuffer.connect(self.updateConsole)
         ledStrip.printBuffer.connect(self.updateConsole)
+        processor.printBuffer.connect(self.updateConsole)
         motors.printBuffer.connect(self.updateConsole)
 
         # Begin Event Loop
@@ -217,6 +194,7 @@ class App(QWidget):
     # PyQt Slot for updating motor rates
     @pyqtSlot(int)
     def updateX(self, xRate):
+        self.commandBox.appendPlainText('run updateX')
         motors.setServoPulse(1,x1+xRate/2)
         self.xRateLabel.setText('X: {}'.format(xRate))
     @pyqtSlot(int)
@@ -225,16 +203,13 @@ class App(QWidget):
         self.yRateLabel.setText('Y: {}'.format(yRate))
     @pyqtSlot(int)
     def AIupdateX(self, xRate):
-        if self.aiControlFlag == True: motors.setServoPulse(1,xRate)
+        if aiControlFlag == True: motors.setServoPulse(1,x1+xRate)
         else: pass
     @pyqtSlot(int)
     def AIupdateY(self, yRate):
-        if self.aiControlFlag == True: motors.setServoPulse(0,yRate)
+        if aiControlFlag == True: motors.setServoPulse(0,y1+yRate)
         else: pass
-    @pyqtSlot(int)
-    def AIsolved(self, finish_flag):
-        if self.aiControlFlag == True and finish_flag == 1: mode.currentMode.handleInput(4)
-        else: pass
+
     def showTime(self):
         if self.timerFlag == True:
             self.timerLabel.setText('{:02d}:{:02d}.{:01d}'.format(self.minCount, self.secCount, self.tenCount))
@@ -259,11 +234,6 @@ class App(QWidget):
     @pyqtSlot(str)
     def updateConsole(self, printBuffer):
         self.commandBox.appendPlainText('[{}]: {}'.format(QDateTime.currentDateTime(), printBuffer))
-    
-    def brightnessChanged(self, value):
-        self.updateConsole('New Brightness Value: {}'.format(value))
-        arduinoValue = value + 100
-        ledStrip.writeArduino(arduinoValue)
 
 class PHYSICALBUTTONS():
     def __init__(self):
@@ -406,7 +376,6 @@ class ManualModeStopped():
     def update(self):
         mainWindow.stopTimer()
         joystick.stop_reading()
-        get_flat_values()
         mode.update(title = 'Manual Solving Mode',
                        b1 = 'Start',
                        b3 = 'Reset',
@@ -426,8 +395,7 @@ class AIMode():
     def update(self):
         mainWindow.stopTimer()
         mainWindow.resetTimer()
-        get_flat_values()
-        mainWindow.aiControlFlag = False
+        aiControlFlag = False
         mode.update(title = 'AI Solving Mode',
                        b1 = 'Start',
                        b3 = 'Menu',
@@ -446,7 +414,7 @@ class AIMode():
 class AIModeRunning():
     def update(self):
         mainWindow.startTimer()
-        mainWindow.aiControlFlag = True
+        aiControlFlag = True
         mode.update(title = 'AI Solving Mode',
                        b2 = 'Stop',
                        colour = 'green',
@@ -455,18 +423,14 @@ class AIModeRunning():
         )
 
     def handleInput(self, button):
-        if button == 2:       
+        if button == 2:
             mode.switchMode('AI')
-            processor.resetline()
-        elif button == 4:
-            processor.resetline()
-            mode.switchMode('Solved')     
         else: pass
 
 class SolvedMaze():
     def update(self):
         mainWindow.stopTimer()
-        mainWindow.aiControlFlag = False
+        aiControlFlag = False
         mode.update(title = 'Maze Solved!',
                        b3 = 'Menu',
                        colour = 'chase',
@@ -480,8 +444,8 @@ class SolvedMaze():
         else: pass
 
 def get_flat_values():
-    defaultx = 1849
-    defaulty = 1939
+    defaultx = 1847
+    defaulty = 1933
 
 
     motors.setServoPulse(0, int(defaulty))
@@ -498,22 +462,16 @@ pButtons = PHYSICALBUTTONS()
 ledButtons = LEDBUTTONCONTROL()
 lcd = LCD1602_WRITE()
 ledStrip = LEDSTRIPCONTROL()
-joystick = JOYSTICK_READ_DATA()
+joystick = joystickControl.JOYSTICK_READ_DATA()
 motors = PCA9685()
-
-print("everything inited")
 
 x1,y1 = get_flat_values()
 
 # Main PyQt Application Loop
 app = QApplication(sys.argv)
-print("app line 1")
 screenWidth = app.primaryScreen().size().width()
 screenHeight = app.primaryScreen().size().height()
 mainWindow = App()
-print("main window created")
 mainWindow.show()
-print("main window shown")
 mode.currentMode.update()
-print("mode update")
 sys.exit(app.exec_())

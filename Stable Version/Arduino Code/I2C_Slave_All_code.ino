@@ -39,13 +39,13 @@ void setup() {
 
 void loop() {
     int potValue = analogRead(POT_PIN);
-    if (!updatedViaI2C || potControlActive || abs(potValue - lastPotValue) > POT_THRESHOLD) {  // Check for significant change
-        dutyCycle = map(potValue, 0, 1023, 1, 255);  // Scale potentiometer input
+    if (!updatedViaI2C || potControlActive || abs(potValue - lastPotValue) > POT_THRESHOLD) {  
+        dutyCycle = map(potValue, 0, 1023, 1, 255); 
         updatedViaI2C = false;  // enable continuous pot adjustment
         potControlActive = true; // Set flag for pot control
         lastPotValue = potValue;  // Update last pot value only when taking control
     }
-    analogWrite(PWM_PIN, dutyCycle);  // Set PWM output based on the latest duty cycle
+    analogWrite(PWM_PIN, dutyCycle);  // Set PWM output
 
     if (chaseActive) {
         runChaseEffect(CRGB::White);  // Run chase effect in White

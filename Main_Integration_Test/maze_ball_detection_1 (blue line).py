@@ -383,7 +383,7 @@ class ImageProcessor:
         cv2.normalize(frame, frame, 0, 255, cv2.NORM_MINMAX)
 
         self.sampled_points = self.detect_line(frame)
-        start = (147, 270)
+        start = (130, 268)
         self.sampled_points = self.reorder_line_to_start(self.sampled_points, start)
        
 

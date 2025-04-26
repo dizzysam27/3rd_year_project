@@ -19,13 +19,14 @@ class JOYSTICK_READ_DATA(QThread):
                                    timeout=0)
         self.running = False
         self.thread = None  # Initialize without a thread
+        self.motors = PCA9685()
 
     def read_data(self):
         while self.running:
             if self.uart0.in_waiting > 0:
                 dataRx = self.uart0.readline().decode('utf-8').strip()
                 try:
-                    xValue, yValue = map(int, dataRx.split(','))
+                    yValue, xValue = map(int, dataRx.split(','))
                     self.printBuffer.emit(f"x: {xValue}, y: {yValue}")
                     self.xRate.emit(int(xValue))
                     self.yRate.emit(int(yValue))
