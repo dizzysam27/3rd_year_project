@@ -1,34 +1,25 @@
-# General Imports
 import sys
 import cv2
 import numpy as np
-#from gpiozero import Button # type: ignore
 
 # PyQt5 Imports
 from PyQt5 import QtGui, QtCore
-from PyQt5.QtCore import pyqtSlot, Qt, QTimer, QDateTime
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QPushButton, QHBoxLayout, QVBoxLayout, QPlainTextEdit, QSlider
+from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QPlainTextEdit
 
-# Maze Game Module Imports
-# from maze_ball_detection_1_copy import ImageProcessor
-# from lcdControl import LCD1602_WRITE
-# from peripherals import LEDSTRIPCONTROL
-# from peripherals import LEDBUTTONCONTROL
-# import joystickControl
-# from motorControl import PCA9685
+# Module Imports
+### TO BE FILLED OUT
 
-global screenWidth, screenHeight, aiControlFlag
-aiControlFlag = False
-
-# Main GUI App Class
+# mainWindow GUI Class
 class App(QWidget):
     def __init__(self):
         # Initialise Class and QApplication
+        app = QApplication(sys.argv)
         super().__init__()
         self.setWindowTitle('Group 15 - Maze Project')
 
         # Set and find fullscreen size
+        screenWidth = app.primaryScreen().size().width()
+        screenHeight = app.primaryScreen().size().height()
         self.showFullScreen()
         self.setFixedSize(QtCore.QSize(screenWidth, screenHeight))
 
@@ -36,13 +27,12 @@ class App(QWidget):
         print(screenHeight)
         
         # Set camera feed dimensions
-        self.imageWidth = int(screenWidth * (2/3) + 20)
+        self.imageWidth = int(screenWidth * (2/3))
         self.imageHeight = int(self.imageWidth * (3/4))
         
         # Create main grid with camera feed size
         mainGrid = QGridLayout()
         self.setLayout(mainGrid)
-        self.setStyleSheet('background-color: #A0A0A0')
         mainGrid.setHorizontalSpacing(5)
         mainGrid.setVerticalSpacing(5)
         mainGrid.setColumnMinimumWidth(0, self.imageWidth)
@@ -51,6 +41,11 @@ class App(QWidget):
         # Content vertical layout
         contentVBox = QVBoxLayout()
         mainGrid.addLayout(contentVBox, 1, 1, 1, 1)
+
+        # Camera Feed
+        self.imageLabel = QLabel('Image')
+        self.imageLabel.setStyleSheet('border: 5px solid black')
+        mainGrid.addWidget(self.imageLabel, 1, 0, 1, 1)
 
         # Header
         headerHBox = QHBoxLayout()
@@ -63,28 +58,13 @@ class App(QWidget):
         self.modeLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignCenter)
         headerHBox.addWidget(self.modeLabel)
 
-        # Camera Feed
-        self.imageLabel = QLabel('Image')
-        self.imageLabel.setStyleSheet('border: 2px solid black')
-        mainGrid.addWidget(self.imageLabel, 1, 0, 1, 1)
-        # Video Capture Thread
-        # processor.cameraVideo.connect(self.updateImage) # Run updateImage when cameraVideo is modified in ImageProcessor()
-        # processor.start()
-        
         # Timer
         self.timerLabel = QLabel('00:00.0')
         self.timerLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.timerLabel.setMinimumHeight(150)
-        self.timerLabel.setStyleSheet('background-color: #A0A0A0; font: bold 100px')
+        self.timerLabel.setStyleSheet('border: 5px solid black; font: bold 100px')
         contentVBox.addWidget(self.timerLabel)
-        # Timer Item
-        timer = QTimer(self)
-        timer.timeout.connect(self.showTime)
-        timer.start(100)
-        self.timerFlag = False
-        self.tenCount = 0
-        self.secCount = 0
-        self.minCount = 0
+
         # Button Labels
         buttonLabelHBox = QHBoxLayout()
         contentVBox.addLayout(buttonLabelHBox)
@@ -129,40 +109,15 @@ class App(QWidget):
         self.button3.setMaximumSize(100, 100)
         self.button3.setStyleSheet('border-radius: 50px; border: 8px solid blue; background-color: #C0C0C0')
         button3Box.addWidget(self.button3)
-        
-        self.button1.clicked.connect(lambda : mode.currentMode.handleInput(1))
-        self.button2.clicked.connect(lambda : mode.currentMode.handleInput(2))
-        self.button3.clicked.connect(lambda : mode.currentMode.handleInput(3))
+        self.button1.clicked.connect(lambda : self.testFunc(1))
+        self.button2.clicked.connect(lambda : self.testFunc(2))
+        self.button3.clicked.connect(lambda : self.testFunc(3))
 
         # PWM Brightness Slider
-        self.brightnessLabel = QLabel('Brightness Slider')
-        self.brightnessLabel.setAlignment(QtCore.Qt.AlignCenter)
-        self.brightnessLabel.setStyleSheet('font: bold 25px')
+        self.brightnessLabel = QLabel('Brightness')
+        self.brightnessLabel.setStyleSheet('border: 5px solid black')
+        self.brightnessLabel.setMinimumHeight(100)
         contentVBox.addWidget(self.brightnessLabel)
-
-        brightnessHBox = QHBoxLayout()
-        contentVBox.addLayout(brightnessHBox)
-
-        brightnessZero = QLabel('0  ')
-        brightnessZero.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        brightnessZero.setStyleSheet('font: bold 25px')
-        brightnessMax = QLabel('  100')
-        brightnessMax.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        brightnessMax.setStyleSheet('font: bold 25px')
-
-        self.brightnessSlider = QSlider(Qt.Horizontal)
-        self.brightnessSlider.setMinimum(0)
-        self.brightnessSlider.setMaximum(100)
-        self.brightnessSlider.setTickInterval(10)
-        self.brightnessSlider.setTickPosition(QSlider.TicksBothSides)
-        self.brightnessSlider.setSingleStep(10)
-        self.brightnessSlider.setMinimumSize(300, 100)
-
-        self.brightnessSlider.valueChanged.connect(self.brightnessChanged)
-
-        brightnessHBox.addWidget(brightnessZero)
-        brightnessHBox.addWidget(self.brightnessSlider, alignment=QtCore.Qt.AlignCenter)
-        brightnessHBox.addWidget(brightnessMax)
         
         # Motor Rate Commands
         rateHBox = QHBoxLayout()
@@ -185,302 +140,25 @@ class App(QWidget):
         self.yRateLabel.setAlignment(QtCore.Qt.AlignCenter)
         rateHBox.addWidget(self.yRateLabel)
 
-        # joystick.xRate.connect(self.updateX)
-        # joystick.yRate.connect(self.updateY)
-
-        # processor.xRate.connect(self.AIupdateX)
-        # processor.yRate.connect(self.AIupdateY)
-
         # Command Box
         self.commandBox = QPlainTextEdit('Initialising System...')
         self.commandBox.setStyleSheet('border: 2px solid black; font: 10px; background-color: #C0C0C0')
         self.commandBox.appendPlainText('Done!')
         contentVBox.addWidget(self.commandBox)
+        
 
-        # joystick.printBuffer.connect(self.updateConsole)
-        # ledStrip.printBuffer.connect(self.updateConsole)
-        # processor.printBuffer.connect(self.updateConsole)
-        # motors.printBuffer.connect(self.updateConsole)
+        sys.exit(app.exec_())
 
-        # Begin Event Loop
-
-    # PyQt Slot for updating image contents
-    @pyqtSlot(np.ndarray)
-    # Image conversion from opencv image to QT pixel map
-    def updateImage(self, image):
-        rgbImage = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        h, w, ch = rgbImage.shape
-        lineSize = ch * w
-        qtImage = QtGui.QImage(rgbImage.data, w, h, lineSize, QtGui.QImage.Format_RGB888)
-        scaledImage = qtImage.scaled(self.imageWidth, self.imageHeight, Qt.KeepAspectRatio)
-        pixmapImage = QPixmap.fromImage(scaledImage)
-        self.imageLabel.setPixmap(pixmapImage)
-
-    # PyQt Slot for updating motor rates
-    # @pyqtSlot(int)
-    # def updateX(self, xRate):
-    #     motors.setServoPulse(0,x1+xRate/2)
-    #     self.xRateLabel.setText('X: {}'.format(xRate))
-    # def updateY(self, yRate):
-    #     motors.setServoPulse(1,y1+yRate/2)
-    #     self.yRateLabel.setText('Y: {}'.format(yRate))
-    # def AIupdateX(self, xRate):
-    #     if aiControlFlag == True: motors.setServoPulse(0,x1+xRate)
-    #     else: pass
-    # def AIupdateY(self, yRate):
-    #     if aiControlFlag == True: motors.setServoPulse(0,y1+yRate)
-    #     else: pass
-
-    def showTime(self):
-        if self.timerFlag == True:
-            self.timerLabel.setText('{:02d}:{:02d}.{:01d}'.format(self.minCount, self.secCount, self.tenCount))
-            # lcd.update_messages(self.timerLabel.text(), "")
-            self.tenCount += 1
-        if self.tenCount == 10:
-            self.tenCount = 0
-            self.secCount += 1
-        if self.secCount == 60:
-            self.secCount = 0
-            self.minCount += 1
-    def startTimer(self):
-        self.timerFlag = True
-    def stopTimer(self):
-        self.timerFlag = False
-    def resetTimer(self):
-        self.tenCount = 0
-        self.secCount = 0
-        self.minCount = 0
-        self.timerLabel.setText('{:02d}:{:02d}.{:01d}'.format(self.minCount, self.secCount, self.tenCount))
-
-    @pyqtSlot(str)
-    def updateConsole(self, printBuffer):
-        self.commandBox.appendPlainText('[{}]: {}'.format(QDateTime.currentDateTime(), printBuffer))
-
-    def brightnessChanged(self, value):
-        self.updateConsole('New Brightness Value: {}'.format(value))
-        arduinoValue = value + 100
-        #self.ledStrip.writeArduino(arduinoValue)
-
-# class PHYSICALBUTTONS():
-#     def __init__(self):
-#         self.pButton1 = Button(26, pull_up=True, bounce_time=0.1)
-#         self.pButton2 = Button(19, pull_up=True, bounce_time=0.1)
-#         self.pButton3 = Button(13, pull_up=True, bounce_time=0.1)
-
-#         self.pButton1.when_pressed = lambda : mode.currentMode.handleInput(1)
-#         self.pButton2.when_pressed = lambda : mode.currentMode.handleInput(2)
-#         self.pButton3.when_pressed = lambda : mode.currentMode.handleInput(3)
-
-class MODE():
-    def __init__(self):
-        self.modes = {
-            'Menu' : MenuMode(),
-            'Manual' : ManualMode(),
-            'ManualRunning' : ManualModeRunning(),
-            'ManualStopped' : ManualModeStopped(),
-            'AI' : AIMode(),
-            'AIRunning' : AIModeRunning(),
-            'Solved' : SolvedMaze()
-        }
-
-        self.currentMode = self.modes['Menu']
-
-    # Switch Mode function called by each currenMode.handleInput()
-    def switchMode(self, nextMode):
-        if nextMode in self.modes:
-            self.currentMode = self.modes[nextMode]
-            self.currentMode.update()
-        else: pass
-
-    # Update Function called each currentMode.update(), changing all features on GUI and peripherals
-    def update(self, title=None, b1=None, b2=None, b3=None, colour=None, lcdTxt=None):
-        if title == None: pass
-        else: mainWindow.modeLabel.setText(title)
-
-        if b1 == None:
-            mainWindow.buttonLabel1.setText('')
-            mainWindow.button1.setStyleSheet('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
-            # ledButtons.setLED(g=0)
-        else:
-            mainWindow.buttonLabel1.setText(b1)
-            mainWindow.button1.setStyleSheet('border-radius: 50px; border: 8px solid green; background-color: #C0C0C0')
-            # ledButtons.setLED(g=1)
-
-        if b2 == None:
-            mainWindow.buttonLabel2.setText('')
-            mainWindow.button2.setStyleSheet('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
-            # ledButtons.setLED(r=0)
-        else:
-            mainWindow.buttonLabel2.setText(b2)
-            mainWindow.button2.setStyleSheet('border-radius: 50px; border: 8px solid red; background-color: #C0C0C0')
-            # ledButtons.setLED(r=1)
-
-        if b3 == None:
-            mainWindow.buttonLabel3.setText('')
-            mainWindow.button3.setStyleSheet('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
-            # ledButtons.setLED(b=0)
-        else:
-            mainWindow.buttonLabel3.setText(b3)
-            mainWindow.button3.setStyleSheet('border-radius: 50px; border: 8px solid blue; background-color: #C0C0C0')
-            # ledButtons.setLED(b=1)
-
-        # if colour == 'green':
-        #     lcd.setRGB(0,255,0)
-        #     ledStrip.writeArduino(1)
-        # elif colour == 'red':
-        #     lcd.setRGB(255,0,0)
-        #     ledStrip.writeArduino(2)
-        # elif colour == 'green':
-        #     lcd.setRGB(0,0,255)
-        #     ledStrip.writeArduino(3)
-        # elif colour == 'chase':
-        #     lcd.setRGB(255,0,0)
-        #     ledStrip.writeArduino(5)
-        # else:
-        #     lcd.setRGB(255,255,255)
-        #     ledStrip.writeArduino(4)
-
-        # if lcdTxt == None: pass
-        # else: lcd.update_messages(lcdTxt[0], lcdTxt[1])
-
-# Each class is created with handleInput() and update() functions to update the UI and other peripherals
-
-class MenuMode():
-    def update(self):
-        mainWindow.resetTimer()
-        mode.update(title = 'Welcome to the Maze Game!',
-                       b1 = 'AI',
-                       b2 = 'Manual',
-                       b3 = 'Calibrate',
-                       lcdTxt = ['Main Menu',
-                                 'AI   Manual  Cal']
-        )
-
-    def handleInput(self, button):
+    def testFunc(self, button):
         if button == 1:
-            mode.switchMode('AI')
+            self.button1.setStyleSheet('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
         elif button == 2:
-            mode.switchMode('Manual')
+            self.button2.setStyleSheet('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
         elif button == 3:
-            mode.switchMode('Calibrate')
-        else: pass
+            self.button3.setStyleSheet('border-radius: 50px; border: 8px solid #C0C0C0; background-color: #C0C0C0')
+        else:
+            pass
 
-class ManualMode():
-    def update(self):
-        mainWindow.resetTimer()
-        mode.update(b1 = 'Start',
-                       b3 = 'Menu',
-                       lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
-                                 'Start       Menu']
-        )
-
-    def handleInput(self, button):
-        if button == 1:
-            mode.switchMode('ManualRunning')
-        elif button == 3:
-            mode.switchMode('Menu')
-        else: pass
-
-class ManualModeRunning():
-    def update(self):
-        mainWindow.startTimer()
-        #joystick.start_reading()
-        mode.update(title = 'Manual Solving Mode',
-                       b2 = 'Stop',
-                       lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
-                                 '      Stop      ']
-        )
-
-    def handleInput(self, button):
-        if button == 2:
-            mode.switchMode('ManualStopped')
-        else: pass
-
-class ManualModeStopped():
-    def update(self):
-        mainWindow.stopTimer()
-        #joystick.stop_reading()
-        mode.update(title = 'Manual Solving Mode',
-                       b1 = 'Start',
-                       b3 = 'Reset',
-                       lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
-                                 'Start      Reset']
-        )
-
-    def handleInput(self, button):
-        if button == 1:
-            mode.switchMode('ManualRunning')
-        elif button == 3:
-            mode.switchMode('Manual')
-        else: pass
-
-class AIMode():
-    def update(self):
-        mainWindow.stopTimer()
-        mainWindow.resetTimer()
-        aiControlFlag = False
-        mode.update(title = 'AI Solving Mode',
-                       b1 = 'Start',
-                       b3 = 'Menu',
-                       lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
-                                 'Start       Menu']
-        )
-
-    def handleInput(self, button):
-        if button == 1:
-            mode.switchMode('AIRunning')
-        elif button == 3:
-            mode.switchMode('Menu')
-        else: pass
-
-class AIModeRunning():
-    def update(self):
-        mainWindow.startTimer()
-        aiControlFlag = True
-        mode.update(title = 'AI Solving Mode',
-                       b2 = 'Stop',
-                       lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
-                                 '      Stop      ']
-        )
-
-    def handleInput(self, button):
-        if button == 2:
-            mode.switchMode('AI')
-        else: pass
-
-class SolvedMaze():
-    def update(self):
-        mainWindow.stopTimer()
-        aiControlFlag = False
-        mode.update(title = 'Maze Solved!',
-                       b3 = 'Menu',
-                       lcdTxt = ['{}'.format(mainWindow.timerLabel.text()),
-                                 '            Menu']
-        )
-
-    def handleInput(self, button):
-        if button == 3:
-            mode.switchMode('Menu')
-        else: pass
-
-def get_flat_values():
-    defaultx = 1851
-    defaulty = 1941
-
-
-    #motors.setServoPulse(0, int(defaulty))
-    #motors.setServoPulse(1, int(defaultx))
-
-    return defaultx, defaulty
-
-# Mode Manager Call
-mode = MODE()
-
-# Main PyQt Application Loop
-app = QApplication(sys.argv)
-screenWidth = app.primaryScreen().size().width()
-screenHeight = app.primaryScreen().size().height()
-mainWindow = App()
-mainWindow.show()
-mode.currentMode.update()
-sys.exit(app.exec_())
+while True:
+    mainWindow = App()
+    mainWindow.show()

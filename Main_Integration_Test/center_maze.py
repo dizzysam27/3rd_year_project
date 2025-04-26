@@ -7,8 +7,8 @@ gyro = LSM6DS3()
 motors = PCA9685()
 
 def get_flat_values():
-    defaultx = 1847
-    defaulty = 1933
+    defaultx = 1849
+    defaulty = 1939
     motors.setServoPulse(0, int(defaulty))
     motors.setServoPulse(1, int(defaultx))
     return defaultx, defaulty
@@ -59,7 +59,7 @@ def gyro_flat_values():
     #x_data, y_data, z_data = (data['gyro_x']),(data['gyro_y']),(data['gyro_z'])
     #print(f"Gyro (°/s): X={x_data}, Y={y_data}, Z={z_data}")
 
-# # get_flat_values()
+get_flat_values()
 # Values = gyro_flat_values()
 # print(Values)
     

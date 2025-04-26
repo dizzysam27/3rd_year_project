@@ -1,27 +1,34 @@
 import cv2
 import numpy as np
-import pickle  # For saving/loading last coordinates
-import os
 import time
 import math
-from simple_pid import PID
-from Peripherals.Motor_Control import PCA9685
-from center_maze import get_flat_values
-import PyQt5
-from PyQt5.QtCore import pyqtSignal, QThread
+from PyQt5 import QtGui
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread
+from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout
+import sys
 from collections import deque
 import argparse
+from simple_pid import PID
+import pickle
+import os
 
-class ImageProcessor:
+xRate = 0
+yRate = 0
+
+class ImageProcessor(QThread):
+    cameraVideo = pyqtSignal(np.ndarray)
+    xRate = pyqtSignal(int)
+    yRate = pyqtSignal(int)
 
 
     def __init__(self):
-
-        self.motors = PCA9685()
+        super().__init__()
         self.cap = cv2.VideoCapture(0)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
-        flat_x, flat_y = get_flat_values()
+        flat_x = 1847
+        flat_y = 1933
         self.defaultx = flat_x
         self.defaulty = flat_y
         
@@ -72,6 +79,12 @@ class ImageProcessor:
         if not self.cap.isOpened():
             print("Error: Could not open webcam.")
             exit()
+
+    def get_flat_values():
+        defaultx = 1847
+        defaulty = 1933
+
+        return defaultx, defaulty
 
     def load_last_coordinates(self):
         if os.path.exists("last_coordinates.pkl"):
@@ -294,13 +307,13 @@ class ImageProcessor:
         if self.new_motor_control[0] == self.last_motor_control[0]:
             pass
         else:
-            self.motors.setServoPulse(1, self.new_motor_control[0])
+            self.xRate.emit(int(self.new_motor_control[0]))
             self.last_motor_control[0] = self.new_motor_control[0]
 
         if self.new_motor_control[1] == self.last_motor_control[1]:
             pass
         else:
-            self.motors.setServoPulse(0, self.new_motor_control[1])
+            self.yRate.emit(int(self.new_motor_control[1]))
             self.last_motor_control[1] = self.new_motor_control[1]
        
         # if self.motorcounter > 60:   
@@ -325,8 +338,8 @@ class ImageProcessor:
             print(f"Point added: {x}, {y}")
 
     def run(self):
-        self.motors.setServoPulse(1, self.defaultx)
-        self.motors.setServoPulse(0, self.defaulty)
+        self.xRate.emit(int(self.new_motor_control[0]))
+        self.yRate.emit(int(self.new_motor_control[1]))
         
         if self.sampled_points:
             choice = input("Use last saved coordinates? (y/n): ")
@@ -361,8 +374,8 @@ class ImageProcessor:
                 print(f"Selected path points: {self.sampled_points}")
                 self.save_last_coordinates()
         
-        self.motors.setServoPulse(1, self.defaultx)
-        self.motors.setServoPulse(0, self.defaulty)
+        self.xRate.emit(int(self.new_motor_control[0]))
+        self.yRate.emit(int(self.new_motor_control[1]))
         self.current_target_index = 0  
         
 
@@ -383,7 +396,7 @@ class ImageProcessor:
         cv2.normalize(frame, frame, 0, 255, cv2.NORM_MINMAX)
 
         self.sampled_points = self.detect_line(frame)
-        start = (147, 270)
+        start = (130, 268)
         self.sampled_points = self.reorder_line_to_start(self.sampled_points, start)
        
 
@@ -403,6 +416,7 @@ class ImageProcessor:
             self.update_goal_position()
             print(f"Ball: {ball_center}, Goal: ({self.gx}, {self.gy})")
 
+            
             self.move_motors(ball_center)
 
             if ball_center:
@@ -423,7 +437,8 @@ class ImageProcessor:
 
 
             cv2.imshow("Tracking", cropped_frame)
-            
+            self.cameraVideo.emit(cropped_frame)
+
             if cv2.waitKey(1) & 0xFF == ord('r'):
                 self.current_target_index = 0
                 self.goal_reached = True
@@ -442,6 +457,3 @@ class ImageProcessor:
         self.cap.release()
         cv2.destroyAllWindows()
         print("Cleaning up and exiting.")
-
-processor = ImageProcessor()
-processor.run()
