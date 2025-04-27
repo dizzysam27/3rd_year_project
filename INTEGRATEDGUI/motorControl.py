@@ -94,6 +94,12 @@ class PCA9685(QThread):
     pulse = pulse*4096/20000        #PWM frequency is 50HZ,the period is 20000us
     self.setPWM(channel, 0, int(pulse))
 
+  def level(self):
+    defaultx = 1847
+    defaulty = 1938
+    self.setServoPulse(0, int(defaulty))
+    self.setServoPulse(1, int(defaultx))
+
   def motorAngle(self, motor1,motor2):
 
     self.setServoPulse(1, self.x_centre + self.x_offset + (motor1 / 100.0) * self.x_maxtilt)
@@ -108,10 +114,10 @@ class PCA9685(QThread):
 
     self.x_offset = 0
     self.y_offset = 0
-    self.x_maxtilt = 70
-    self.y_maxtilt = 70
-    self.x_centre = 1900
-    self.y_centre = 1915
+    self.x_maxtilt = 30
+    self.y_maxtilt = 30
+    self.x_centre = 1847
+    self.y_centre = 1938
 
     self.motorAngle(0,0)
     
@@ -172,3 +178,5 @@ class PCA9685(QThread):
       for i in range(100, -101, -1):  
         pwm.setServoPulse(1, 1915 + (i / 100.0) * 85) 
         time.sleep(0.02)   
+# test = PCA9685()
+# test.level()

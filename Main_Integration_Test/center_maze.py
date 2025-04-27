@@ -11,11 +11,11 @@ def get_flat_values():
     # Manually set flat values to skip calibrating each time 
     
     defaultx = 1849
-    defaulty = 1939
+    defaulty = 1940
     motors.setServoPulse(0, int(defaulty))
     motors.setServoPulse(1, int(defaultx))
     return defaultx, defaulty
-x1,y1 = get_flat_values()
+
     # Tilt maze above and below assumes start values to find true flat values.
     # Return the servo pulse for determined flat level
     
@@ -71,10 +71,7 @@ def gyro_flat_values():
     motors.setServoPulse(1,int(pulse_y_x[1]))
     return pulse_y_x
 
-<<<<<<< HEAD
-# get_flat_values()
-=======
->>>>>>> ead9a5bed851a42af320a1d9aa78f544e684eb49
+get_flat_values()
 # Values = gyro_flat_values()
 # print(Values)
     

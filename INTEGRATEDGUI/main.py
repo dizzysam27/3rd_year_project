@@ -54,7 +54,7 @@ class App(QWidget):
         # Header
         headerHBox = QHBoxLayout()
         mainGrid.addLayout(headerHBox, 0, 0, 1, 2)
-        self.titleLabel = QLabel('Group 15 Maze Game')
+        self.titleLabel = QLabel('Group 12 Maze Game')
         self.titleLabel.setStyleSheet('border: 5px solid black; font: bold 50px')
         headerHBox.addWidget(self.titleLabel)
         self.modeLabel = QLabel('Menu')
@@ -186,8 +186,8 @@ class App(QWidget):
         joystick.xRate.connect(self.updateX)
         joystick.yRate.connect(self.updateY)
 
-        processor.xRate.connect(self.AIupdateX)
-        processor.yRate.connect(self.AIupdateY)
+        # processor.xRate.connect(self.AIupdateX)
+        # processor.yRate.connect(self.AIupdateY)
         processor.finish_flag.connect(self.AIsolved)
 
         # Command Box
@@ -223,17 +223,27 @@ class App(QWidget):
     def updateY(self, yRate):
         motors.setServoPulse(0,y1+yRate/2)
         self.yRateLabel.setText('Y: {}'.format(yRate))
-    @pyqtSlot(int)
-    def AIupdateX(self, xRate):
-        if self.aiControlFlag == True: motors.setServoPulse(1,xRate)
-        else: pass
-    @pyqtSlot(int)
-    def AIupdateY(self, yRate):
-        if self.aiControlFlag == True: motors.setServoPulse(0,yRate)
-        else: pass
+    # @pyqtSlot(int)
+    # def AIupdateX(self, xRate):
+    #     if self.aiControlFlag == True: motors.setServoPulse(1,xRate)
+    #     else: pass
+    # @pyqtSlot(int)
+    # def AIupdateY(self, yRate):
+    #     if self.aiControlFlag == True: motors.setServoPulse(0,yRate)
+    #     else: pass
+
+
+    def setAiControlActive(self, active):
+        self.aiControlFlag = active
+        print(f"AI Control Flag set to: {self.aiControlFlag}") # Debug print
+        # Emit the signal to the ImageProcessor thread
+        processor.aiControlStateChanged.emit(self.aiControlFlag)
+
+
     @pyqtSlot(int)
     def AIsolved(self, finish_flag):
-        if self.aiControlFlag == True and finish_flag == 1: mode.currentMode.handleInput(4)
+        if self.aiControlFlag == True and finish_flag == 1:
+            mode.currentMode.handleInput(4)
         else: pass
     def showTime(self):
         if self.timerFlag == True:
@@ -427,7 +437,7 @@ class AIMode():
         mainWindow.stopTimer()
         mainWindow.resetTimer()
         get_flat_values()
-        mainWindow.aiControlFlag = False
+        mainWindow.setAiControlActive(False)
         mode.update(title = 'AI Solving Mode',
                        b1 = 'Start',
                        b3 = 'Menu',
@@ -446,7 +456,8 @@ class AIMode():
 class AIModeRunning():
     def update(self):
         mainWindow.startTimer()
-        mainWindow.aiControlFlag = True
+        # mainWindow.aiControlFlag = True
+        mainWindow.setAiControlActive(True)
         mode.update(title = 'AI Solving Mode',
                        b2 = 'Stop',
                        colour = 'green',
@@ -455,10 +466,12 @@ class AIModeRunning():
         )
 
     def handleInput(self, button):
-        if button == 2:       
+        if button == 2:
+            mainWindow.setAiControlActive(False)       
             mode.switchMode('AI')
             processor.resetline()
         elif button == 4:
+            mainWindow.setAiControlActive(False) 
             processor.resetline()
             mode.switchMode('Solved')     
         else: pass
@@ -466,7 +479,7 @@ class AIModeRunning():
 class SolvedMaze():
     def update(self):
         mainWindow.stopTimer()
-        mainWindow.aiControlFlag = False
+        mainWindow.setAiControlActive(False)
         mode.update(title = 'Maze Solved!',
                        b3 = 'Menu',
                        colour = 'chase',
@@ -480,8 +493,8 @@ class SolvedMaze():
         else: pass
 
 def get_flat_values():
-    defaultx = 1849
-    defaulty = 1939
+    defaultx = 1847
+    defaulty = 1938
 
 
     motors.setServoPulse(0, int(defaulty))
@@ -493,13 +506,13 @@ def get_flat_values():
 mode = MODE()
 
 # Other Peripheral Calls
-processor = ImageProcessor()
 pButtons = PHYSICALBUTTONS()
 ledButtons = LEDBUTTONCONTROL()
 lcd = LCD1602_WRITE()
 ledStrip = LEDSTRIPCONTROL()
 joystick = JOYSTICK_READ_DATA()
 motors = PCA9685()
+processor = ImageProcessor(motors)
 
 print("everything inited")
 

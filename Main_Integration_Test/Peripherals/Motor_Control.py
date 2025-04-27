@@ -107,8 +107,8 @@ class PCA9685:
     self.y_offset = 0
     self.x_maxtilt = 70
     self.y_maxtilt = 70
-    self.x_centre = 1900
-    self.y_centre = 1915
+    self.x_centre = 1849
+    self.y_centre = 1938
 
     # self.motorAngle(0,0)
     
@@ -170,7 +170,7 @@ class PCA9685:
         pwm.setServoPulse(1, 1915 + (i / 100.0) * 85) 
         time.sleep(0.02)   
 
-hello = PCA9685()
+# hello = PCA9685()
 #while True:
 #   hello.run()
 # hello.calibrate() 

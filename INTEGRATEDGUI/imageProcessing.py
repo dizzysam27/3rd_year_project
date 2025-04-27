@@ -2,13 +2,13 @@ import cv2
 import numpy as np
 import pickle  # For saving/loading last coordinates
 import os
-import time
-import math
+# import time
+# import math
 from simple_pid import PID
-from motorControl import PCA9685
+# from motorControl import PCA9685
 #from center_maze import get_flat_values
 import PyQt5
-from PyQt5.QtCore import pyqtSignal, QThread
+from PyQt5.QtCore import pyqtSignal, QThread, pyqtSlot
 from collections import deque
 import argparse
 
@@ -21,15 +21,22 @@ class ImageProcessor(QThread):
     xRate = pyqtSignal(int)
     yRate = pyqtSignal(int)
     finish_flag = pyqtSignal(int)
-    def __init__(self):
+    aiControlStateChanged = pyqtSignal(bool)
+    def __init__(self, motors):
         super().__init__()
-        self.motors = PCA9685()
+        
+        self.motors = motors
+        self._ai_control_active = False
+        self.aiControlStateChanged.connect(self.onAiControlStateChanged)
+
+
         self.cap = cv2.VideoCapture(0)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
+
         #flat_x, flat_y = get_flat_values()
         self.defaultx = 1849#flat_x
-        self.defaulty = 1939#flat_y
+        self.defaulty = 1941#flat_y
         
         self.sampled_points = self.load_last_coordinates()
         self.current_target_index = 0
@@ -103,26 +110,9 @@ class ImageProcessor(QThread):
 
         return frame[start_y + y_offset:end_y + y_offset, start_x + x_offset:end_x + x_offset]
     
-    def rotate_frame(self, image):
-        # Define three source points (e.g., corners of a triangle in the original image)
-        src_pts = np.float32([[10, 10], [305, 13], [15, 235]])
-
-        # Define three corresponding destination points (where you want those points to map)
-        dst_pts = np.float32([[0, 0], [310, 0], [0, 250]])
-
-        # Get the affine transformation matrix
-        M = cv2.getAffineTransform(src_pts, dst_pts)
-
-        # Apply the affine transformation
-        rows, cols, _ = image.shape
-        transformed_img = cv2.warpAffine(image, M, (cols, rows))
-        
-        # return transformed_img
-        return image
-
     def detect_ball(self, frame):
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        hsv = cv2.GaussianBlur(hsv, (5, 5), 0)
+      
         lower_red, upper_red = np.array([120,50, 80]), np.array([255,255, 159])
         mask = cv2.inRange(hsv, lower_red, upper_red)
 
@@ -145,20 +135,20 @@ class ImageProcessor(QThread):
 
 
                     if self.balltrackercounter == 10:
-                        if self.balltracker[0] == cx and self.balltracker[1] == cy:
+                        if self.balltracker[0] >= cx - 1 and self.balltracker[0] <= cx + 1 and self.balltracker[1] >= cy - 1 and self.balltracker[1] <= cy + 1:
                             self.output_limits = 30
                             self.output_limitsy = 30
                             print('boosted')
                             self.boosted = 1
-                            cx = 0
-                            cy = 0
+                            cx = 800 - cx 
+                            cy = 600 - cy
                             if self.current_target_index < 4:
                                 self.current_target_index = 0
                             else:
                                 self.current_target_index = self.current_target_index - 4
                                 self.goal_reached = True
 
-                    if self.balltrackercounter == 14:
+                    if self.balltrackercounter == 13:
                         if self.boosted == 1:
                             self.output_limitsy = self.default_limits_y
                             self.output_limits = self.default_limits_x
@@ -182,6 +172,7 @@ class ImageProcessor(QThread):
             cy = self.last_location[1]
         return None
     
+
     def find_and_fill_contours(self, mask, frame):
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         filled_frame = frame.copy()
@@ -196,6 +187,7 @@ class ImageProcessor(QThread):
         return filled_frame, contours
     import numpy as np
 
+
     def reorder_line_to_start(self, line_points, start):
         # line_points: np.array of shape (N, 2)
         distances = np.linalg.norm(line_points - start, axis=1)
@@ -204,10 +196,13 @@ class ImageProcessor(QThread):
         # Rotate using np.concatenate instead of +
         return np.concatenate((line_points[start_idx:], line_points[:start_idx]), axis=0)
 
+
     def detect_line(self, frame):
+        # self.xRate.emit(self.defaultx)
+        # self.yRate.emit(self.defaulty)
         cv2.normalize(frame, frame, 0, 255, cv2.NORM_MINMAX)
 
-        lower_blue, upper_blue = np.array([157,121,58]), np.array([255,198,166])
+        lower_blue, upper_blue = np.array([150,115,49]), np.array([255,219,168])
         bmask = cv2.inRange(frame, lower_blue, upper_blue)
 
         gfilled_frame, gcontours = self.find_and_fill_contours(bmask, frame)
@@ -253,16 +248,18 @@ class ImageProcessor(QThread):
                 cv2.circle(frame, (x, y), 3, (0, 0, 255), -1)
 
             # print coordinates
-            print("Sampled 100 points:", interpolated_points)
+            # print("Sampled 100 points:", interpolated_points)
 
         return interpolated_points
     
     def resetline(self):
         self.current_target_index = 0
         self.goal_reached = True
+        self.pid_x.reset()
+        self.pid_y.reset()
+
         print("reset")
                
-
 
     def finished_zone(self, x,y):
         # [x_min, x_max, y_min, y_max] points
@@ -282,13 +279,18 @@ class ImageProcessor(QThread):
         else:
             pass
 
-
-  
+    @pyqtSlot(bool)
+    def onAiControlStateChanged(self, is_active):
+        self._ai_control_active = is_active
+        # Optional: Reset motors to default if AI is deactivated
+        # if not is_active:
+        #    self.motors.setServoPulse(1, self.defaultx)
+        #    self.motors.setServoPulse(0, self.defaulty)
 
 
     def move_motors(self, ball_center):
         if ball_center:
-            self.motorcounter += 1
+           
             bx, by = ball_center
             if abs(bx - self.gx) < self.reached_distance and abs(by - self.gy) < self.reached_distance:
                 self.goal_reached = True
@@ -296,58 +298,25 @@ class ImageProcessor(QThread):
             
             control_x = self.pid_x(bx)
             control_y = self.pid_y(by)
-            print("x %s y %s" % (control_x, control_y))
-            if self.motorcounter == 1:
-                self.lastinput = [control_x, control_y]
-            elif self.motorcounter > 30:
-                if [control_x,control_y] == self.lastinput:
-                    print('ballstuck')
-                    # self.motors.setServoPulse(0, self.defaulty)
-                    # self.motors.setServoPulse(1, self.defaultx)
-
-                self.motorcounter = 1
-                self.lastinput = [control_x, control_y]
-
-                    
             
-            
-            # if abs(bx - self.gx) < 10:
-            #      self.motors.setServoPulse(1, int(self.defaultx))
-            # else:
-            #     self.motors.setServoPulse(1, int(self.defaultx + control_x))
-    
-            # if abs(by - self.gy) < 10:
-            #      self.motors.setServoPulse(0, int(self.defaulty))
-            # else:
-            #     self.motors.setServoPulse(0, int(self.defaulty + control_y))
+            motor_x_val = self.defaultx + control_x
+            motor_y_val = self.defaulty + control_y
 
-            # self.motors.setServoPulse(0, int(self.defaulty + control_y))
-            # self.motors.setServoPulse(1, int(self.defaultx + control_x))
-            self.new_motor_control[0] = self.defaultx + control_x
-            self.new_motor_control[1] = self.defaulty + control_y
+        # --- Motor Control Logic Moved Here ---
+        # Check the internal flag before sending commands
+            if self._ai_control_active:
+                self.motors.setServoPulse(1, int(motor_x_val)) # Send X command
+                self.motors.setServoPulse(0, int(motor_y_val)) # Send Y command
+            # Else: If AI is not active, motors might return to default
+        # (handled in onAiControlStateChanged or could be done here too)
+        # ---------------------------------------
 
-        else:
-            self.new_motor_control[0] = self.defaultx
-            self.new_motor_control[1] = self.defaulty
-
-        if self.new_motor_control[0] == self.last_motor_control[0]:
-            pass
-        else:
-            self.xRate.emit(self.new_motor_control[0])
-            #self.motors.setServoPulse(1, self.new_motor_control[0])
-            self.last_motor_control[0] = self.new_motor_control[0]
-
-        if self.new_motor_control[1] == self.last_motor_control[1]:
-            pass
-        else:
-            self.yRate.emit(self.new_motor_control[1])
-            #self.motors.setServoPulse(0, self.new_motor_control[1])
-            self.last_motor_control[1] = self.new_motor_control[1]
-       
-        # if self.motorcounter > 60:   
-        #     self.motors.setServoPulse(0, self.defaulty)
-        #     self.motors.setServoPulse(1, self.defaultx)
-        #     self.motorcounter = 0
+        # --- Signal Emission (Keep ONLY if needed for GUI Labels) ---
+        # If you still want to display the values in the GUI:
+        # self.xRate.emit(int(motor_x_val))
+        # self.yRate.emit(int(motor_y_val))
+        # If xRate/yRate were ONLY for motors, comment/remove these emits.
+        # ----------------
 
     def update_goal_position(self):
         if self.goal_reached and self.current_target_index < len(self.sampled_points):
@@ -366,16 +335,14 @@ class ImageProcessor(QThread):
             print(f"Point added: {x}, {y}")
 
     def run(self):
-        self.xRate.emit(self.defaultx)
-        self.yRate.emit(self.defaulty)
-        #self.motors.setServoPulse(1, self.defaultx)
-        #self.motors.setServoPulse(0, self.defaulty)
+      
+        self.motors.setServoPulse(1, self.defaultx)
+        self.motors.setServoPulse(0, self.defaulty)
         
         
-        self.xRate.emit(self.defaultx)
-        self.yRate.emit(self.defaulty)
-        #self.motors.setServoPulse(1, self.defaultx)
-        #self.motors.setServoPulse(0, self.defaulty)
+        # self.xRate.emit(self.defaultx)
+        # self.yRate.emit(self.defaulty)
+       
         self.current_target_index = 0  
         
 
@@ -398,10 +365,11 @@ class ImageProcessor(QThread):
         self.sampled_points = self.detect_line(frame)
         start = (130, 268)
         self.sampled_points = self.reorder_line_to_start(self.sampled_points, start)
+
+
        
 
-        print(self.line_points)
-        print(self.line_points[0][0])
+
 
         while True:
             
@@ -411,11 +379,15 @@ class ImageProcessor(QThread):
                 break
 
             cropped_frame = self.crop_frame(frame)
-            cropped_frame = self.rotate_frame(cropped_frame)
             ball_center = self.detect_ball(cropped_frame)
             
+            
+            for goal in self.sampled_points[:198]:
+                if  not self._ai_control_active:
+                    cv2.circle(cropped_frame, (goal[0], goal[1]), 2, (0, 150, 255), -1)
+            
             self.update_goal_position()
-            print(f"Ball: {ball_center}, Goal: ({self.gx}, {self.gy})")
+            # print(f"Ball: {ball_center}, Goal: ({self.gx}, {self.gy})")
 
             self.move_motors(ball_center)
 
@@ -436,20 +408,9 @@ class ImageProcessor(QThread):
             cv2.circle(cropped_frame, (self.gx, self.gy), 5, (0, 0, 255), -1)
 
 
-            cv2.imshow("Tracking", cropped_frame)
+            # cv2.imshow("Tracking", cropped_frame)
             self.cameraVideo.emit(cropped_frame)
             
-            if cv2.waitKey(1) & 0xFF == ord('r'):
-                self.current_target_index = 0
-                self.goal_reached = True
-                print("reset")
-               
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                self.xRate.emit(self.defaultx)
-                self.yRate.emit(self.defaulty)
-                #self.motors.setServoPulse(1, self.defaultx)
-                #self.motors.setServoPulse(0, self.defaulty)
-                break
           
                 
 

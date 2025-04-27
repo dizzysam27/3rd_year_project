@@ -28,8 +28,8 @@ class JOYSTICK_READ_DATA(QThread):
                 try:
                     yValue, xValue = map(int, dataRx.split(','))
                     self.printBuffer.emit(f"x: {xValue}, y: {yValue}")
-                    self.xRate.emit(int(xValue))
-                    self.yRate.emit(int(yValue))
+                    self.xRate.emit(int(yValue))
+                    self.yRate.emit(int(xValue))
                 except ValueError:
                     self.printBuffer.emit("Invalid data received")
 
