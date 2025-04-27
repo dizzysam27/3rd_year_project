@@ -1,0 +1,1558 @@
+commit b454f4511565d53ea2c1944aa32fdebaab31bf0c
+Author: Archie <archiehurman@gmail.com>
+Date:   Sun Apr 27 14:11:10 2025 +0100
+
+    27/4
+
+commit d1a95e04dd13a7d357c96eb6f9e6ceec71990266
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Sun Apr 27 11:20:01 2025 +0100
+
+    test code updates
+
+commit 6e9fd9313b04c32560dbcbc713a3ed92d56705b7
+Author: Archie <archiehurman@gmail.com>
+Date:   Sat Apr 26 17:07:29 2025 +0100
+
+    rebase
+
+commit 777849141126134770b687cb75a4f71f6610802e
+Merge: ad3bd39 ead9a5b
+Author: Archie <archiehurman@gmail.com>
+Date:   Sat Apr 26 17:03:12 2025 +0100
+
+    .
+
+commit ad3bd39e2ac4aeb59c7726fd7268dbd4462d9280
+Author: Archie <archiehurman@gmail.com>
+Date:   Sat Apr 26 16:56:31 2025 +0100
+
+    fixed?
+
+commit ead9a5bed851a42af320a1d9aa78f544e684eb49
+Merge: f5f5aba 8a6a7fa
+Author: ArchieHurman <98830200+ArchieHur@users.noreply.github.com>
+Date:   Sat Apr 26 16:44:30 2025 +0100
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit f5f5aba913dd2cafbe05ed94b7cf5ef8addca355
+Author: ArchieHurman <98830200+ArchieHur@users.noreply.github.com>
+Date:   Sat Apr 26 16:24:16 2025 +0100
+
+    Gyro Changes
+
+commit 8a6a7fa75a942f48c91f1546f327a872a16df15f
+Author: Archie <archiehurman@gmail.com>
+Date:   Sat Apr 26 16:11:33 2025 +0100
+
+    fixed broken repo
+
+commit a9b270f72ec8cd41979a73ac0a54d4d5c2f34a4a
+Author: Alex Watson <130507247+shoutykennethBristol@users.noreply.github.com>
+Date:   Sat Apr 26 16:01:04 2025 +0100
+
+    Update main.py
+    
+    26/4 manual commit from git website
+
+commit b7652209fd4e054c1222deed39b1ea9a6755cc7b
+Author: Alex Watson <130507247+shoutykennethBristol@users.noreply.github.com>
+Date:   Sat Apr 26 15:59:44 2025 +0100
+
+    Update imageProcessing.py
+    
+    26/4 changes
+
+commit 66066e3cea8b2ec80235ef631685177b164a3d70
+Author: Alex Watson <130507247+shoutykennethBristol@users.noreply.github.com>
+Date:   Fri Apr 25 14:32:18 2025 +0100
+
+    Update a_star.py
+    
+    This is the final version
+
+commit a940d97a7d52231566ebc9718805b338584aab49
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Wed Apr 23 20:23:05 2025 +0100
+
+    added PWM slider
+
+commit 94d6d002a3f6e85ae46d19de67ff87d37a496092
+Author: Archie <archiehurman@gmail.com>
+Date:   Sun Apr 20 01:01:04 2025 +0100
+
+    babysitting
+
+commit 78abd3fb08be7aa72afe7e2bbd5efec74c5f0830
+Merge: 3f57d4b 54b2ac8
+Author: Archie <archiehurman@gmail.com>
+Date:   Sat Apr 19 13:49:07 2025 +0100
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 3f57d4b0f8e63b775eb74a7e888709ae3819c985
+Author: Archie <archiehurman@gmail.com>
+Date:   Sat Apr 19 13:49:05 2025 +0100
+
+    Ollie Changes
+
+commit 54b2ac8c7372ec80b8e3212770814c9d2507d034
+Author: ArchieHurman <98830200+ArchieHur@users.noreply.github.com>
+Date:   Sat Apr 19 00:43:42 2025 +0100
+
+    gyros!
+
+commit 8f65d5069750e12fc0cf29a938bf3ba763223e8a
+Merge: 2afff0a d2e8e4d
+Author: ArchieHurman <98830200+ArchieHur@users.noreply.github.com>
+Date:   Sat Apr 19 00:34:31 2025 +0100
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 2afff0ad18bb53201707aa4dc47a01df4bf4b209
+Author: ArchieHurman <98830200+ArchieHur@users.noreply.github.com>
+Date:   Sat Apr 19 00:34:24 2025 +0100
+
+    gyro tests
+
+commit d2e8e4dda67cebe61bd4cbcbc58025db52200676
+Merge: 0872d18 221c704
+Author: Archie <archiehurman@gmail.com>
+Date:   Tue Apr 15 16:56:57 2025 +0100
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 0872d18331a5ed1411bf7a955dd2914c3ef1ce0e
+Author: Archie <archiehurman@gmail.com>
+Date:   Tue Apr 15 16:56:47 2025 +0100
+
+    changeees
+
+commit 221c704d5c14f4fe742b96c2141fbc8f7bb8910f
+Merge: d75bc6a 4f827cb
+Author: ArchieHurman <98830200+ArchieHur@users.noreply.github.com>
+Date:   Tue Apr 15 15:45:49 2025 +0100
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 4f827cb4e43d129d4bb5aacdf8c4b8657964283e
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Tue Apr 15 15:32:55 2025 +0100
+
+    removed kendama changed it to mode
+
+commit d75bc6ab2f2cf2c7101c22cb3d023ea9a02f0ada
+Merge: 1d0b698 f727be3
+Author: ArchieHurman <98830200+ArchieHur@users.noreply.github.com>
+Date:   Tue Apr 15 12:50:20 2025 +0100
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 1d0b698c9668f9b3f73e23600b9bb4dbbe3ede5c
+Author: ArchieHurman <98830200+ArchieHur@users.noreply.github.com>
+Date:   Tue Apr 15 12:40:51 2025 +0100
+
+    Gyro stuff
+
+commit f727be3c8a324c8b651fbde5a60e80d6dc72c87a
+Author: Archie <archiehurman@gmail.com>
+Date:   Mon Apr 14 15:16:20 2025 +0100
+
+    more changes
+
+commit a498660e0a4712bd09f86e4f4e82144928b9f890
+Author: Archie <archiehurman@gmail.com>
+Date:   Mon Apr 14 15:15:14 2025 +0100
+
+    whole lotta changes
+
+commit d40355d403011c7d668ba8533aead8b105d6d7af
+Author: ArchieHurman <98830200+ArchieHur@users.noreply.github.com>
+Date:   Tue Apr 8 14:53:56 2025 +0100
+
+    Slave I2C code cleaned and commented. Need to test with I2C on main LED
+
+commit 469092e0962aa575b8fecef14691bdf31f06f4c5
+Author: Ollie <oli@flowmo.co>
+Date:   Wed Mar 19 20:28:47 2025 +0000
+
+    Create ball_stuck_test.py
+
+commit 08fb4dc7a6c34d8b3c83d5904773412834c26d24
+Author: Archie <archiehurman@gmail.com>
+Date:   Wed Mar 19 19:35:09 2025 +0000
+
+    babysitting
+
+commit e9d721ce4bbfe3bbdb75b24268f118c2b9bf69f8
+Author: Archie <archiehurman@gmail.com>
+Date:   Wed Mar 19 14:36:25 2025 +0000
+
+    push
+
+commit ba8b2e51b768dcb6aa15330f44233ef3496ebc42
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Mon Mar 17 20:41:18 2025 +0000
+
+    finished (mostly) gui
+
+commit 829c4da7651c7404d8d4162df55e4d2e4d5fc8e0
+Author: Archie <archiehurman@gmail.com>
+Date:   Mon Mar 17 15:59:31 2025 +0000
+
+    updated gui even more hell yeah
+
+commit 50929213be735b9039bab6fec6ccd5b00a8442f4
+Author: Archie <archiehurman@gmail.com>
+Date:   Mon Mar 17 15:31:23 2025 +0000
+
+    alex w more better gui things
+
+commit c4d70444433bc806fefccc76e46b3c799fe2fba8
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Mon Mar 17 14:16:10 2025 +0000
+
+    Update unconncetedGUI.py
+
+commit 3714b5abba04773d86964ee5c3e86e85595915a1
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Mon Mar 17 14:09:28 2025 +0000
+
+    Update unconncetedGUI.py
+
+commit fda4430c4176e1e5acbf4602c60ea65d3ad9f0d7
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Sat Mar 15 20:13:48 2025 +0000
+
+    created test gui even more tests
+
+commit ab2306382a06da577b1512bc8e49e188da1c928f
+Author: Archie <archiehurman@gmail.com>
+Date:   Thu Mar 13 16:45:44 2025 +0000
+
+    i9 did a thing
+
+commit 6f57ab8dd5dac39d588142cf62edc03f8253253a
+Author: Archie <archiehurman@gmail.com>
+Date:   Thu Mar 13 15:09:31 2025 +0000
+
+    alex w complete manual mode it works now!!!
+
+commit 31a28cbca0f856f840445fc447302dbbaff73728
+Author: Archie <archiehurman@gmail.com>
+Date:   Thu Mar 13 14:01:05 2025 +0000
+
+    alex w updating  gui more
+
+commit 5ddc7fe60613b843d8f2fc5ee9c9ea7d9cb0a372
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Wed Mar 12 20:41:26 2025 +0000
+
+    GUI Updates
+
+commit dac1977eb5b822f9b0d0e348fd4902ea5516ce87
+Author: Archie <archiehurman@gmail.com>
+Date:   Wed Mar 12 16:34:56 2025 +0000
+
+    Added Integrated GUI folder and began implementation
+
+commit c316af70740e59f3f8f8188160a889718cde7535
+Merge: 14897c3 d7820d9
+Author: Archie <archiehurman@gmail.com>
+Date:   Wed Mar 12 15:19:46 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 14897c3b7906901a68124cc9f5214af1362d06c9
+Author: Archie <archiehurman@gmail.com>
+Date:   Wed Mar 12 15:19:44 2025 +0000
+
+    pushy :) sam <3 isa
+
+commit d7820d91fe356e906b09f9cd04ec94c573b6505e
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Wed Mar 12 15:17:31 2025 +0000
+
+    Updating GUI with LCD test
+
+commit 15a25a2aca1938eaae989d5230086e6b8cc6daf5
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Wed Mar 12 14:05:02 2025 +0000
+
+    things?
+
+commit b71499b596e1b17db7f421582570c2258abc5f13
+Merge: d1b2e15 8f94eb3
+Author: Archie <archiehurman@gmail.com>
+Date:   Mon Mar 3 16:49:43 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 8f94eb33340496fd7fe4c200f27ee94b1782a475
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Fri Mar 7 10:10:47 2025 +0000
+
+    Update main.py
+
+commit 58e0b5f15fca7385bca93e27e370cfdfbf208097
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Thu Mar 6 21:30:49 2025 +0000
+
+    gyro code added
+
+commit f913d5f30f0617fcc856744ac745593082da0d9b
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Thu Mar 6 21:20:26 2025 +0000
+
+    Updated LCD Code
+
+commit 64c2a7f3cde7fff9582c7464405a75eacf1e9f64
+Merge: aed7174 b901b99
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Thu Mar 6 21:07:29 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit aed71742ed217d8e3b304a57c6ad131666b41d1e
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Thu Mar 6 21:05:22 2025 +0000
+
+    commited
+
+commit d1b2e15222f5e7708fb4e83bba778a9ad3292a81
+Author: Archie <archiehurman@gmail.com>
+Date:   Mon Mar 3 16:49:39 2025 +0000
+
+    pi5
+
+commit b901b996023dd785830e3708af05ce930a4c0f89
+Author: Archie <archiehurman@gmail.com>
+Date:   Fri Feb 28 12:09:22 2025 +0000
+
+    gui test
+
+commit b59254f0a6c6b761af71ceb6c3da3f01246fa706
+Merge: 6f0a406 e05ba5c
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Fri Feb 28 12:08:56 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 6f0a406ff2285e7d50690dda1fd9d33e5537888a
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Fri Feb 28 12:08:53 2025 +0000
+
+    GUI Testing
+
+commit e05ba5c6098b326908142bcb7ce71a80ae96ea26
+Author: Archie <archiehurman@gmail.com>
+Date:   Fri Feb 28 11:18:55 2025 +0000
+
+    gui works on pi
+
+commit 6b31712c24b7a8afeef22e8145c0d4f704b64662
+Merge: dfc73c6 b0902d1
+Author: Archie <archiehurman@gmail.com>
+Date:   Fri Feb 28 10:48:09 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit dfc73c6cf90e17f3c5c71a20951836cff4a1457c
+Author: Archie <archiehurman@gmail.com>
+Date:   Fri Feb 28 10:48:06 2025 +0000
+
+    update maze test gui things
+
+commit b0902d1c20d349a34ee675d4d28fdd6f1d245b66
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Fri Feb 28 10:47:12 2025 +0000
+
+    Update maze_test_gui.py
+
+commit b776e5b7521b99d9ace0810956eb724b4fadb3bf
+Merge: 9148bb3 3f0eb93
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Fri Feb 28 10:39:17 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 9148bb341026db0153bf7ed2e1e488eee012b6d0
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Fri Feb 28 10:39:05 2025 +0000
+
+    Update maze_test_gui.py
+
+commit 3f0eb9314a83a41fc9b3436c5e7b78257b5d0f31
+Merge: 5667e59 0caa0d2
+Author: Archie <archiehurman@gmail.com>
+Date:   Fri Feb 28 10:38:22 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 5667e590da2aab62d6df198a6ea43a76c123984e
+Author: Archie <archiehurman@gmail.com>
+Date:   Fri Feb 28 10:36:11 2025 +0000
+
+    UPDATE
+
+commit 0caa0d2304047ba45a2043296a5328f67dbd1eeb
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Fri Feb 28 10:35:04 2025 +0000
+
+    Added gui to integration test code
+
+commit 4671c7390bff3a2a6100b08ba0aa5b41d88ae968
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Thu Feb 27 22:40:18 2025 +0000
+
+    More GUI stuff
+    
+    sam jones is binning off coursework for a bike ride :(
+
+commit 77f3baf7c56ee3a23532701e19472e71c0698e5d
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Thu Feb 27 17:48:12 2025 +0000
+
+    Renamed stuff cos imports were breaking
+
+commit a11b6f0a1ff773e8f3f46b473de82914a1dbddd3
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Thu Feb 27 17:21:58 2025 +0000
+
+    GUI testing
+    
+    more of it
+
+commit 6e2b17a329370feedf0d138dca4dcad3732ff57f
+Author: mark-ford123 <123364838+mark-ford123@users.noreply.github.com>
+Date:   Thu Feb 27 13:37:33 2025 +0000
+
+    Delete Main_Integration_Test/maze_ball_detection_astar_integrated.py
+
+commit 59df8c2db7b51cb6220461869ccada4dc84cf191
+Author: mark-ford123 <123364838+mark-ford123@users.noreply.github.com>
+Date:   Thu Feb 27 13:18:45 2025 +0000
+
+    Update maze_ball_detection_astar_integrated.py
+
+commit 97a6d7c56b4f5c2985896d4419f34a0781f386fd
+Merge: 4b63235 ee5e69c
+Author: Archie <archiehurman@gmail.com>
+Date:   Thu Feb 27 13:10:36 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 4b632354287e8860349034f704aee72ce2c4f494
+Author: Archie <archiehurman@gmail.com>
+Date:   Thu Feb 27 13:10:34 2025 +0000
+
+    hello
+
+commit ee5e69c238f8bef5629163e03ecac3dd3aa967c7
+Author: mark-ford123 <123364838+mark-ford123@users.noreply.github.com>
+Date:   Thu Feb 27 13:09:37 2025 +0000
+
+    Update maze_ball_detection_astar_integrated.py
+
+commit ece86c17860fe9a14bc02131e33003921fb5338b
+Author: mark-ford123 <123364838+mark-ford123@users.noreply.github.com>
+Date:   Thu Feb 27 13:03:28 2025 +0000
+
+    Create maze_ball_detection_astar_integrated.py
+
+commit fb757ba33421395c491133943865dca9567d37cc
+Merge: ceba716 00edc16
+Author: Archie <archiehurman@gmail.com>
+Date:   Thu Feb 27 11:22:20 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit ceba7166f07c6b48722710d4963574341e6c2494
+Author: Archie <archiehurman@gmail.com>
+Date:   Thu Feb 27 11:22:16 2025 +0000
+
+    pushy
+
+commit 00edc169ba9935092d6fe360720a9befd3616423
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Wed Feb 26 17:51:17 2025 +0000
+
+    Testing GUI code
+
+commit 3520dc64c6a1f4c2c7aeb92ea393025946d77a42
+Merge: 6dcc936 c1d12e6
+Author: Archie <archiehurman@gmail.com>
+Date:   Wed Feb 26 15:50:38 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 6dcc936506ed47e7a61b8380306117c45b077710
+Author: Archie <archiehurman@gmail.com>
+Date:   Wed Feb 26 15:50:27 2025 +0000
+
+    image detection working
+
+commit c1d12e6552cb90e82eb0ffbdc15a1327a29eb59b
+Author: ArchieHurman <98830200+ArchieHur@users.noreply.github.com>
+Date:   Tue Feb 25 14:55:09 2025 +0000
+
+    led on arduino prototype code
+
+commit 18e2797468734d978b92342b98c9bd75dad5a3cd
+Author: mark-ford123 <123364838+mark-ford123@users.noreply.github.com>
+Date:   Tue Feb 25 14:17:23 2025 +0000
+
+    Create a_star_image_dect.py
+
+commit 10b1df1be6bf4c737902e890dd4c6713308af5b5
+Author: mark-ford123 <123364838+mark-ford123@users.noreply.github.com>
+Date:   Tue Feb 25 14:16:13 2025 +0000
+
+    Update a_star.py
+
+commit f131063fe27356103adfe2a75add61b8f8171f10
+Author: Ollie <oli@flowmo.co>
+Date:   Thu Feb 20 16:44:36 2025 +0000
+
+    Update maze_line_detection_copy.py
+    
+    fix
+
+commit ad01b8d9aee0ac0b83faf47d685bcf53f2b3c4e9
+Author: Ollie <oli@flowmo.co>
+Date:   Thu Feb 20 16:36:15 2025 +0000
+
+    Update maze_line_detection_copy.py
+    
+    fix
+
+commit f226657408ab64a80bc6e69d3e3d0c8eee3cb48f
+Author: Ollie <oli@flowmo.co>
+Date:   Thu Feb 20 16:32:46 2025 +0000
+
+    Update maze_line_detection_copy.py
+    
+    revert
+
+commit 51943fe3314f83a9240cdff53e272ec0bf82a0d3
+Author: Ollie <oli@flowmo.co>
+Date:   Thu Feb 20 16:31:00 2025 +0000
+
+    Update maze_line_detection_copy.py
+    
+    fix
+
+commit 55fb4c68495fa90a214b6b95db617e0487b46488
+Author: Ollie <oli@flowmo.co>
+Date:   Thu Feb 20 16:28:59 2025 +0000
+
+    Update maze_line_detection_copy.py
+    
+    fix
+
+commit 807a9bef348c17c78b236709d921c0f5d5f86a53
+Author: Ollie <oli@flowmo.co>
+Date:   Thu Feb 20 16:26:15 2025 +0000
+
+    Update maze_line_detection_copy.py
+    
+    test
+
+commit dbc235c4f4fbc86138b6152295528a6b2d3b3926
+Author: Archie <archiehurman@gmail.com>
+Date:   Thu Feb 20 16:24:20 2025 +0000
+
+    fix?
+
+commit 267353d2eb68f61ad11b3e16df40c96c38987663
+Author: Ollie <oli@flowmo.co>
+Date:   Thu Feb 20 16:11:41 2025 +0000
+
+    Update maze_line_detection_oop.py
+    
+    fix
+
+commit 999f18ce9aa2edffacca0073a32cca527dee4994
+Author: Ollie <oli@flowmo.co>
+Date:   Thu Feb 20 16:08:59 2025 +0000
+
+    Update maze_line_detection_oop.py
+    
+    fix
+
+commit d888e037420f1cf2db0d4c4e45dae4979c80f9d8
+Author: Ollie <oli@flowmo.co>
+Date:   Thu Feb 20 16:05:24 2025 +0000
+
+    Update maze_line_detection_oop.py
+    
+    fix
+
+commit c567fe7102d0c3af6ddc16c235f855ad1496faab
+Author: Ollie <oli@flowmo.co>
+Date:   Thu Feb 20 16:04:31 2025 +0000
+
+    Update maze_line_detection_oop.py
+    
+    fix
+
+commit a80b7c575dc3e2acfdbc25e4b777953b335e1b4d
+Author: Ollie <oli@flowmo.co>
+Date:   Thu Feb 20 15:56:22 2025 +0000
+
+    Update maze_line_detection_oop.py
+    
+    thread test 4
+
+commit a4cb723417d4444647ea407ae1a34f41359650aa
+Author: Ollie <oli@flowmo.co>
+Date:   Thu Feb 20 15:55:00 2025 +0000
+
+    Update maze_line_detection_oop.py
+    
+    threading test 3
+
+commit 1fc641e3c991c6b46b8035b824ca4d7d1f19f16f
+Author: Ollie <oli@flowmo.co>
+Date:   Thu Feb 20 15:35:58 2025 +0000
+
+    Update maze_line_detection_oop.py
+    
+    threading test 2
+
+commit 24f75092390dfb3f97bc11ed0f9d5ab08132361e
+Author: Ollie <oli@flowmo.co>
+Date:   Thu Feb 20 15:27:08 2025 +0000
+
+    Update maze_line_detection_oop.py
+
+commit a0e349c41372b132ed9c851f17802013e583171e
+Author: Ollie <oli@flowmo.co>
+Date:   Thu Feb 20 15:15:43 2025 +0000
+
+    Create maze_line_detection_oop.py
+    
+    image processing object oriented
+
+commit 5781f9334bde2f3d7d793ef7e800efcf1ab35bf2
+Author: mark-ford123 <123364838+mark-ford123@users.noreply.github.com>
+Date:   Thu Feb 20 14:18:02 2025 +0000
+
+    Update breadth_first_search.py
+
+commit 3fa529f30ff580ddc8fa8be442d0daa1599ca059
+Author: mark-ford123 <123364838+mark-ford123@users.noreply.github.com>
+Date:   Thu Feb 20 13:58:10 2025 +0000
+
+    Create a_star.py
+
+commit 863d8469efd41ced19b0d20df783901366440019
+Author: mark-ford123 <123364838+mark-ford123@users.noreply.github.com>
+Date:   Thu Feb 20 13:57:56 2025 +0000
+
+    Create breadth_first_search.py
+
+commit 8f9efcd4b00d11034d23272e488cb88d54f90eba
+Author: mark-ford123 <123364838+mark-ford123@users.noreply.github.com>
+Date:   Thu Feb 20 13:57:29 2025 +0000
+
+    Create depth_first_search.py
+
+commit a9d98a6f49538ff4e1c53448dc9eceece53bd78c
+Author: mark-ford123 <123364838+mark-ford123@users.noreply.github.com>
+Date:   Thu Feb 20 12:24:24 2025 +0000
+
+    Update Image Detection Test.py
+
+commit 663dc74b994ca4a3fbd6057c9666d77205f097d1
+Author: Archie <archiehurman@gmail.com>
+Date:   Thu Feb 20 12:23:50 2025 +0000
+
+    hello
+
+commit af8d0d805cca9c484480d9bdac00121ed02aa97a
+Author: Archie <archiehurman@gmail.com>
+Date:   Thu Feb 20 12:23:22 2025 +0000
+
+    hello
+
+commit ffe7a27fd956c53f98ceaf85c27f533d279ffab5
+Author: Archie <archiehurman@gmail.com>
+Date:   Wed Feb 19 12:45:14 2025 +0000
+
+    Line Detection
+
+commit 4a24617c166f612c0be4a6239430680cc781a893
+Merge: f548ab9 c1c59fe
+Author: Archie <archiehurman@gmail.com>
+Date:   Tue Feb 18 15:01:27 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit f548ab956a4247e3d5925e2edb7ee8636df5ec76
+Author: Archie <archiehurman@gmail.com>
+Date:   Tue Feb 18 14:59:42 2025 +0000
+
+    ollie code
+
+commit c1c59fe00d90f3a08e93764d8a2b2a927e657c58
+Author: ArchieHurman <98830200+ArchieHur@users.noreply.github.com>
+Date:   Tue Feb 18 14:51:42 2025 +0000
+
+    LED in classes
+
+commit 78c7593b6dccdabcb48ba2f823a1217bbecedb59
+Author: Archie <archiehurman@gmail.com>
+Date:   Tue Feb 18 12:48:47 2025 +0000
+
+    motah cotrolll
+
+commit 9b7ee092336d3d65dae47bfd8905c3e561cea27d
+Author: Archie <archiehurman@gmail.com>
+Date:   Tue Feb 18 12:44:17 2025 +0000
+
+    idk
+
+commit 8db3afa36c94a0b0bca25f2e9693f4ed7d92f298
+Author: Archie <archiehurman@gmail.com>
+Date:   Fri Feb 7 12:36:53 2025 +0000
+
+    ommit
+
+commit a6f1855e0de4526a39340c44293696f99831a2e4
+Author: Archie <archiehurman@gmail.com>
+Date:   Mon Feb 3 16:52:35 2025 +0000
+
+    LED control working
+
+commit 75be5ede94af116fb89638aa7c11c45c62728c21
+Author: Archie <archiehurman@gmail.com>
+Date:   Mon Feb 3 16:26:23 2025 +0000
+
+    LEDtests again
+
+commit 5d139bd2cc2e126aef1075208a2be25e8bfd1fa1
+Author: ArchieHurman <98830200+ArchieHur@users.noreply.github.com>
+Date:   Mon Feb 3 15:49:09 2025 +0000
+
+    LED test
+
+commit a6e4742fb46e5618bb75f7128784077b4fb4ff0e
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Fri Jan 31 16:49:21 2025 +0000
+
+    update
+
+commit c6da3f74c31c26fec07208186d79634b16533c54
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Fri Jan 31 16:47:56 2025 +0000
+
+    Peaaace Restored
+
+commit 2e1056f84170226b4d15ee8b2b4f507735dfad31
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Fri Jan 31 16:43:31 2025 +0000
+
+    Maybe Working
+
+commit f11f2531b7a3ab8f7802297c6e7b788a6ec924bb
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Fri Jan 31 16:34:58 2025 +0000
+
+    Delete Test Code directory
+
+commit bbc594b9e9ac9e4ea578525e778e42338e8b8ead
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Fri Jan 31 16:34:51 2025 +0000
+
+    Delete Stable Version directory
+
+commit 7a1ad88d26f9e283968c922841e9ec9dddc397c3
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Fri Jan 31 16:34:41 2025 +0000
+
+    Delete Beta Testing directory
+
+commit c88b8a181a1460046f7429ecc6874e3a723aabe5
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Fri Jan 31 16:29:21 2025 +0000
+
+    fix
+
+commit 64b82699d05869c7f6ecc2a091040f0bc5c57630
+Merge: 8b208b4 4ce9d4b
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Fri Jan 31 16:19:45 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 8b208b4e84aa067844552d3f8e52b9b4744830d1
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Fri Jan 31 16:15:49 2025 +0000
+
+    Changed Main to Stable Version
+
+commit 4ce9d4bee0f3b820b9553ad97c1e83e7b6cdaece
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Fri Jan 31 14:18:48 2025 +0000
+
+    Update Physical_Buttons.py
+
+commit eba40b4e87098fc78100cd53220b9a8ddaad31c5
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Fri Jan 31 14:11:48 2025 +0000
+
+    Test
+
+commit be76c8153a02c74ab361a1718dbc85438806faf4
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Fri Jan 31 01:22:05 2025 +0000
+
+    stuff
+
+commit b1a0004d151cc7e9ba8cdeb12ab4525a0b20201c
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Fri Jan 31 01:16:50 2025 +0000
+
+    Moved files
+
+commit ad49aa4e45b7dac39ccb706bb845997af5e12d23
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Fri Jan 31 01:15:34 2025 +0000
+
+    Ordered files
+
+commit e297158621204eb76e56b71f2ae9d24db612d0ed
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Fri Jan 31 00:38:27 2025 +0000
+
+    rename file
+
+commit d8d4b4789ca9cf7a7111cac0da8636a9116e8ad9
+Merge: d4f71ac fee71e1
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Fri Jan 31 00:35:08 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit d4f71ac7dd1e017e4911da4dec031a363cfb5011
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Fri Jan 31 00:35:04 2025 +0000
+
+    added
+
+commit fee71e1abef00606f9d9d8886e74e5ff781cca4c
+Author: ArchieHurman <98830200+ArchieHur@users.noreply.github.com>
+Date:   Thu Jan 30 15:11:01 2025 +0000
+
+    LED thing testing
+
+commit 404767c37663af9660f4691c0d3411bbe8e83560
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Thu Jan 30 14:00:05 2025 +0000
+
+    also updated physical buttons
+    
+    removed the errors and such
+
+commit b387282b5a956a5b5065573ff9a288e09185d056
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Thu Jan 30 13:56:37 2025 +0000
+
+    ADDED stuff
+
+commit 9846c9e6e6b34a355332b9edc3bd9f0641bb053e
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Thu Jan 30 11:09:38 2025 +0000
+
+    Changed main
+
+commit 885b12273a5c8249b56674ee2e504ae50070854b
+Merge: 0f38635 851012d
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Thu Jan 30 11:08:00 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 0f38635baad59ff81919dcfc5e4d2665d948a652
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Thu Jan 30 11:07:50 2025 +0000
+
+    Working_LEDS
+
+commit 851012dc743e978ff7206e4814548d7f4a130cec
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Thu Jan 30 11:06:02 2025 +0000
+
+    Working led strip
+
+commit ce1f1c91b57781eef9c2e9bea337fe5974ed76e3
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Wed Jan 29 16:39:26 2025 +0000
+
+    Working button lights
+
+commit 6f693d4c4a4dac35e17dbbfe8a1088cb97c15cac
+Merge: eecc8f7 ff43961
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Wed Jan 29 13:16:19 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit eecc8f7e30b7875b426ce324ba13262a89940ef3
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Wed Jan 29 13:16:16 2025 +0000
+
+    hello
+
+commit ff4396111a20671ca8fe9266b06002f6cb5e8244
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Tue Jan 28 21:59:44 2025 +0000
+
+    Added some comments and button illumination
+
+commit ced20c6058e3981ca1ead736b768aaea4c933962
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Mon Jan 27 13:41:44 2025 +0000
+
+    fixed random fucking start thing
+
+commit 5a1de5a24b07d97ba93b0b89beb5236e8f72fa97
+Merge: 191ce58 933e9c7
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Mon Jan 27 13:24:21 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 191ce584be7d86d8a0b13ac37858a0c5e2e16adc
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Mon Jan 27 13:24:07 2025 +0000
+
+    :)
+
+commit 933e9c7a3d2bb5eb356dc9502664f49759ab110c
+Merge: b582dc7 d3e6fe8
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Wed Jan 22 17:16:34 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit b582dc7509888fbdb528b2c52e8c1a6d3108c2f7
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Wed Jan 22 17:15:56 2025 +0000
+
+    hi
+
+commit d3e6fe822e3e6cc020de54ce8a215b544aa5d8ee
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Wed Jan 22 15:26:33 2025 +0000
+
+    h
+
+commit 3fd013f931242de8a28827626156cf27ab520789
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Wed Jan 22 14:58:13 2025 +0000
+
+    Working Version
+
+commit d5ebb038cd566bfa5ace0e3a68f53d1b4965294e
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Wed Jan 22 11:51:48 2025 +0000
+
+    Updated Main Folder with working code
+
+commit 6c3fe86c4f3cc1d07da7bfecebbec7c63776fdca
+Merge: 671a331 7b5b287
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Wed Jan 22 11:50:31 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 671a331509564cfd61afcec904afe566cb8db43c
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Wed Jan 22 11:49:02 2025 +0000
+
+    Working
+
+commit 7b5b287156d71f62efc1b7791fd4f4d0321fdf53
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Tue Jan 21 20:00:22 2025 +0000
+
+    led control
+
+commit 2e3544f5ffb80b18b90e283efb1f969004ae668d
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Tue Jan 21 16:48:24 2025 +0000
+
+    asd
+
+commit fa417809c3b87c94f041de5290c898c96939315c
+Merge: aa493d1 cc3c4e3
+Author: ArchieHurman <98830200+ArchieHur@users.noreply.github.com>
+Date:   Tue Jan 21 15:24:07 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit aa493d1f44500109ea5da5a79696dac5b38723d7
+Author: ArchieHurman <98830200+ArchieHur@users.noreply.github.com>
+Date:   Tue Jan 21 15:23:49 2025 +0000
+
+    LED_driver code first version
+
+commit cc3c4e39950602f854e62dc7f69096523105d21e
+Merge: 0c4b8dd a751fb5
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Tue Jan 21 13:22:14 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 0c4b8dd1e3089106d62e8fb735a782eed0b25cee
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Tue Jan 21 13:21:28 2025 +0000
+
+    asd
+
+commit a751fb54652eef29cd516a7fe25b646f1b002125
+Author: Ollie <oli@flowmo.co>
+Date:   Tue Jan 21 13:17:14 2025 +0000
+
+    image detection - test 1
+
+commit 4564cb526a912f2149bcf12b4476f1385cf9c3b1
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Tue Jan 21 13:13:58 2025 +0000
+
+    stage
+
+commit e71f2938500038e4ce5fc1fdb055c3dfc51225c9
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Tue Jan 21 00:53:54 2025 +0000
+
+    update Timer class
+
+commit 73fc4a41aec9f89ff9f0344eeb43fb91ed013db0
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Tue Jan 21 00:24:26 2025 +0000
+
+    pico led
+
+commit ec49af722264cb5d590498a50cca278efda48d0a
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Tue Jan 21 00:01:16 2025 +0000
+
+    jh
+
+commit 3fc20b9911b81e40edc39bc0c6cfc69ec1080fcc
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Mon Jan 20 22:26:52 2025 +0000
+
+    ads
+
+commit 2fbad93c34e4a58ca23cb5e6245b76b44a3cbbb7
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Mon Jan 20 21:56:01 2025 +0000
+
+    added_smoothing
+
+commit 6c29b94707957504505046db023886c070b64596
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Mon Jan 20 16:43:29 2025 +0000
+
+    'slave'
+
+commit 94fed23c890143c809d1e9a9fd2dc36536cdd7ae
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Mon Jan 20 16:41:15 2025 +0000
+
+    working on pi5
+
+commit f87e216793e4658757ae8f9f50df50413be63347
+Author: dizzysam27 <pt21564@bristol.ac.uk>
+Date:   Mon Jan 20 10:36:22 2025 +0000
+
+    working
+
+commit 29847a0ffa00cddd6fd40f132dc5244b3c78cbc5
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Mon Jan 20 01:28:45 2025 +0000
+
+    jh
+
+commit 33def5acbb0285dedd5e5983944c98e9c3855a84
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Mon Jan 20 01:20:44 2025 +0000
+
+    working
+
+commit 69480bf4afb544919a9142e8234aca4a4a300586
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Mon Jan 20 00:55:37 2025 +0000
+
+    Working
+
+commit f6dae83e375ce521d3696ee9f4df779b496e9261
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Mon Jan 20 00:18:18 2025 +0000
+
+    deleted
+
+commit df97237a6a846dbc7b2edeb30dba9244acb8c1ab
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Mon Jan 20 00:12:31 2025 +0000
+
+    Everything Working
+
+commit b82fc8b7a7b5b7b48c6c7b3d2d7ea101f8f92401
+Merge: 5662db5 dcb37b7
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Sun Jan 19 23:57:53 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 5662db530c43e2c45cffd44e9bc22991572b2bbc
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Sun Jan 19 23:56:57 2025 +0000
+
+    sorted
+
+commit dcb37b71fb6a7f0e860fd5844ff38184a132b06a
+Merge: 2e5c947 ff138fd
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Sun Jan 19 23:56:23 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 2e5c947e85ce21a44a02ac71b6e6fe554d9719f8
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Sun Jan 19 23:54:55 2025 +0000
+
+    delected
+
+commit ff138fddf4296cf379817f57a330f709933ec422
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Sun Jan 19 22:43:15 2025 +0000
+
+    working gui
+
+commit 922a18143e10dc506f67a5e74faa8daf55480886
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Sun Jan 19 22:39:43 2025 +0000
+
+    commit
+
+commit 7dfbf1675768a7b2b44459e1b85f86826580f68f
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Sun Jan 19 22:39:22 2025 +0000
+
+    working
+
+commit c91d65871c47870ce482dc0c7676fe3864528d05
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Sun Jan 19 22:20:00 2025 +0000
+
+    Working with LCD Timer
+
+commit b70e15a59612555b66a80f204e2ac78baea5bad9
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Sun Jan 19 21:50:51 2025 +0000
+
+    message
+
+commit e491af6118e2d4c6ccd927ff4d271e7a2d9ed30b
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Sun Jan 19 21:49:44 2025 +0000
+
+    message
+
+commit 6dff6e68ef559907386de8e9c6b9b824aab5fc2d
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Sun Jan 19 19:54:26 2025 +0000
+
+    fancy shit
+
+commit 74a1e3287baa9acc5278241d7b672b52e3c2fbb8
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Sun Jan 19 19:26:21 2025 +0000
+
+    added
+
+commit ab018e2bf516526284427900b2edeef401c7edf0
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Sun Jan 19 15:36:49 2025 +0000
+
+    changes
+
+commit af2c35e130b32ca759648854246b1e778660fb6b
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Sun Jan 19 02:44:38 2025 +0000
+
+    added_timer
+
+commit 872ab4c67eb725323aaa66b5891d28a3adcec267
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Sun Jan 19 00:13:55 2025 +0000
+
+    Added GUI
+
+commit 5087399a037422c83b4226e020adcb9b380012f2
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Sat Jan 18 23:57:04 2025 +0000
+
+    Working
+
+commit 811f154bf02de175f4cf0430de8c90edfe7e0adf
+Merge: 35cb887 83e6620
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Sat Jan 18 23:44:36 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 35cb887ef44813160fe7d5550f650c60796e3849
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Sat Jan 18 23:44:32 2025 +0000
+
+    fixed
+
+commit d3c704f4f36adbcd68c0e2d4aef519004bc65e64
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Sat Jan 18 23:44:10 2025 +0000
+
+    Made major changes to the class structure
+
+commit 83e66201184ec19b140ca650498cdfcb78cc68e5
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Sat Jan 18 10:57:13 2025 +0000
+
+    Create Gyro_Control.py
+
+commit 0bbc8c5a165c8d45f9bdeaae858ab18a64b0feaf
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Sat Jan 18 10:56:33 2025 +0000
+
+    'added_gyro_code'
+
+commit 02e7fc90333febc162f12b69784651391b8713b3
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Fri Jan 17 23:55:22 2025 +0000
+
+    added user interface
+
+commit 79fd5a871d8abc3b4bf7013df54fa20baa1971b3
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Fri Jan 17 22:55:56 2025 +0000
+
+    thing
+
+commit ded637ece286ea29f8de8eb5d7ef8757299a02de
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Fri Jan 17 22:52:28 2025 +0000
+
+    added
+
+commit 6157c839d0c8aecde1d38fd1fe66a7fc40cf1afa
+Merge: 4b9522e f92b32e
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Fri Jan 17 18:19:53 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 4b9522e941c507a4560a8884837b46c43073c266
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Fri Jan 17 18:18:12 2025 +0000
+
+    added
+
+commit f92b32e5e9d637a95b43c8b1fc99b47b050a5788
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Fri Jan 17 12:24:05 2025 +0000
+
+    'add_simple'
+
+commit 5380a297d34c691a188e0f32925dc9bdbd3ffc77
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Thu Jan 16 02:35:16 2025 +0000
+
+    Update LCD_Control.py
+
+commit 9aa44c063aeb55681aee5dbcb329698f3df44d01
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Thu Jan 16 01:49:03 2025 +0000
+
+    Update LCD_Control.py
+
+commit ba86ff15e9a7a891b129ff23b63e94fa1569d589
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Thu Jan 16 01:43:41 2025 +0000
+
+    Create LCD_Control.py
+
+commit 77bbcaa486b100df556e15f261c6b3f88af578ac
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Thu Jan 16 01:43:12 2025 +0000
+
+    Create LCD_Module.py
+
+commit 236f7de7bd4a0ceb575561c8a842bd5b5dd2facb
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Thu Jan 16 01:42:01 2025 +0000
+
+    'added'
+
+commit 0ffaf7da218be61ebc6e1e6daf6ed8232cdcb4eb
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Thu Jan 16 01:37:54 2025 +0000
+
+    hi
+
+commit 1302b42b519ba7e35ea4425d4a26554023b0d4a7
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Wed Jan 15 14:57:39 2025 +0000
+
+    UART update
+
+commit a92f84a8e2a07be920c36b8aea80641d61c8679c
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Wed Jan 15 11:38:25 2025 +0000
+
+    updated again
+
+commit f15bed7359f083d2b7bb99a7f2ca7c8b7f755060
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Wed Jan 15 11:38:00 2025 +0000
+
+    updated stuff i guess
+
+commit 23ea0944cb85c2dc1e119e577311d06ae0f3ac03
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Tue Jan 14 23:32:35 2025 +0000
+
+    Simplified code
+
+commit b5a6d056f57758226052423638b30534e5d54560
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Tue Jan 14 22:33:09 2025 +0000
+
+    UART_Slave updated
+    
+    Added counter functionality (should work but need to test it with the Pico on 15/01
+
+commit 5ec3e76774d58428f3500545d487df3ecb8ef43d
+Author: Alex Watson <bv21918@bristol.ac.uk>
+Date:   Tue Jan 14 14:57:38 2025 +0000
+
+    Update DUALUART_Slave_wip.py
+
+commit 1f4612f569494824e78653286991ed4248d5510f
+Merge: 98a5483 b195994
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Tue Jan 14 14:36:46 2025 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit 98a54834152d8aab744b808868dc071ded82cfe8
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Tue Jan 14 14:36:19 2025 +0000
+
+    'alex'
+
+commit ec7cdb0abf48559b1552ee22dd2e6e62c33783b0
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Tue Jan 14 11:50:00 2025 +0000
+
+    hi
+
+commit b195994ae68b664acaaa65e78651ff7275c309db
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Tue Jan 14 11:49:34 2025 +0000
+
+    Update UART0_Master.py
+
+commit fa52b27d96e6ce9d63374269bf783a2495664be0
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Tue Jan 14 11:45:35 2025 +0000
+
+    Update UART0_Master.py
+
+commit 52c0013d3b5fa13f56ba0b74ec49e1a041572d59
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Tue Jan 14 11:44:09 2025 +0000
+
+    changed
+
+commit a7ff02064fd1e8c430f167c030e91feef6f9282d
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Tue Jan 14 11:30:51 2025 +0000
+
+    added
+
+commit 658d99b529006f2e8fb8a39b18290bab454dcf54
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Tue Jan 14 11:29:51 2025 +0000
+
+    added
+
+commit 6de734effb8a5d2a810db45db94f89ec1f2435fc
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Tue Jan 14 11:28:35 2025 +0000
+
+    Changes
+
+commit 93c2ade5d65ca4bd2a35515df47791dbbb152ef5
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Tue Jan 14 11:21:37 2025 +0000
+
+    Added Pico Code
+
+commit a26ad0460bf938775cd71e1391d28967132abb3c
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Mon Jan 13 20:38:31 2025 +0000
+
+    'added_folders'
+
+commit 4c4341bea307965eb32c6f5793a8cfafec1d6d34
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Mon Jan 13 20:37:50 2025 +0000
+
+    ''
+
+commit b85933fe910e6f62cd1058e3776d0ad1fb44c750
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Mon Jan 13 20:29:40 2025 +0000
+
+    'minor'
+
+commit b7aaf368b06e5d5e53c3164666e44e2fb325d56d
+Merge: e6397e6 caeb663
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Thu Dec 19 22:45:52 2024 +0000
+
+    Merge branch 'main' of https://github.com/dizzysam27/3rd_year_project
+
+commit e6397e6e39118b25e98598a84248d80aab0a427e
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Thu Dec 19 22:45:13 2024 +0000
+
+    Added Files
+
+commit caeb6636928d8ffde0d54e9adca91c3fd45bfb10
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Sun Dec 15 03:13:30 2024 +0000
+
+    Create Button and Timer.py
+
+commit a6560fdbedf90aebdc3b85b7436780348434b1e0
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Sun Dec 15 02:08:40 2024 +0000
+
+    Create UART_Master.py
+
+commit 7ebc3680e73ebedda6b4c190475a42158f5e1bc2
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Sun Dec 15 02:07:37 2024 +0000
+
+    Create UART_Master_Start_Stop_Timer.py
+
+commit 868e7cccad6754de6446a1c68d2ae244ea8c248f
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Sun Dec 15 02:02:36 2024 +0000
+
+    Add
+
+commit 5393983da0147520fd795bf9c28a0b9fc8b16887
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Sat Dec 14 23:02:19 2024 +0000
+
+    'Add'
+
+commit 17d140cdecea3305970ce3e3331e6c25b6953cb5
+Merge: bc84b34 1f1ca83
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Sat Dec 14 19:47:26 2024 +0000
+
+    'merge'
+
+commit bc84b348ab48bea57e381c52eb10b16460982882
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Sat Dec 14 19:46:33 2024 +0000
+
+    'commit
+
+commit 1f1ca834d309594e538bee280b17782bc0aa8864
+Author: Sam J <pt21564@bristol.ac.uk>
+Date:   Sat Dec 14 19:43:42 2024 +0000
+
+    Added files for I2C and UART
+
+commit ed80d81ecebc68c86e42428495a3404074419fb7
+Author: samjones <pt21564@bristol.ac.uk>
+Date:   Thu Dec 12 00:51:59 2024 +0000
+
+    Changes
+
+commit 2a3ea20e6139b950e7177e527b0903816d91909f
+Merge: 49f086f fe937e5
+Author: samjones <pt21564@bristol.ac.uk>
+Date:   Wed Dec 11 23:38:27 2024 +0000
+
+    Merge branch 'main' of github.com:dizzysam27/3rd_year_project
+
+commit 49f086ffac6787507a96c8b3845f413d370e1d1c
+Author: samjones <pt21564@bristol.ac.uk>
+Date:   Wed Dec 11 23:25:21 2024 +0000
+
+    Changes
+
+commit fe937e531ad37b481b33fd2b1c3250cf57d3f7f3
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Wed Dec 11 23:19:37 2024 +0000
+
+    Update Servo_Sweep.py
+
+commit aa1ddb9630d11696a8bb00a46efe315afbc3ac40
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Wed Dec 11 23:19:25 2024 +0000
+
+    Create Servo_Sweep.py
+
+commit 608d8b9283b77a3f676e924f9dcee4233c541b10
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Wed Dec 11 23:19:10 2024 +0000
+
+    Delete Servo Control/Servo_Sweep
+
+commit 1ff1b3367e24dc4f43e54c148da79c9dc63480ec
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Wed Dec 11 23:18:21 2024 +0000
+
+    Create Servo_Sweep
+
+commit fec9baa590dcbb21cc928bf9f716d6b948b8775d
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Wed Dec 11 22:56:39 2024 +0000
+
+    Delete Servo Control/Servo_Controller.py
+
+commit 90f620ed905d6317d86f160406da738a9e3922e7
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Wed Dec 11 22:12:03 2024 +0000
+
+    Create Servo_control.py
+
+commit 36f9d8f5c4a1f4c3f510f2a74bf731cfdb48e6a4
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Mon Oct 28 16:09:07 2024 +0000
+
+    Added Colour_Detection.py
+
+commit d2665d323894cfd53d7785084aa0f9b35894ba71
+Author: samjones <pt21564@bristol.ac.uk>
+Date:   Thu Oct 17 19:25:24 2024 +0100
+
+    Added Servo_Controller.py
+
+commit 2b0d9029c53153a7a10fbd063228633e07b54e97
+Author: dizzysam27 <98830295+dizzysam27@users.noreply.github.com>
+Date:   Wed Oct 16 15:10:46 2024 +0100
+
+    Initial commit
