@@ -4,6 +4,7 @@ import numpy as np
 
 # PyQt5 Imports
 from PyQt5 import QtGui, QtCore
+from PyQt5.QtCore import QDateTime
 from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QPlainTextEdit
 
 # Module Imports
@@ -159,6 +160,10 @@ class App(QWidget):
         else:
             pass
 
+    def updateConsole(self, printBuffer):
+        self.commandBox.appendPlainText('[{}]: {}'.format(QDateTime.currentDateTime(), printBuffer))
+
 while True:
     mainWindow = App()
     mainWindow.show()
+    mainWindow.updateConsole(f"x: 50, y: 50")
