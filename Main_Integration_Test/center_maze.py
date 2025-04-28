@@ -71,7 +71,7 @@ def gyro_flat_values():
     motors.setServoPulse(1,int(pulse_y_x[1]))
     return pulse_y_x
 
-get_flat_values()
+gyro_flat_values()
 # Values = gyro_flat_values()
 # print(Values)
     

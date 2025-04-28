@@ -32,8 +32,11 @@ class MazeSolver:
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         # Define the range for green color (in HSV)
-        lower_green = np.array([40, 50, 50])   # Lower bound of green
-        upper_green = np.array([80, 255, 255]) # Upper bound of green
+        #colours changed by archie
+        lower_green = np.array([0, 85, 0])#np.array([35, 50, 50])
+        upper_green = np.array([140, 196, 117])#np.array([85, 255, 255])
+        #lower_green = np.array([40, 50, 50])   # Lower bound of green
+        #upper_green = np.array([80, 255, 255]) # Upper bound of green
 
         # Threshold the image to get the green areas (walls)
         green_mask = cv2.inRange(hsv, lower_green, upper_green)
@@ -149,6 +152,9 @@ while True:
     # Ensure the start and end points are inside the bounds of the hole mask
     start_point = (min(max(start_point[0], 0), hole_mask_cleaned.shape[0] - 1),
                   min(max(start_point[1], 0), hole_mask_cleaned.shape[1] - 1))
+    
+    #added by archie
+    cv2.circle(frame, (start_point[0],start_point[1]), 3, (0, 0, 255), -1)
 
     end_point = (min(max(end_point[0], 0), hole_mask_cleaned.shape[0] - 1),
                 min(max(end_point[1], 0), hole_mask_cleaned.shape[1] - 1))

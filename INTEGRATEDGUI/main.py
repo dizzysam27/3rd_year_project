@@ -3,6 +3,10 @@ import sys
 import cv2
 import numpy as np
 from gpiozero import Button # type: ignore
+import smbus
+import time
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 # PyQt5 Imports
 from PyQt5 import QtGui, QtCore
@@ -294,7 +298,8 @@ class MODE():
             'ManualStopped' : ManualModeStopped(),
             'AI' : AIMode(),
             'AIRunning' : AIModeRunning(),
-            'Solved' : SolvedMaze()
+            'Solved' : SolvedMaze(),
+            'Cal' : CalibrationMode()
         }
 
         self.currentMode = self.modes['Menu']
@@ -344,7 +349,7 @@ class MODE():
         elif colour == 'red':
             lcd.setRGB(255,0,0)
             ledStrip.writeArduino(2)
-        elif colour == 'green':
+        elif colour == 'blue':
             lcd.setRGB(0,0,255)
             ledStrip.writeArduino(3)
         elif colour == 'chase':
@@ -376,8 +381,73 @@ class MenuMode():
         elif button == 2:
             mode.switchMode('Manual')
         elif button == 3:
-            mode.switchMode('Calibrate')
+            mode.switchMode('Cal')
         else: pass
+
+class CalibrationMode():
+    def update(self):
+        mode.update(title = 'Calibrating',
+                    colour = 'blue',
+                    lcdTxt = ['Calibrating...',
+                              '      Menu      ']
+        )
+
+        mainWindow.updateConsole('Calibratng Maze - Press any button to cancel')
+        # Set servo pulse range and approximate centre
+        servo_levels = np.arange(-50,50,5).tolist()
+        servo_start_yx = [1930,1850]
+
+        gyro.initialize_sensor()
+        print("LSM6DS3 Initialized")
+
+        # Set servo motors to assumed default value
+        motors.setServoPulse(0, int(servo_start_yx[0]))
+        motors.setServoPulse(1, int(servo_start_yx[1]))
+        
+        
+        time.sleep(0.3)
+        
+        pulse_y_x = [0,0]    
+        for servo in range(2):
+            gyro_results = []       
+            for offset in servo_levels:
+                pulse = servo_start_yx[servo] + offset
+                
+                # Initially move servo far from the test pulse location to reduce servo errors
+                # This is as servos appear to respond less accurately to pulse changes > 10
+                motors.setServoPulse(servo, int(pulse + 25))
+                time.sleep(0.1)
+                
+                motors.setServoPulse(servo, int(pulse))
+                time.sleep(0.3)
+                
+                # Read accelerometer values from gyroscope
+                gyro_data = gyro.get_sensor_data()
+                #print(f"Accel (g): X={gyro_data['accel_x']:.4f}, Y={gyro_data['accel_y']:.4f}, Z={gyro_data['accel_z']:.4f}")
+                
+                # X anb Y values swapped due to orientation of Gyroscope
+                # on maze board 
+                gyro_yx = [(gyro_data['accel_x']),(gyro_data['accel_y'])]
+                gyro_results.append(gyro_yx[servo])
+
+            gyro_results = np.array(gyro_results)
+            print(gyro_results)
+            
+            # Return index and pulse of flattest reading
+            flat_index = int(np.abs(gyro_results).argmin())
+            pulse_y_x[servo] = int(servo_start_yx[servo] + servo_levels[flat_index])
+
+            motors.setServoPulse(servo, pulse_y_x[int(servo)])
+
+        # Set servos to flat pulse location and return values
+        motors.setServoPulse(0,int(pulse_y_x[0]))
+        motors.setServoPulse(1,int(pulse_y_x[1]))
+
+        mainWindow.updateConsole('Calibration done, return to menu')
+        mode.switchMode('Menu')
+
+    def handleInput(self, button):
+        mode.switchMode('Menu')
 
 class ManualMode():
     def update(self):
@@ -502,6 +572,52 @@ def get_flat_values():
 
     return defaultx, defaulty
 
+class LSM6DS3:
+    # LSM6DS3 I2C address
+    LSM6DS3_ADDR = 0x6A  # Default address
+
+    # Register addresses
+    CTRL1_XL = 0x10  # Accelerometer control
+    CTRL2_G = 0x11   # Gyroscope control
+    OUTX_L_XL = 0x28  # Accelerometer data register
+    OUTX_L_G = 0x22   # Gyroscope data register
+    def __init__(self):
+        # Initialize I2C bus
+        self.bus = smbus.SMBus(1)  # Use I2C bus 1
+
+    def initialize_sensor(self):
+        # Set accelerometer to 2g range, 104 Hz output data rate
+        self.bus.write_byte_data(self.LSM6DS3_ADDR, self.CTRL1_XL, 0x40)
+        # Set gyroscope to 250 dps range, 104 Hz output data rate
+        self.bus.write_byte_data(self.LSM6DS3_ADDR, self.CTRL2_G, 0x40)
+
+    def read_raw_data(self, addr):
+        # Read two bytes of data from the specified address
+        low = self.bus.read_byte_data(self.LSM6DS3_ADDR, addr)
+        high = self.bus.read_byte_data(self.LSM6DS3_ADDR, addr + 1)
+        
+        # Combine high and low values
+        value = (high << 8) | low
+    
+        # Convert to signed value
+        if value > 32767:
+            value -= 65536
+        return value
+
+    def get_sensor_data(self):
+        accel_x = self.read_raw_data(self.OUTX_L_XL) / 16384.0  # Convert to g
+        accel_y = self.read_raw_data(self.OUTX_L_XL + 2) / 16384.0
+        accel_z = self.read_raw_data(self.OUTX_L_XL + 4) / 16384.0
+    
+        gyro_x = self.read_raw_data(self.OUTX_L_G) / 131.0  # Convert to degrees/sec
+        gyro_y = self.read_raw_data(self.OUTX_L_G + 2) / 131.0
+        gyro_z = self.read_raw_data(self.OUTX_L_G + 4) / 131.0
+    
+        return {
+            "accel_x": accel_x, "accel_y": accel_y, "accel_z": accel_z,
+            "gyro_x": gyro_x, "gyro_y": gyro_y, "gyro_z": gyro_z
+        }
+
 # Mode Manager Call
 mode = MODE()
 
@@ -513,6 +629,7 @@ ledStrip = LEDSTRIPCONTROL()
 joystick = JOYSTICK_READ_DATA()
 motors = PCA9685()
 processor = ImageProcessor(motors)
+gyro = LSM6DS3()
 
 print("everything inited")
 

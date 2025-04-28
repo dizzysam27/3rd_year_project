@@ -11,8 +11,8 @@ NUM_WAYPOINTS = 50  # Number of points to simplify A* path into
 
 # A* Related Constants
 HOLE_DARKNESS_THRESHOLD = 85
-LOWER_GREEN = np.array([35, 50, 50])
-UPPER_GREEN = np.array([85, 255, 255])
+LOWER_GREEN = np.array([0, 85, 0])#np.array([35, 50, 50])
+UPPER_GREEN = np.array([140, 196, 117])#np.array([85, 255, 255])
 HOLE_REPULSION_STRENGTH = 50.0
 HOLE_REPULSION_THRESHOLD_NORM = 0.2
 
@@ -127,7 +127,7 @@ class MazeSolver:
 
     def run(self):
         # --- Define A* start/end points relative to the NEW CROP (350x260) ---
-        start_point_yx = (250, 140)  # User specified Y, X << UPDATED
+        start_point_yx = (130, 268)  # User specified Y, X << UPDATED
         end_point_yx = (120, 25)  # User specified Y, X << UPDATED
         # ---
         print(f"--- Using A* Start: {start_point_yx}, End: {end_point_yx} (relative to {350}x{260} crop) ---")
@@ -195,91 +195,48 @@ class MazeSolver:
                         self.final_frame = processed_frame.copy()  # Store frame for display
                         print(f"Path Found ({len(self.stored_path_yx)} pts). Simplified to {len(self.waypoints_yx)} Waypoints.")
 
-            # --- Output Waypoints as Array ---
-            waypoints_np_yx = np.array(self.waypoints_yx, dtype=np.int32)
-            x_coords = waypoints_np_yx[:, 1]  # Second column is X
-            y_coords = waypoints_np_yx[:, 0]  # First column is Y
-            print("\n--- Generated Waypoint X Coordinates ---")
-            print(f"Array Shape: {x_coords.shape}")
-            print(repr(x_coords))  # Use repr for clear array output
-            print("\n--- Generated Waypoint Y Coordinates ---")
-            print(f"Array Shape: {y_coords.shape}")
-            print(repr(y_coords))  # Use repr for clear array output
-            print("------------------------------------")
-            # --- End Output ---
-            break  # Exit pathfinding loop after success
-        else:
-            print("A* failed to find a path this frame. Retrying...")
-            time.sleep(1)
-        else:
-            print("Invalid A* start/end points found. Retrying...")
-            time.sleep(1)
+                    # --- Output Waypoints as Array ---
+                    waypoints_np_yx = np.array(self.waypoints_yx, dtype=np.int32)
+                    x_coords = waypoints_np_yx[:, 1]  # Second column is X
+                    y_coords = waypoints_np_yx[:, 0]  # First column is Y
+                    print("\n--- Generated Waypoint X Coordinates ---")
+                    print(f"Array Shape: {x_coords.shape}")
+                    print(repr(x_coords))  # Use repr for clear array output
+                    print("\n--- Generated Waypoint Y Coordinates ---")
+                    print(f"Array Shape: {y_coords.shape}")
+                    print(repr(y_coords))  # Use repr for clear array output
+                    print("------------------------------------")
+                    waypoints_new = []
+                    for waypoint in waypoints_np_yx:
+                        waypoints_new.append([waypoint[0],waypoint[1]])
 
-        # Display current frame while searching (optional)
-        temp_display = processed_frame.copy()
-        cv2.putText(temp_display, "Searching for path...", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-        cv2.putText(temp_display, "Searching for path...", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
-        cv2.imshow("Maze Solver - Pathfinding", temp_display)
+                    return waypoints_new
+                    # --- End Output ---
+                    break  # Exit pathfinding loop after success
+                else:
+                    print("Invalid A* start/end points found. Retrying...")
+                    time.sleep(1)
+
+
 
         # Allow quitting while searching
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
             print("Exiting before path found.")
             self.path_found_and_generated = False  # Indicate failure
-            break  # Exit loop
 
-    # --- End of pathfinding loop ---
-    # Clear intermediate windows
-    try:
-        cv2.destroyWindow("DEBUG A* Start-End on Obstacles")
-    except:
-        pass
-    try:
-        cv2.destroyWindow("Maze Solver - Pathfinding")
-    except:
-        pass
+        # --- End of pathfinding loop ---
+        # Clear intermediate windows
+        try:
+            cv2.destroyWindow("DEBUG A* Start-End on Obstacles")
+        except:
+            pass
+        try:
+            cv2.destroyWindow("Maze Solver - Pathfinding")
+        except:
+            pass
 
-    # --- Static Display Loop (If path was found) ---
-    if not self.path_found_and_generated or self.final_frame is None:
-        print("Error: Path not generated successfully or frame not stored.")
-    else:
-        print("\nDisplaying calculated path and waypoints.")
-        print("Press 'q' in the display window to exit.")
-        while True:
-            output_image = self.final_frame.copy()
-            # Use stored masks
-            vis_green_mask = self.stored_green_mask
-            vis_hole_mask = self.stored_hole_mask
-            if vis_green_mask is not None:
-                output_image[vis_green_mask == 255] = (0, 255, 0)  # Green walls
-            if vis_hole_mask is not None:
-                hole_contours, _ = cv2.findContours(vis_hole_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                cv2.drawContours(output_image, hole_contours, -1, (255, 0, 255), 2)  # Pink Rings
-
-            # Draw Waypoints
-            if self.waypoints_yx:
-                for point in self.waypoints_yx:
-                    cv2.circle(output_image, (point[1], point[0]), 3, (255, 100, 0), -1)  # Blue dots
-
-            # Draw Original A* Start/End Markers (relative to crop)
-            h, w = output_image.shape[:2]
-            start_r = max(0, min(start_point_yx[0], h - 1))
-            start_c = max(0, min(start_point_yx[1], w - 1))
-            end_r = max(0, min(end_point_yx[0], h - 1))
-            end_c = max(0, min(end_point_yx[1], w - 1))
-            cv2.drawMarker(output_image, (start_c, start_r), (255, 0, 0), cv2.MARKER_STAR, 15, 2)  # Blue Start
-            cv2.drawMarker(output_image, (end_c, end_r), (0, 255, 255), cv2.MARKER_TILTED_CROSS, 15, 2)  # Yellow End
-
-            cv2.putText(output_image, "Path Calculated - Press 'q' to exit", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                        (0, 0, 0), 3, cv2.LINE_AA)
-            cv2.putText(output_image, "Path Calculated - Press 'q' to exit", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                        (255, 255, 255), 1, cv2.LINE_AA)
-
-            cv2.imshow("Maze Solver - Calculated Path", output_image)
-            key = cv2.waitKey(1) & 0xFF
-            if key == ord('q'):
-                break
-    # --- End Static Display Loop ---
+      
 
     # --- UPDATED Cleanup Method (No motors) ---
     def cleanup(self):
@@ -339,15 +296,3 @@ def astar_repulsive(start, end, grid_shape, green_wall_mask, dist_from_holes, re
     print("No path found!")
     return None
 
-
-# --- Main Execution ---
-if __name__ == "__main__":
-    solver = MazeSolver()
-    try:
-        # Run the simplified process: find path, print waypoints, display static result
-        solver.run()
-    except KeyboardInterrupt:
-        print("\nManual interruption detected.")
-    finally:
-        # Ensure cleanup happens
-        solver.cleanup()
