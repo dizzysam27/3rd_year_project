@@ -29,7 +29,6 @@ class ImageProcessor(QThread):
         self._ai_control_active = False
         self.aiControlStateChanged.connect(self.onAiControlStateChanged)
 
-
         self.cap = cv2.VideoCapture(0)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
@@ -41,7 +40,6 @@ class ImageProcessor(QThread):
         self.sampled_points = self.load_last_coordinates()
         self.current_target_index = 0
         self.goal_reached = True
-
         self.default_limits_x = 18
         self.default_limits_y = 15
         self.output_limits =  self.default_limits_x
@@ -49,21 +47,14 @@ class ImageProcessor(QThread):
         self.last_location = [133, 249]
         self.last_motor_control = [self.defaultx,self.defaulty]
         self.new_motor_control = [0,0]
-
         self.reached_distance = 22
         self.motorcounter = 0
         self.lastinput = [0,0]
-
         self.balltracker = [0,0]
         self.balltrackercounter = 0
         self.boosted = 0
-
         self.maze_finished = 0
-
         self.line_points = np.zeros(shape=(400,2))
-
-        
-        
 
         ap = argparse.ArgumentParser()
         ap.add_argument("-v", "--video",
@@ -79,7 +70,7 @@ class ImageProcessor(QThread):
         self.pid_x = PID(self.PID_VALUES[0],self.PID_VALUES[1],self.PID_VALUES[2])
         self.pid_y = PID(self.PID_VALUESy[0],self.PID_VALUESy[1],self.PID_VALUESy[2])
         # self.pid_x.proportional_on_measurement = True
-        # self.pid_y.proortional_on_measurement = True
+        # self.pid_y.proportional_on_measurement = True
 
         self.pid_x.output_limits = (-self.output_limits, self.output_limits)
         self.pid_y.output_limits = (-self.output_limitsy, self.output_limitsy)
@@ -123,17 +114,18 @@ class ImageProcessor(QThread):
                 M = cv2.moments(largest_contour)
                 if M["m00"] != 0:
                     
+                    # store center coordinates of ball 
                     cx = int(M["m10"] / M["m00"])
                     cy = int(M["m01"] / M["m00"])
                     self.last_location[0] = int(M["m10"] / M["m00"])
                     self.last_location[1] = int(M["m01"] / M["m00"])
-
+                    
+                    # store ball location for stuck detection
                     if self.balltrackercounter == 0:
                         self.balltracker[0] = int(M["m10"] / M["m00"])
                         self.balltracker[1] = int(M["m01"] / M["m00"])
 
-
-
+                    # if ball still in same location then boost motors
                     if self.balltrackercounter == 10:
                         if self.balltracker[0] >= cx - 1 and self.balltracker[0] <= cx + 1 and self.balltracker[1] >= cy - 1 and self.balltracker[1] <= cy + 1:
                             self.output_limits = 30
@@ -148,6 +140,7 @@ class ImageProcessor(QThread):
                                 self.current_target_index = self.current_target_index - 4
                                 self.goal_reached = True
 
+                    # stop boost after 3 frames
                     if self.balltrackercounter == 13:
                         if self.boosted == 1:
                             self.output_limitsy = self.default_limits_y
@@ -159,15 +152,18 @@ class ImageProcessor(QThread):
                         cx = int(M["m10"] / M["m00"])
                         cy = int(M["m01"] / M["m00"])
 
+                    #increment ball tracker counter and return limits to normal
                     self.balltrackercounter += 1
                     self.pid_x.output_limits = (-self.output_limits, self.output_limits)
                     self.pid_y.output_limits = (-self.output_limitsy, self.output_limitsy)
                     
+                    # check if maze is finished
                     self.finished_zone(cx,cy)
 
                     return (cx, cy)
                 
         else:
+            # if ball not detected then use last known location
             cx = self.last_location[0]
             cy = self.last_location[1]
         return None
@@ -193,7 +189,7 @@ class ImageProcessor(QThread):
         distances = np.linalg.norm(line_points - start, axis=1)
         start_idx = np.argmin(distances)
 
-        # Rotate using np.concatenate instead of +
+        # Return line points in correct order
         return np.concatenate((line_points[start_idx:], line_points[:start_idx]), axis=0)
 
 
@@ -247,11 +243,9 @@ class ImageProcessor(QThread):
             for (x, y) in interpolated_points:
                 cv2.circle(frame, (x, y), 3, (0, 0, 255), -1)
 
-            # print coordinates
-            # print("Sampled 100 points:", interpolated_points)
-
         return interpolated_points
     
+    # function to reset goal to start
     def resetline(self):
         self.current_target_index = 0
         self.goal_reached = True
@@ -261,6 +255,7 @@ class ImageProcessor(QThread):
         print("reset")
                
 
+    # function to check if ball is in end area
     def finished_zone(self, x,y):
         # [x_min, x_max, y_min, y_max] points
         goal_area = [0, 50, 110, 210]
@@ -282,97 +277,78 @@ class ImageProcessor(QThread):
     @pyqtSlot(bool)
     def onAiControlStateChanged(self, is_active):
         self._ai_control_active = is_active
-        # Optional: Reset motors to default if AI is deactivated
-        # if not is_active:
-        #    self.motors.setServoPulse(1, self.defaultx)
-        #    self.motors.setServoPulse(0, self.defaulty)
+        # Reset motors to default if AI is deactivated
+        if not is_active:
+            self.motors.setServoPulse(1, self.defaultx)
+            self.motors.setServoPulse(0, self.defaulty)
 
 
     def move_motors(self, ball_center):
         if ball_center:
-           
             bx, by = ball_center
+            # check if ball has reached goal
             if abs(bx - self.gx) < self.reached_distance and abs(by - self.gy) < self.reached_distance:
                 self.goal_reached = True
 
-            
+            # Calculate motor change with PID
             control_x = self.pid_x(bx)
             control_y = self.pid_y(by)
             
+            # new motor values
             motor_x_val = self.defaultx + control_x
             motor_y_val = self.defaulty + control_y
 
-        # --- Motor Control Logic Moved Here ---
         # Check the internal flag before sending commands
             if self._ai_control_active:
                 self.motors.setServoPulse(1, int(motor_x_val)) # Send X command
                 self.motors.setServoPulse(0, int(motor_y_val)) # Send Y command
-            # Else: If AI is not active, motors might return to default
-        # (handled in onAiControlStateChanged or could be done here too)
-        # ---------------------------------------
 
-        # --- Signal Emission (Keep ONLY if needed for GUI Labels) ---
-        # If you still want to display the values in the GUI:
-        # self.xRate.emit(int(motor_x_val))
-        # self.yRate.emit(int(motor_y_val))
-        # If xRate/yRate were ONLY for motors, comment/remove these emits.
-        # ----------------
-
+    # function to update goal position
     def update_goal_position(self):
+        # if last goal was reached and maze has not reached end of goals
         if self.goal_reached and self.current_target_index < len(self.sampled_points):
             self.gx, self.gy = self.sampled_points[self.current_target_index]
+            # then go to next goal
             self.current_target_index += 1
             self.goal_reached = False  
+        # if the last goal was reached, goal goes back to start
         elif self.current_target_index >= len(self.sampled_points):
             self.current_target_index = 0  
 
+        # set PID setpoints to new goal location
         self.pid_x.setpoint = self.gx
         self.pid_y.setpoint = self.gy
 
+    # function for picking manual goal points ( not really used anymore )
     def mouse_callback(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
             self.sampled_points.append((x, y))
             print(f"Point added: {x}, {y}")
+         
+    # cleanup function for exiting         
+    def cleanup(self):
+        self.cap.release()
+        cv2.destroyAllWindows()
+        print("Cleaning up and exiting.")
 
+
+    # main loop
     def run(self):
-      
+        
+        # set motors to flat and goal to start position
         self.motors.setServoPulse(1, self.defaultx)
         self.motors.setServoPulse(0, self.defaulty)
-        
-        
-        # self.xRate.emit(self.defaultx)
-        # self.yRate.emit(self.defaulty)
-       
         self.current_target_index = 0  
         
-
-        # print('5')
-        # time.sleep(1)
-        # print('4')
-        # time.sleep(1)
-        # print('3')
-        # time.sleep(1)
-        # print('2')
-        # time.sleep(1)
-        # print('1')
-        # time.sleep(1)
-        # print('READY')
+        # setup camera and initial line detectio
         ret, frame = self.cap.read()
-    
         frame = self.crop_frame(frame)
         cv2.normalize(frame, frame, 0, 255, cv2.NORM_MINMAX)
-
         self.sampled_points = self.detect_line(frame)
         start = (130, 268)
         self.sampled_points = self.reorder_line_to_start(self.sampled_points, start)
 
-
-       
-
-
-
-        while True:
-            
+        while True:            
             ret, frame = self.cap.read()
             if not ret:
                 print("Error: Failed to capture frame.")
@@ -381,42 +357,30 @@ class ImageProcessor(QThread):
             cropped_frame = self.crop_frame(frame)
             ball_center = self.detect_ball(cropped_frame)
             
-            
             for goal in self.sampled_points[:198]:
                 if  not self._ai_control_active:
                     cv2.circle(cropped_frame, (goal[0], goal[1]), 2, (0, 150, 255), -1)
             
             self.update_goal_position()
-            # print(f"Ball: {ball_center}, Goal: ({self.gx}, {self.gy})")
-
             self.move_motors(ball_center)
 
+            # draw line for visual ball tracking on gui
             if ball_center:
                 cv2.circle(cropped_frame, ball_center, 3, (0, 0, 255), -1)
                 self.ballpts.appendleft(ball_center)
                 for i in range(1, len(self.ballpts)):
                     # if either of the tracked points are None, ignore
-                    # them
                     if self.ballpts[i - 1] is None or self.ballpts[i] is None:
                         continue
-                    # otherwise, compute the thickness of the line and
+                    # compute the thickness of the line and
                     # draw the connecting lines
                     thickness = int(np.sqrt(self.args["buffer"] / float(i + 1)) * 2.5)
                     cv2.line(cropped_frame, self.ballpts[i - 1], self.ballpts[i], (0, 0, 255), thickness)
 
-
             cv2.circle(cropped_frame, (self.gx, self.gy), 5, (0, 0, 255), -1)
 
-
-            # cv2.imshow("Tracking", cropped_frame)
+            # send final video to gui
             self.cameraVideo.emit(cropped_frame)
             
-          
-                
-
+        # exit     
         self.cleanup()
-
-    def cleanup(self):
-        self.cap.release()
-        cv2.destroyAllWindows()
-        print("Cleaning up and exiting.")
