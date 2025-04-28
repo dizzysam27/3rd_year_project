@@ -1,27 +1,29 @@
+# necessary imports
 import cv2
 import numpy as np
 import pickle  # For saving/loading last coordinates
 import os
-# import time
-# import math
 from simple_pid import PID
-# from motorControl import PCA9685
-#from center_maze import get_flat_values
 import PyQt5
 from PyQt5.QtCore import pyqtSignal, QThread, pyqtSlot
 from collections import deque
 import argparse
 
+# global variables for gui communication
 global xRate, yRate, finish_flag
 xRate = 0
 yRate =0
 finish_flag = 0
+
+# Main
 class ImageProcessor(QThread):
+    # signals for communicating with gui
     cameraVideo = pyqtSignal(np.ndarray)
     xRate = pyqtSignal(int)
     yRate = pyqtSignal(int)
     finish_flag = pyqtSignal(int)
     aiControlStateChanged = pyqtSignal(bool)
+    
     def __init__(self, motors):
         super().__init__()
         
